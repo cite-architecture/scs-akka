@@ -1,0 +1,6 @@
+{
+  "name": "Akka-based Scala Cite Services",
+  "description": "(Micro)service delivering CITE/CTS data via a REST service using Akka HTTP.",
+  "website": "https://cite-architecture.github.io",
+  "success_url": "/ip/8.8.8.8"
+}
