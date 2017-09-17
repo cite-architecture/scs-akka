@@ -30,6 +30,8 @@ case class IpPairSummaryRequest(ip1: String, ip2: String)
 
 case class IpPairSummary(distance: Option[Double], ip1Info: IpInfo, ip2Info: IpInfo)
 
+case class CtsUrnString(urnString: String)
+
 object IpPairSummary {
   def apply(ip1Info: IpInfo, ip2Info: IpInfo): IpPairSummary = IpPairSummary(calculateDistance(ip1Info, ip2Info), ip1Info, ip2Info)
 
@@ -55,6 +57,7 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val ipInfoFormat = jsonFormat5(IpInfo.apply)
   implicit val ipPairSummaryRequestFormat = jsonFormat2(IpPairSummaryRequest.apply)
   implicit val ipPairSummaryFormat = jsonFormat3(IpPairSummary.apply)
+  implicit val ctsUrnStringFormat = jsonFormat1(CtsUrnString.apply)
 }
 
 trait Service extends Protocols {
@@ -82,6 +85,18 @@ trait Service extends Protocols {
           logger.error(error)
           Future.failed(new IOException(error))
         }
+      }
+    }
+  }
+
+  def fetchCtsUrn(urnString: String): Future[Either[String, CtsUrnString]] = {
+    try {
+      val urn:CtsUrn = CtsUrn(urnString)
+      val urnReply = CtsUrnString(urn.toString)
+      Unmarshal(urnReply).to[CtsUrnString].map(Right(_))
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
       }
     }
   }
@@ -115,7 +130,17 @@ trait Service extends Protocols {
           }
         }
       } ~
-      pathPrefix("text" / "ip" ) {
+      pathPrefix("texts"  ) {
+        (get & path(Segment)) { urnString =>
+          complete {
+            fetchCtsUrn(urnString).map[ToResponseMarshallable] {
+              case Right(ctsUrnString) => ctsUrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      pathPrefix("texts" / "ip" ) {
         (get & path(Segment)) { ip =>
           complete {
             fetchIpInfo(ip).map[ToResponseMarshallable] {
