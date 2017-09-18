@@ -14,8 +14,11 @@ import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import java.io.IOException
+import java.io.File
+
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.math._
+
 import spray.json.DefaultJsonProtocol
 
 import edu.holycross.shot.ohco2._
@@ -131,6 +134,16 @@ trait Service extends Protocols {
         }
       } ~
       pathPrefix("texts"  ) {
+        (get & path(Segment / Segment)) { (cexLibrary, urnString) =>
+          complete {
+            fetchCtsUrn(urnString).map[ToResponseMarshallable] {
+              case Right(ctsUrnString) => ctsUrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      pathPrefix("texts"  ) {
         (get & path(Segment)) { urnString =>
           complete {
             fetchCtsUrn(urnString).map[ToResponseMarshallable] {
@@ -154,6 +167,7 @@ trait Service extends Protocols {
   }
 }
 
+
 object CiteMicroservice extends App with Service {
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
@@ -161,6 +175,21 @@ object CiteMicroservice extends App with Service {
 
   override val config = ConfigFactory.load()
   override val logger = Logging(system, getClass)
+
+  def getListOfFiles(dir: String):List[File] = {
+    val d = new File(dir)
+    if (d.exists && d.isDirectory) {
+        d.listFiles.filter(_.isFile).toList
+    } else {
+        List[File]()
+    }
+  }
+
+  val cexDirectory:String = config.getString("cex.directory")
+  val cexFiles:List[java.io.File] = getListOfFiles(cexDirectory)
+
+  logger.info(s"CEX files at: ${cexDirectory}")
+  logger.info(cexFiles.toString)
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
 }
