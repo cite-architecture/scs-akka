@@ -1,3 +1,5 @@
+package edu.furman.akkascs
+
 import akka.actor.ActorSystem
 import akka.event.{LoggingAdapter, Logging}
 import akka.http.scaladsl.Http
@@ -18,6 +20,7 @@ import java.io.File
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.math._
+import scala.util.{Success, Failure}
 
 import spray.json.DefaultJsonProtocol
 
@@ -32,8 +35,6 @@ case class IpInfo(query: String, country: Option[String], city: Option[String], 
 case class IpPairSummaryRequest(ip1: String, ip2: String)
 
 case class IpPairSummary(distance: Option[Double], ip1Info: IpInfo, ip2Info: IpInfo)
-
-case class CtsUrnString(urnString: String)
 
 object IpPairSummary {
   def apply(ip1Info: IpInfo, ip2Info: IpInfo): IpPairSummary = IpPairSummary(calculateDistance(ip1Info, ip2Info), ip1Info, ip2Info)
@@ -52,7 +53,6 @@ object IpPairSummary {
       case _ => None
     }
   }
-
   private val EarthRadius = 6371.0
 }
 
@@ -61,9 +61,10 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val ipPairSummaryRequestFormat = jsonFormat2(IpPairSummaryRequest.apply)
   implicit val ipPairSummaryFormat = jsonFormat3(IpPairSummary.apply)
   implicit val ctsUrnStringFormat = jsonFormat1(CtsUrnString.apply)
+  implicit val corpusNodesFormat = jsonFormat1(CitableNodesJson.apply)
 }
 
-trait Service extends Protocols {
+trait Service extends Protocols with Ohco2Service {
   implicit val system: ActorSystem
   implicit def executor: ExecutionContextExecutor
   implicit val materializer: Materializer
@@ -71,12 +72,28 @@ trait Service extends Protocols {
   def config: Config
   val logger: LoggingAdapter
 
+  def getListOfFiles(dir: String):List[File] = {
+    val d = new File(dir)
+    if (d.exists && d.isDirectory) {
+      d.listFiles.filter(_.isFile).toList
+    } else {
+      List[File]()
+    }
+  }
+
+  lazy val cexLibraries:scala.collection.immutable.Map[String,CiteLibrary] = {
+      val cexDirectory:String = config.getString("cex.directory")  
+      logger.info(s"\n\nCEX files at: ${cexDirectory}\n")
+      val cexFiles:List[java.io.File] = getListOfFiles(cexDirectory)
+      val cl:scala.collection.immutable.Map[String,CiteLibrary] = CexRepos(cexFiles)
+      cl
+  }
+
+
   lazy val ipApiConnectionFlow: Flow[HttpRequest, HttpResponse, Any] =
     Http().outgoingConnection(config.getString("services.ip-api.host"), config.getInt("services.ip-api.port"))
 
-
   def ipApiRequest(request: HttpRequest): Future[HttpResponse] = Source.single(request).via(ipApiConnectionFlow).runWith(Sink.head)
-
 
   def fetchIpInfo(ip: String): Future[Either[String, IpInfo]] = {
     ipApiRequest(RequestBuilding.Get(s"/json/$ip")).flatMap { response =>
@@ -92,73 +109,57 @@ trait Service extends Protocols {
     }
   }
 
-  def fetchCtsUrn(urnString: String): Future[Either[String, CtsUrnString]] = {
-    try {
-      val urn:CtsUrn = CtsUrn(urnString)
-      val urnReply = CtsUrnString(urn.toString)
-      Unmarshal(urnReply).to[CtsUrnString].map(Right(_))
-    } catch {
-      case e: Exception => {
-        Future.successful(Left(s"${new IOException(e)}"))
-      }
-    }
-  }
-
-/*
-  def fetchCtsText(u: String): Future[Either[String,Corpus]] = {
-
-  }
-*/
 
   val routes = {
     logRequestResult("cite-microservice") {
-      pathPrefix("ip") {
-        (get & path(Segment)) { ip =>
+    pathPrefix("ip") {
+      (get & path(Segment)) { ip =>
+        complete {fetchIpInfo(ip).map[ToResponseMarshallable] {case Right(ipInfo) => ipInfo
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~
+      (post & entity(as[IpPairSummaryRequest])) { ipPairSummaryRequest =>
+        complete {
+          val ip1InfoFuture = fetchIpInfo(ipPairSummaryRequest.ip1)
+          val ip2InfoFuture = fetchIpInfo(ipPairSummaryRequest.ip2)
+          ip1InfoFuture.zip(ip2InfoFuture).map[ToResponseMarshallable] {
+            case (Right(info1), Right(info2)) => IpPairSummary(info1, info2)
+            case (Left(errorMessage), _) => BadRequest -> errorMessage
+            case (_, Left(errorMessage)) => BadRequest -> errorMessage
+          }
+        }
+      }
+    } ~
+      pathPrefix("texts"  ) {
+        (get & path(Segment / Segment)) { (cexLibrary, urnString) =>
           complete {
-            fetchIpInfo(ip).map[ToResponseMarshallable] {
-              case Right(ipInfo) => ipInfo
+
+            val tempLib = cexLibraries(cexLibrary)
+
+            fetchOhco2Text(tempLib, urnString).map[ToResponseMarshallable] {
+              case Right(corpusString) => corpusString
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
         } ~
-        (post & entity(as[IpPairSummaryRequest])) { ipPairSummaryRequest =>
+        (get & path(Segment / "first" / Segment)) { (cexLibrary, urnString) =>
           complete {
-            val ip1InfoFuture = fetchIpInfo(ipPairSummaryRequest.ip1)
-            val ip2InfoFuture = fetchIpInfo(ipPairSummaryRequest.ip2)
-            ip1InfoFuture.zip(ip2InfoFuture).map[ToResponseMarshallable] {
-              case (Right(info1), Right(info2)) => IpPairSummary(info1, info2)
-              case (Left(errorMessage), _) => BadRequest -> errorMessage
-              case (_, Left(errorMessage)) => BadRequest -> errorMessage
-            }
-          }
-        }
-      } ~
-      pathPrefix("texts"  ) {
-        (get & path(Segment / Segment)) { (cexLibrary, urnString) =>
-          complete {
+            logger.info(s"\n\nWill deliver FIRST citable node for ${urnString} using ${cexLibrary}.cex.\n")
             fetchCtsUrn(urnString).map[ToResponseMarshallable] {
               case Right(ctsUrnString) => ctsUrnString
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
-        }
-      } ~
-      pathPrefix("texts"  ) {
-        (get & path(Segment)) { urnString =>
-          complete {
-            fetchCtsUrn(urnString).map[ToResponseMarshallable] {
-              case Right(ctsUrnString) => ctsUrnString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        }
-      } ~
-      pathPrefix("texts" / "ip" ) {
-        (get & path(Segment)) { ip =>
-          complete {
-            fetchIpInfo(ip).map[ToResponseMarshallable] {
-              case Right(ipInfo) => ipInfo
-              case Left(errorMessage) => BadRequest -> errorMessage
+        } ~
+        (get & path( Segment / "ngram" / )) { (cexLibrary) =>
+          parameters('n.as[Int]) { n =>
+            complete {
+              logger.info(s"\n\nWill deliver ngram histogram with n=${n}.\n")
+              fetchCtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1").map[ToResponseMarshallable] {
+                case Right(ctsUrnString) => ctsUrnString
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
             }
           }
         }
@@ -168,7 +169,7 @@ trait Service extends Protocols {
 }
 
 
-object CiteMicroservice extends App with Service {
+object CiteMicroservice extends App with Service with Ohco2Service {
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
   override implicit val materializer = ActorMaterializer()
@@ -176,20 +177,7 @@ object CiteMicroservice extends App with Service {
   override val config = ConfigFactory.load()
   override val logger = Logging(system, getClass)
 
-  def getListOfFiles(dir: String):List[File] = {
-    val d = new File(dir)
-    if (d.exists && d.isDirectory) {
-        d.listFiles.filter(_.isFile).toList
-    } else {
-        List[File]()
-    }
-  }
-
-  val cexDirectory:String = config.getString("cex.directory")
-  val cexFiles:List[java.io.File] = getListOfFiles(cexDirectory)
-
-  logger.info(s"CEX files at: ${cexDirectory}")
-  logger.info(cexFiles.toString)
+  logger.debug(s"\n\nREADY\nCorpus-size: ${cexLibraries.size}\n\n")
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
 }

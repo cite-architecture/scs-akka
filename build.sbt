@@ -24,8 +24,8 @@ libraryDependencies ++= {
 
     "edu.holycross.shot.cite" %% "xcite" % "2.7.1",
     "edu.holycross.shot" %% "cex" % "6.1.0",
-    "edu.holycross.shot" %% "ohco2" % "10.1.2",
-    "edu.holycross.shot" %% "scm" % "5.1.3",
+    "edu.holycross.shot" %% "ohco2" % "10.3.0",
+    "edu.holycross.shot" %% "scm" % "5.1.5",
     "edu.holycross.shot" %% "citeobj" % "4.3.3"
   )
 }

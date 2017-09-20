@@ -1,3 +1,5 @@
+package edu.furman.akkascs
+
 import akka.event.NoLogging
 import akka.event.Logging
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -72,15 +74,17 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
   }
 
   it should "respond to a second path" in {
-    Get(s"/texts/ip/${ip2Info.query}") ~> routes ~> check {
+    Get(s"/texts/million/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
+      val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1")
+      val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
       status shouldBe OK
       contentType shouldBe `application/json`
-      responseAs[IpInfo] shouldBe ip2Info
+      responseAs[CtsUrnString] shouldBe urnStringReply
     }
   }
 
   it should """respond to "texts" and correctly use the xcite library to confirm a good URN" """ in {
-    Get(s"/texts/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
+    Get(s"/texts/first/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
       val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1")
       val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
       status shouldBe OK
@@ -90,7 +94,7 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
   }
 
   it should """respond to "texts" and correctly use the xcite library to confirm a bad URN" """ in {
-    Get(s"/texts/urn:cts:NOT-A-URN") ~> routes ~> check {
+    Get(s"/texts/first/urn:cts:NOT-A-URN") ~> routes ~> check {
       logger.error(responseAs[String])
       status shouldBe BadRequest
       responseAs[String].length should be > 0
