@@ -42,9 +42,9 @@ To implement:
 ### Ngram histograms
 
 - tbd `/texts/ngram?n=**N**` => compute histogram of all ngrams of size `N`
-- tbd `/texts/ngram?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than **T** times
-- tbd `/texts/ngram/**CTS URN**?n=**N**` => compute histogram of all ngrams of size `N` within **CTS URN**
-- tbd `/texts/ngram/**CTS URN**?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than **T** times within **CTS URN**
+- tbd `/texts/ngram?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times
+- tbd `/texts/ngram/**CTS URN**?n=**N**` => compute histogram of all ngrams of size `N` within `CTS URN`
+- tbd `/texts/ngram/**CTS URN**?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times within **CTS URN**
 
 (By default, each of these ignores punctuation. To include punctuation, add `&ignorePunctuation=false` to any request.)
 
