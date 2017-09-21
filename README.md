@@ -41,9 +41,12 @@ To implement:
 
 ### Ngram histograms
 
-- `/texts/ngram/histogram/`**n** => compute histogram of all ngrams of size `n`
-- `/texts/ngram/histogram/`**n**/**threshhold** => compute histogram of all ngrams of size `n` occurring more than **threshold** times
-- `/texts/ngram/histogram/`**n**/**threshhold**/**CTS URN** => compute histogram of all ngrams of size `n` occurring more than **threshold** times within **CTS URN**
+- `/texts/ngram?n=**N**` => compute histogram of all ngrams of size `N`
+- `/texts/ngram?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than **T** times
+- `/texts/ngram/**CTS URN**?n=**N**` => compute histogram of all ngrams of size `N` within **CTS URN**
+- `/texts/ngram/**CTS URN**?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than **T** times within **CTS URN**
+
+(By default, each of these ignores punctuation. To include punctuation, add `&ignorePunctuation=false` to any request.)
 
 ## Versions
 
