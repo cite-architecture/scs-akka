@@ -36,11 +36,12 @@ trait Ohco2Service extends Protocols {
   implicit val system: ActorSystem
   implicit def executor: ExecutionContextExecutor
   implicit val materializer: Materializer
+  implicit val cexLibrary:CiteLibrary
 
   def config: Config
   val logger: LoggingAdapter
 
-  def fetchOhco2Text(cexLibrary: CiteLibrary, urnString: String): Future[Either[String,CitableNodesJson]] = {
+  def fetchOhco2Text(urnString: String): Future[Either[String,CitableNodesJson]] = {
   	 try {
       val urn:CtsUrn = CtsUrn(urnString)
       val c:Corpus = cexLibrary.textRepository.get.corpus >= urn 

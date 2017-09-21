@@ -24,7 +24,7 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
 
   "Ohco2Service" should "respond to single query" in {
 
-    Get(s"/texts/million/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
+    Get(s"/urn/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
       val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1")
       val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
       status shouldBe OK
@@ -33,13 +33,21 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
     }
   }
 
-  it should """respond to "texts" and correctly use the xcite library to confirm a good URN" """ in {
-    Get(s"/texts/first/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
+  it should """respond to "urn" and correctly use the xcite library to confirm a good URN" """ in {
+    Get(s"/urn/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
       val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1")
       val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
       status shouldBe OK
       contentType shouldBe `application/json`
       responseAs[CtsUrnString] shouldBe urnStringReply
+    }
+  }
+  
+  it should """respond to "urn" and correctly use the xcite library to confirm a bad URN" """ in {
+    Get(s"/urn/urn:cts:NOT-A-URN") ~> routes ~> check {
+      logger.error(responseAs[String])
+      status shouldBe BadRequest
+      responseAs[String].length should be > 0
     }
   }
 
