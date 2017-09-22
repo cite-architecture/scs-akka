@@ -12,45 +12,56 @@ The following services are under development.
 
 ### Text services
 
-To implement:
+Implemented:
 
-- tbd `/texts` => lists all distinct work-components appearing in cited text nodes
 - implemented `/texts`**CTS URN** => list of citable nodes matching **CTS URN**
 - implemented `/texts/first/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
-- tbd `/texts/reff/`**CTS URN** => (possibly empty) list of CTS URNs matching **CTS URN**
-- tbd `/texts/next/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
-- tbd `/texts/prev/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
+
+To be implemented:
+
+- `/texts` => lists all distinct work-components appearing in cited text nodes
+- `/texts/reff/`**CTS URN** => (possibly empty) list of CTS URNs matching **CTS URN**
+- `/texts/next/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
+- `/texts/prev/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
 
 ### Text catalog services
 
-- tbd `/textcatalog` => lists catalog entries for all cataloged texts
-- tbd `/textcatalog/`**CTS URN** =>  (possibly empty) list of catalog entries matching **CTS URN**
+To be implemented:
+
+- `/textcatalog` => lists catalog entries for all cataloged texts
+- `/textcatalog/`**CTS URN** =>  (possibly empty) list of catalog entries matching **CTS URN**
 
 ### String searching services
 
-- tbd `/texts/find/`**String**` => find all passages in repository with text content matching **String**
-- tbd `/texts/find/`**String**/**CTS URN**/  => find all passages in **CTS URN** with text content matching **String**
-- tbd `/texts/findAll/?t=`**String**`[&t=`**String**`]...` => find all passages in repository with content matching each **token**
-- tbd `/texts/findAll/`**CTS URN**`?t=`**token**`[&t=`**String**`]...` => find all passages in **CTS URN** with content matching each **String**
+To be implemented:
 
+- `/texts/find/`**String**` => find all passages in repository with text content matching **String**
+- `/texts/find/`**String**/**CTS URN**/  => find all passages in **CTS URN** with text content matching **String**
+- `/texts/findAll/?t=`**String**`[&t=`**String**`]...` => find all passages in repository with content matching each **token**
+- `/texts/findAll/`**CTS URN**`?t=`**token**`[&t=`**String**`]...` => find all passages in **CTS URN** with content matching each **String**
 
-- tbd `/texts/token/`**String**` => find all passages in repository with white-space delimited token matching **String**
-- tbd `/texts/token/`**String**/**CTS URN**/  => find all passages in **CTS URN** with white-space delimited token matching **String**
-- tbd `/texts/allTokens/?t=`**tokens**`[&t=`**tokens**`]...` => find all passages in repository with content matching each **token**
-- tbd `/texts/allTokens/`**CTS URN**`?t=`**token**`[&t=`**String**`]...` => find all passages in **CTS URN** with content matching each **token**
+To be implemented:
+
+- `/texts/token/`**String**` => find all passages in repository with white-space delimited token matching **String**
+- `/texts/token/`**String**/**CTS URN**/  => find all passages in **CTS URN** with white-space delimited token matching **String**
+- `/texts/allTokens/?t=`**tokens**`[&t=`**tokens**`]...` => find all passages in repository with content matching each **token**
+- `/texts/allTokens/`**CTS URN**`?t=`**token**`[&t=`**String**`]...` => find all passages in **CTS URN** with content matching each **token**
 
 ### Ngram histograms
 
-- tbd `/texts/ngram?n=**N**` => compute histogram of all ngrams of size `N`
-- tbd `/texts/ngram?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times
-- tbd `/texts/ngram/**CTS URN**?n=**N**` => compute histogram of all ngrams of size `N` within `CTS URN`
-- tbd `/texts/ngram/**CTS URN**?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times within **CTS URN**
+Implemented:
+
+- `/texts/ngram?n=**N**` => compute histogram of all ngrams of size `N`
+- `/texts/ngram?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times
+- `/texts/ngram/**CTS URN**?n=**N**` => compute histogram of all ngrams of size `N` within `CTS URN`
+- `/texts/ngram/**CTS URN**?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times within **CTS URN**
 
 (By default, each of these ignores punctuation. To include punctuation, add `&ignorePunctuation=false` to any request.)
 
 ## Versions
 
-- **0.1.0** Initial framework setup; modify template for Scala 2.12.
+- **0.1.0** First version that responds to some CITE queries, and has tested them.
+- **0.0.1** Initial framework setup; modify template for Scala 2.12.
 
 ## Author & license
 
