@@ -19,10 +19,10 @@ import edu.holycross.shot.scm._
 class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Service {
   override def testConfigSource = "akka.loglevel = WARNING"
   override def config = testConfig
-  override val logger = Logging(system.eventStream, "my.nice.string")
+  override val logger = Logging(system.eventStream, "edu.furman.akkascs")
 
-  "Service" should "respond to a path" in {
-    Get(s"/urn/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
+  "The CiteMicroservice" should "respond to a path" in {
+    Get(s"/ctsurn/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
       val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1")
       val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
       status shouldBe OK
@@ -31,8 +31,8 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
     }
   }
 
-  it should """respond to "urn" and correctly use the xcite library to confirm a good URN" """ in {
-    Get(s"/urn/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
+  it should """respond to "ctsurn" and correctly use the xcite library to confirm a good URN" """ in {
+    Get(s"/ctsurn/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
       val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1")
       val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
       status shouldBe OK
@@ -41,8 +41,8 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
     }
   }
 
-  it should """respond to "urn" and correctly use the xcite library to confirm a bad URN" """ in {
-    Get(s"/urn/urn:cts:NOT-A-URN") ~> routes ~> check {
+  it should """respond to "ctsurn" and correctly use the xcite library to confirm a bad URN" """ in {
+    Get(s"/ctsurn/urn:cts:NOT-A-URN") ~> routes ~> check {
       logger.error(responseAs[String])
       status shouldBe BadRequest
       responseAs[String].length should be > 0

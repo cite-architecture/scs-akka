@@ -33,7 +33,9 @@ import edu.holycross.shot.scm._
 
 trait Protocols extends DefaultJsonProtocol {
   implicit val ctsUrnStringFormat = jsonFormat1(CtsUrnString.apply)
-  implicit val corpusNodesFormat = jsonFormat1(CitableNodesJson.apply)
+  implicit val corpusFormat = jsonFormat1(CorpusJson.apply)
+  implicit val citableNodeFormat = jsonFormat1(CitableNodeJson.apply)
+  implicit val ngramHistoFormat = jsonFormat1(NgramHistoJson.apply)
 }
 
 trait Service extends Protocols with Ohco2Service {
@@ -55,7 +57,6 @@ trait Service extends Protocols with Ohco2Service {
 
   lazy val cexLibraries:scala.collection.immutable.Map[String,CiteLibrary] = {
       val cexDirectory:String = config.getString("cex.directory")  
-      logger.info(s"\n\nCEX files at: ${cexDirectory}\n")
       val cexFiles:List[java.io.File] = getListOfFiles(cexDirectory)
       val cl:scala.collection.immutable.Map[String,CiteLibrary] = CexRepos(cexFiles)
       cl
@@ -70,10 +71,9 @@ trait Service extends Protocols with Ohco2Service {
 
   val routes = {
     logRequestResult("cite-microservice") {
-    pathPrefix("urn"  ) {
+    pathPrefix("ctsurn"  ) {
         (get & path(Segment)) { (urnString) =>
           complete {
-            logger.info(s"\n\nWill check ${urnString} for validity.")
             fetchCtsUrn(urnString).map[ToResponseMarshallable] {
               case Right(ctsUrnString) => ctsUrnString
               case Left(errorMessage) => BadRequest -> errorMessage
@@ -82,6 +82,34 @@ trait Service extends Protocols with Ohco2Service {
         }
       } ~
       pathPrefix("texts"  ) {
+        (get & path("first" / Segment)) { (urnString) =>
+          complete {
+            fetchFirstNode(urnString).map[ToResponseMarshallable] {
+              case Right(citableNodeString) => citableNodeString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~
+        (get & path( "ngram" )) { 
+          parameters('n.as[Int] ? 3, 't.as[Int] ? 1, 's.as[String] ?, 'ignorePunctuation.as[Boolean] ? true) { (n, t, s, ignorePunctuation) =>
+            complete {
+              fetchNgram(n, t, s, None, ignorePunctuation).map[ToResponseMarshallable] {
+                case Right(ngh) => ngh
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~
+        (get & path( "ngram" / Segment  )) { urnString => 
+          parameters('n.as[Int] ? 3, 't.as[Int] ? 1, 's.as[String] ?, 'ignorePunctuation.as[Boolean] ? true) { (n, t, s, ignorePunctuation) =>
+            complete {
+              fetchNgram(n, t, s, Some(urnString), ignorePunctuation).map[ToResponseMarshallable] {
+                case Right(ngh) => ngh
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~ 
         (get & path(Segment)) { urnString =>
           complete {
             fetchOhco2Text(urnString).map[ToResponseMarshallable] {
@@ -89,27 +117,7 @@ trait Service extends Protocols with Ohco2Service {
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
-        } ~
-        (get & path("first" / Segment)) { (urnString) =>
-          complete {
-            logger.info(s"\n\nWill deliver FIRST citable node for ${urnString}.\n")
-            fetchCtsUrn(urnString).map[ToResponseMarshallable] {
-              case Right(ctsUrnString) => ctsUrnString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        } ~
-        (get & path( "ngram" / )) { 
-          parameters('n.as[Int], 'urn.as[String]) { (n, u) =>
-            complete {
-              logger.info(s"\n\nWill deliver ngram histogram with n=${n}.\n")
-              fetchCtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1").map[ToResponseMarshallable] {
-                case Right(ctsUrnString) => ctsUrnString
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        }
+        } 
       } 
     }
   }
