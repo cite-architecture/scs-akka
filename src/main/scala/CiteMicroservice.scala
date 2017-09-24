@@ -152,7 +152,7 @@ trait Service extends Protocols with Ohco2Service {
         } ~ 
         (get & path(Segment)) { urnString =>
           complete {
-            fetchOhco2Text(urnString).map[ToResponseMarshallable] {
+            testFetchOhco2Text(urnString).map[ToResponseMarshallable] {
               case Right(corpusString) => corpusString
               case Left(errorMessage) => BadRequest -> errorMessage
             }
