@@ -21,28 +21,30 @@ Implemented:
 
 To be implemented:
 
-- `/texts/next/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
-- `/texts/prev/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
+- `/texts/nexturn/`**CTS URN** => (possibly empty) Vector of CTS URNs identifying the next chunk of text
+- `/texts/prevurn/`**CTS URN** => (possibly empty) Vector of CTS URNs identifying the previous chunk of text
+- `/texts/next/`**CTS URN** => (possibly empty) Corpus of the next chunk of text
+- `/texts/prev/`**CTS URN** => (possibly empty) Corpus of the previous chunk of text
 
 ### Text catalog services
 
 Implemented:
 
-- implemented ``/textcatalog` => lists catalog entries for all cataloged texts
-- implemented ``/textcatalog/`**CTS URN** =>  (possibly empty) list of catalog entries matching **CTS URN**
+- implemented `/textcatalog` => lists catalog entries for all cataloged texts
+- implemented `/textcatalog/`**CTS URN** =>  (possibly empty) list of catalog entries matching **CTS URN**
 
 ### String searching services
 
 To be implemented:
 
-- `/texts/find/`**String**` => find all passages in repository with text content matching **String**
+- `/texts/find/**String**` => find all passages in repository with text content matching **String**
 - `/texts/find/`**String**/**CTS URN**/  => find all passages in **CTS URN** with text content matching **String**
 - `/texts/findAll/?t=`**String**`[&t=`**String**`]...` => find all passages in repository with content matching each **token**
 - `/texts/findAll/`**CTS URN**`?t=`**token**`[&t=`**String**`]...` => find all passages in **CTS URN** with content matching each **String**
 
 To be implemented:
 
-- `/texts/token/`**String**` => find all passages in repository with white-space delimited token matching **String**
+- `/texts/token/**String**` => find all passages in repository with white-space delimited token matching **String**
 - `/texts/token/`**String**/**CTS URN**/  => find all passages in **CTS URN** with white-space delimited token matching **String**
 - `/texts/allTokens/?t=`**tokens**`[&t=`**tokens**`]...` => find all passages in repository with content matching each **token**
 - `/texts/allTokens/`**CTS URN**`?t=`**token**`[&t=`**String**`]...` => find all passages in **CTS URN** with content matching each **token**
@@ -51,10 +53,10 @@ To be implemented:
 
 Implemented:
 
-- implemented ``/texts/ngram?n=**N**` => compute histogram of all ngrams of size `N`
-- implemented ``/texts/ngram?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times
-- implemented ``/texts/ngram/**CTS URN**?n=**N**` => compute histogram of all ngrams of size `N` within `CTS URN`
-- implemented ``/texts/ngram/**CTS URN**?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times within **CTS URN**
+- implemented `/texts/ngram?n=**N**` => compute histogram of all ngrams of size `N`
+- implemented `/texts/ngram?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times
+- implemented `/texts/ngram/**CTS URN**?n=**N**` => compute histogram of all ngrams of size `N` within `CTS URN`
+- implemented `/texts/ngram/**CTS URN**?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times within **CTS URN**
 
 (By default, each of these ignores punctuation. To include punctuation, add `&ignorePunctuation=false` to any request.)
 
