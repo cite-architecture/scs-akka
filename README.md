@@ -17,10 +17,10 @@ Implemented:
 - implemented `/texts`**CTS URN** => list of citable nodes matching **CTS URN**
 - implemented `/texts/first/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
 - implemented `/texts` => lists all distinct work-components appearing in cited text nodes
+- implemented `/texts/reff/`**CTS URN** => (possibly empty) list of CTS URNs matching **CTS URN**
 
 To be implemented:
 
-- `/texts/reff/`**CTS URN** => (possibly empty) list of CTS URNs matching **CTS URN**
 - `/texts/next/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
 - `/texts/prev/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
 
