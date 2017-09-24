@@ -28,6 +28,7 @@ import edu.holycross.shot.scm._
 case class CtsUrnString(urnString: String)
 case class CexLibraries(repos:Vector[CiteLibrary])
 case class CorpusJson(citableNodes:Vector[Map[String, String]])
+case class ReffJson(reff:Vector[String])
 case class CitableNodeJson(citableNode:Map[String, String])
 case class NgramHistoJson(ngramHisto:Vector[ (Map[String,String], Map[String,Int] ) ] )
 case class CatalogJson(citeCatalog:Vector[ Map[String,String] ] )
@@ -83,6 +84,59 @@ trait Ohco2Service extends Protocols {
     }
   }
 
+  def fetchReff1(urnString: String): Future[Either[String,ReffJson]] = {
+     try {
+      val urn:CtsUrn = CtsUrn(urnString)
+      val c:Corpus = textRepository.get.corpus >= urn 
+      val v:Vector[String] = c.urns.map(u => u.toString)
+      val n:ReffJson = ReffJson(v) 
+      Unmarshal(n).to[ReffJson].map(Right(_))
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
+
+  def fetchReff(urnString: String): Future[Either[String,ReffJson]] = {
+     try {
+      val urn:CtsUrn = CtsUrn(urnString)
+
+      urn.versionOption match {
+        case Some(v) => {
+          val c:Corpus = cexLibrary.textRepository.get.corpus >= urn 
+          val v:Vector[String] = c.urns.map(u => u.toString)
+          val n:ReffJson = ReffJson(v) 
+          Unmarshal(n).to[ReffJson].map(Right(_))
+        }
+        case None => {
+          val passageComp:String = urn.passageComponentOption match {
+            case Some(s) => s
+            case None => ""
+          }
+          val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
+          val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
+          val corpora:Vector[Corpus] = realUrns.map(ru => {
+            logger.info(ru.toString)
+            textRepository.get.corpus >= CtsUrn(s"${ru.dropPassage}${passageComp}")
+          })
+          val assembledVector:Vector[String] = {
+            (for (c <- corpora) yield {
+              for (n <- c.urns) yield { n.toString }
+            }).flatten
+          }
+          val n:ReffJson = ReffJson(assembledVector) 
+          Unmarshal(n).to[ReffJson].map(Right(_))
+        }
+      }      
+
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
+
   def fetchOhco2Text(urnString: String): Future[Either[String,CorpusJson]] = {
   	 try {
       val urn:CtsUrn = CtsUrn(urnString)
@@ -101,7 +155,7 @@ trait Ohco2Service extends Protocols {
      try {
       val urn:CtsUrn = CtsUrn(urnString)
 
-      if (urn.passageComponentOption == None){ throw new ScsException("No passage component. This service will not return a whole text.") }
+      //if (urn.passageComponentOption == None){ throw new ScsException("No passage component. This service will not return a whole text.") }
 
       urn.versionOption match {
         case Some(v) => {
@@ -111,8 +165,12 @@ trait Ohco2Service extends Protocols {
           Unmarshal(n).to[CorpusJson].map(Right(_))
         }
         case None => {
-          val passageComp:String = urn.passageComponentOption.get
-          val realUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
+          val passageComp:String = urn.passageComponentOption match {
+            case Some(s) => s
+            case None => ""
+          }
+          val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
+          val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
           val corpora:Vector[Corpus] = realUrns.map(ru => textRepository.get.corpus >= CtsUrn(s"${ru.dropPassage}${passageComp}"))
           val assembledVector:Vector[Map[String,String]] = {
             (for (c <- corpora) yield {

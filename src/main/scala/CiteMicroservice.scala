@@ -37,6 +37,7 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val citableNodeFormat = jsonFormat1(CitableNodeJson.apply)
   implicit val ngramHistoFormat = jsonFormat1(NgramHistoJson.apply)
   implicit val catalogFormat = jsonFormat1(CatalogJson.apply)
+  implicit val reffFormat = jsonFormat1(ReffJson.apply)
 }
 
 trait Service extends Protocols with Ohco2Service {
@@ -98,6 +99,16 @@ trait Service extends Protocols with Ohco2Service {
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
+        }
+      } ~
+      pathPrefix("reff") {
+        (get & path(Segment)) { urnString =>
+          complete {
+            fetchReff(urnString).map[ToResponseMarshallable] {
+              case Right(reffString) => reffString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          } 
         }
       } ~
       pathPrefix("texts2") {
