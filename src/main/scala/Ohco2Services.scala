@@ -53,9 +53,18 @@ trait Ohco2Service extends Protocols {
   def config: Config
   val logger: LoggingAdapter
 
-  def fetchCatalog:Future[Either[String,CatalogJson]] = {
+  def fetchCatalog(urnString:Option[String]):Future[Either[String,CatalogJson]] = {
     try {
-      val cc:Vector[CatalogEntry] = textRepository.get.catalog.texts
+      val cc:Vector[CatalogEntry] = urnString match {
+        case Some(us) => {
+          val urn:CtsUrn = CtsUrn(us).dropPassage
+          val preVector:Vector[CatalogEntry] = textRepository.get.catalog.texts
+          preVector.filter(_.urn ~~ urn)
+        } 
+        case None => {
+          textRepository.get.catalog.texts
+        }
+      }
       val v = cc.map(l => 
           Map("urn" -> l.urn.toString, 
            "citationScheme" -> l.citationScheme,

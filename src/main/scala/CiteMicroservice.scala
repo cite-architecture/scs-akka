@@ -82,6 +82,24 @@ trait Service extends Protocols with Ohco2Service {
           }
         }
       } ~
+      pathPrefix("textcatalog") {
+        (get & path( Segment)) { urnString => 
+          complete {
+            fetchCatalog(Some(urnString)).map[ToResponseMarshallable] {
+              case Right(catalogString) => catalogString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~
+        (get & pathEnd ) { 
+          complete {
+            fetchCatalog(None).map[ToResponseMarshallable] {
+              case Right(catalogString) => catalogString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
       pathPrefix("texts2") {
         (get & path(Segment)) { urnString =>
             complete {
@@ -131,7 +149,7 @@ trait Service extends Protocols with Ohco2Service {
         } ~ 
         (get & pathEnd) { 
           complete {
-            fetchCatalog.map[ToResponseMarshallable] {
+            fetchCatalog(None).map[ToResponseMarshallable] {
               case Right(catalogString) => catalogString
               case Left(errorMessage) => BadRequest -> errorMessage
             }
