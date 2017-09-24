@@ -39,7 +39,7 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
     }
   }
 
-  it should """respond to "ctsurn" and correctly use the xcite library to confirm a good URN """ in {
+  it should """respond to "/ctsurn" and correctly use the xcite library to confirm a good URN """ in {
     Get(s"/ctsurn/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
       val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1")
       val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
@@ -49,14 +49,14 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
     }
   }
 
-  it should """respond to "ctsurn" and correctly use the xcite library to confirm a bad URN """ in {
+  it should """respond to "/ctsurn" and correctly use the xcite library to confirm a bad URN """ in {
     Get(s"/ctsurn/urn:cts:NOT-A-URN") ~> routes ~> check {
       status shouldBe BadRequest
       responseAs[String].length should be > 0
     }
   }
 
-  it should """respond to "texts/URN" correctly """ in {
+  it should """respond to "/texts/URN" correctly """ in {
     Get(s"/texts/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
       val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1")
       status shouldBe OK
@@ -64,7 +64,7 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
     }
   }
 
-  it should """respond to "texts/first/URN" correctly """ in {
+  it should """respond to "/texts/first/URN" correctly """ in {
     Get(s"/texts/first/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:") ~> routes ~> check {
       val r:CitableNodeJson  = responseAs[CitableNodeJson]
       status shouldBe OK
@@ -73,7 +73,16 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
     }
   }
 
-  it should """respond correctly to "texts/ngram" with an "n" and "t" param """ in {
+  it should """respond correctly to "/texts/ngram" with an "n" and "t" param """ in {
+    Get(s"/texts/ngram?n=8&t=9") ~> routes ~> check {
+      val r:NgramHistoJson  = responseAs[NgramHistoJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.ngramHisto.size should equal (1)
+      r.ngramHisto(0)._2("count") should equal (10)
+    }  
+  }
+  it should """respond correctly to "/texts/ngram/" as though it werre "/texts/ngram" """ in {
     Get(s"/texts/ngram?n=8&t=9") ~> routes ~> check {
       val r:NgramHistoJson  = responseAs[NgramHistoJson]
       status shouldBe OK
@@ -83,7 +92,7 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
     }  
   }
 
-  it should """respond correctly to "texts/ngram/URN" with an "n" and "t" param """ in {
+  it should """respond correctly to "/texts/ngram/URN" with an "n" and "t" param """ in {
     Get(s"/texts/ngram/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1?n=3&t=5") ~> routes ~> check {
       val r:NgramHistoJson  = responseAs[NgramHistoJson]
       status shouldBe OK
@@ -95,6 +104,33 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
 
   it should """respond correctly to "/textcatalog """ in {
     Get(s"/textcatalog") ~> routes ~> check {
+      val r:CatalogJson  = responseAs[CatalogJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.citeCatalog.size should equal (12)
+    }  
+  }
+
+  it should """respond correctly to "/textcatalog/ as though it were /textcatalog """ in {
+    Get(s"/textcatalog/") ~> routes ~> check {
+      val r:CatalogJson  = responseAs[CatalogJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.citeCatalog.size should equal (12)
+    }  
+  }
+
+  it should """respond correctly to "/texts as though it were /textcatalog """ in {
+    Get(s"/texts") ~> routes ~> check {
+      val r:CatalogJson  = responseAs[CatalogJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.citeCatalog.size should equal (12)
+    }  
+  }
+
+  it should """respond correctly to "/texts/ as though it were /textcatalog """ in {
+    Get(s"/texts/") ~> routes ~> check {
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`

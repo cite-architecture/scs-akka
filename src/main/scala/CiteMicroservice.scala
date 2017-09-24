@@ -92,7 +92,7 @@ trait Service extends Protocols with Ohco2Service {
             }
           }
         } ~
-        (get & pathEnd ) { 
+        (get & pathEndOrSingleSlash ) { 
           complete {
             fetchCatalog(None).map[ToResponseMarshallable] {
               case Right(catalogString) => catalogString
@@ -158,7 +158,7 @@ trait Service extends Protocols with Ohco2Service {
             }
           }
         } ~ 
-        (get & pathEnd) { 
+        (get &  pathEndOrSingleSlash ) { 
           complete {
             fetchCatalog(None).map[ToResponseMarshallable] {
               case Right(catalogString) => catalogString
