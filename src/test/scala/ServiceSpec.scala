@@ -21,6 +21,8 @@ class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Se
   override def config = testConfig
   override val logger = Logging(system.eventStream, "edu.furman.akkascs")
 
+  val textRepository:Option[TextRepository] = cexLibrary.textRepository 
+
   "The CiteMicroservice" should "respond to a path" in {
     Get(s"/ctsurn/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
       val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1")

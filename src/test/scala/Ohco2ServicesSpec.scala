@@ -20,10 +20,13 @@ import edu.holycross.shot.scm._
 
 
 class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Service {
+
+
   override def testConfigSource = "akka.loglevel = INFO"
   override def config = testConfig
   override val logger = Logging(system.eventStream, "edu.furman.akkascs")
 
+  val textRepository:Option[TextRepository] = cexLibrary.textRepository 
 
   "Ohco2Service" should "respond to single query" in {
 
@@ -71,12 +74,12 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
   }
 
   it should """respond correctly to "texts/ngram" with an "n" and "t" param """ in {
-    Get(s"/texts/ngram?n=3&t=50") ~> routes ~> check {
+    Get(s"/texts/ngram?n=8&t=9") ~> routes ~> check {
       val r:NgramHistoJson  = responseAs[NgramHistoJson]
       status shouldBe OK
       contentType shouldBe `application/json`
       r.ngramHisto.size should equal (1)
-      r.ngramHisto(0)._2("count") should equal (55)
+      r.ngramHisto(0)._2("count") should equal (10)
     }  
   }
 
@@ -87,6 +90,24 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
       contentType shouldBe `application/json`
       r.ngramHisto.size should equal (1)
       r.ngramHisto(0)._2("count") should equal (6)
+    }  
+  }
+
+  it should """respond correctly to "/textcatalog """ in {
+    Get(s"/textcatalog") ~> routes ~> check {
+      val r:CatalogJson  = responseAs[CatalogJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.citeCatalog.size should equal (12)
+    }  
+  }
+
+  it should """respond correctly to "/textcatalog/URN """ in {
+    Get(s"/textcatalog/urn:cts:greekLit:tlg0012.tlg001:") ~> routes ~> check {
+      val r:CatalogJson  = responseAs[CatalogJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.citeCatalog.size should equal (3)
     }  
   }
 
