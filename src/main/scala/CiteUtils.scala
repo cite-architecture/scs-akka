@@ -25,3 +25,5 @@ object CexRepos{
 		cexMap
 	}
 }
+
+case class ScsException(extext:String) extends Exception

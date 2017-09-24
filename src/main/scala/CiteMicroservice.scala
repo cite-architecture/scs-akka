@@ -36,6 +36,7 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val corpusFormat = jsonFormat1(CorpusJson.apply)
   implicit val citableNodeFormat = jsonFormat1(CitableNodeJson.apply)
   implicit val ngramHistoFormat = jsonFormat1(NgramHistoJson.apply)
+  implicit val catalogFormat = jsonFormat1(CatalogJson.apply)
 }
 
 trait Service extends Protocols with Ohco2Service {
@@ -81,6 +82,16 @@ trait Service extends Protocols with Ohco2Service {
           }
         }
       } ~
+      pathPrefix("texts2") {
+        (get & path(Segment)) { urnString =>
+            complete {
+              testFetchOhco2Text(urnString).map[ToResponseMarshallable] {
+                case Right(corpusString) => corpusString
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+        }
+      } ~
       pathPrefix("texts"  ) {
         (get & path("first" / Segment)) { (urnString) =>
           complete {
@@ -117,7 +128,15 @@ trait Service extends Protocols with Ohco2Service {
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
-        } 
+        } ~ 
+        (get & pathEnd) { 
+          complete {
+            fetchCatalog.map[ToResponseMarshallable] {
+              case Right(catalogString) => catalogString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }  
       } 
     }
   }
@@ -132,7 +151,18 @@ object CiteMicroservice extends App with Service with Ohco2Service {
   override val config = ConfigFactory.load()
   override val logger = Logging(system, getClass)
 
-  logger.debug(s"\n\nREADY\nCorpus-size: ${cexLibrary.textRepository.get.corpus.size}\n\n")
+  val textRepository:Option[TextRepository] = cexLibrary.textRepository 
+
+  textRepository match {
+    case Some(tr) => { 
+        logger.debug(s"\n\nREADY\nCorpus-size: ${cexLibrary.textRepository.get.corpus.size}\n\n")
+        cexLibrary.textRepository.get
+      } 
+    case None => {
+        logger.debug(s"\n\nREADY\nNO TEXT REPOSITORY IN THIS CEX FILE!\n\n")
+    }
+  }
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
+
 }
