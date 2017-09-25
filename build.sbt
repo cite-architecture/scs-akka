@@ -1,4 +1,6 @@
+import NativePackagerHelper._
 enablePlugins(JavaAppPackaging)
+enablePlugins(LauncherJarPlugin)
 
 name := "cite-microservice"
 organization := "edu.furman.classics"
@@ -24,12 +26,11 @@ libraryDependencies ++= {
 
     "edu.holycross.shot.cite" %% "xcite" % "3.2.1",
     "edu.holycross.shot" %% "cex" % "6.1.0",
-    "edu.holycross.shot" %% "ohco2" % "10.3.0",
-    "edu.holycross.shot" %% "scm" % "5.1.5",
+    "edu.holycross.shot" %% "ohco2" % "10.4.0",
+    "edu.holycross.shot" %% "scm" % "5.1.6",
     "edu.holycross.shot" %% "citeobj" % "5.0.0"
   )
 }
 
-enablePlugins(JavaAppPackaging)
 
 Revolver.settings
