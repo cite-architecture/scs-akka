@@ -10,6 +10,8 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.scaladsl.Flow
 import org.scalatest._
 
+import java.net.{URI, URLDecoder, URLEncoder}
+
 import spray.json._
 import DefaultJsonProtocol._
 
@@ -186,7 +188,32 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
       r.ngramHisto(0)._2("count") should equal (10)
     }  
   }
-  it should """respond correctly to "/texts/ngram/" as though it werre "/texts/ngram" """ in {
+
+  it should """respond correctly to "/texts/ngram" with an "n" and "t" and "s" param """ in {
+    val greekString:String = "Ἀχιλλεύς"
+    val encodedString:String = URLEncoder.encode(greekString, "UTF-8")
+    Get(s"/texts/ngram?s=${encodedString}&n=3&t=4") ~> routes ~> check {
+      val r:NgramHistoJson  = responseAs[NgramHistoJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.ngramHisto.size should equal (2)
+      r.ngramHisto(0)._2("count") should equal (29)
+    }  
+  }
+
+  it should """respond correctly to "/texts/ngram/URN" with an "n" and "t" and "s" param """ in {
+    val greekString:String = "Ἀχιλλεύς"
+    val encodedString:String = URLEncoder.encode(greekString, "UTF-8")
+    Get(s"/texts/ngram/urn:cts:greekLit:tlg0012.tlg001:1?s=${encodedString}&n=3&t=4") ~> routes ~> check {
+      val r:NgramHistoJson  = responseAs[NgramHistoJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.ngramHisto.size should equal (1)
+      r.ngramHisto(0)._2("count") should equal (6)
+    }  
+  }
+
+  it should """respond correctly to "/texts/ngram/" as though it were "/texts/ngram" """ in {
     Get(s"/texts/ngram?n=8&t=9") ~> routes ~> check {
       val r:NgramHistoJson  = responseAs[NgramHistoJson]
       status shouldBe OK
@@ -204,6 +231,30 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
       r.ngramHisto.size should equal (1)
       r.ngramHisto(0)._2("count") should equal (6)
     }  
+  }
+
+  it should """respond correctly to "/texts/ngram/urns?ng=STRING" correctly """ in {
+    val greekString:String = "ἔπεα πτερόεντα προσηύδα"
+    val encodedString:String = URLEncoder.encode(greekString, "UTF-8")
+    Get(s"/texts/ngram/urns?ng=${encodedString}") ~> routes ~> check {
+      val i:Int = 55
+      val vu:ReffJson = responseAs[ReffJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      vu.reff.size should equal(i)
+    }
+  }
+
+  it should """respond correctly to "/texts/ngram/urns/URN?ng=STRING" correctly """ in {
+    val greekString:String = "ἔπεα πτερόεντα προσηύδα"
+    val encodedString:String = URLEncoder.encode(greekString, "UTF-8")
+    Get(s"/texts/ngram/urns/urn:cts:greekLit:tlg0012.tlg001:1?ng=${encodedString}") ~> routes ~> check {
+      val i:Int = 1 
+      val vu:ReffJson = responseAs[ReffJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      vu.reff.size should equal(i)
+    }
   }
 
   it should """respond correctly to "/textcatalog """ in {

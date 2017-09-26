@@ -160,6 +160,36 @@ trait Service extends Protocols with Ohco2Service {
             }
           }
         } ~ 
+        (get & path( "ngram" / "urns"  )){
+          parameters('ng.as[String]) { ng => 
+            complete {
+              fetchUrnsForNgram(None, ng).map[ToResponseMarshallable]{
+                case Right(ngh) => ngh
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~
+        (get & path( "ngram" / "urns" / Segment )){ urnString =>
+          parameters('ng.as[String]) { ng => 
+            complete {
+              fetchUrnsForNgram(Some(urnString), ng).map[ToResponseMarshallable]{
+                case Right(ngh) => ngh
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~
+        (get & path( "ngram" / Segment )){ urnString =>
+          parameters('n.as[Int] ? 3, 't.as[Int] ? 1, 's.as[String] ?, 'ignorePunctuation.as[Boolean] ? true) { (n, t, s, ignorePunctuation) =>
+            complete {
+              fetchNgram(n, t, s, Some(urnString), ignorePunctuation).map[ToResponseMarshallable] {
+                case Right(ngh) => ngh
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~
         (get & path( "ngram" )) { 
           parameters('n.as[Int] ? 3, 't.as[Int] ? 1, 's.as[String] ?, 'ignorePunctuation.as[Boolean] ? true) { (n, t, s, ignorePunctuation) =>
             complete {
@@ -170,16 +200,6 @@ trait Service extends Protocols with Ohco2Service {
             }
           }
         } ~
-        (get & path( "ngram" / Segment  )) { urnString => 
-          parameters('n.as[Int] ? 3, 't.as[Int] ? 1, 's.as[String] ?, 'ignorePunctuation.as[Boolean] ? true) { (n, t, s, ignorePunctuation) =>
-            complete {
-              fetchNgram(n, t, s, Some(urnString), ignorePunctuation).map[ToResponseMarshallable] {
-                case Right(ngh) => ngh
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~ 
         (get & path(Segment)) { urnString =>
           complete {
             fetchOhco2Text(urnString).map[ToResponseMarshallable] {

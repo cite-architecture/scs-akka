@@ -12,6 +12,8 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.unmarshalling.Unmarshal
 
+import java.net.{URI, URLDecoder, URLEncoder}
+
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 
@@ -136,6 +138,31 @@ case class CatalogJson(citeCatalog:Vector[(
       }
     }
   }
+
+  def fetchUrnsForNgram(urnString: Option[String], ngString: String): Future[Either[String,ReffJson]] = {
+   try {
+      val nu:Vector[CtsUrn] = urnString match {
+        case Some(u) => {
+          val urn:CtsUrn = CtsUrn(u)
+          val urnv:Vector[CtsUrn] = (textRepository.get.corpus >= urn).urnsForNGram(ngString)
+          urnv
+        }
+        case None => {
+          val urnv:Vector[CtsUrn] = textRepository.get.corpus.urnsForNGram(ngString)      
+          urnv
+        }
+      }
+      val v:Vector[String] = nu.map(u => u.toString)
+      val n:ReffJson = ReffJson(v) 
+      Unmarshal(n).to[ReffJson].map(Right(_))
+   } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+
+  }
+
 
   /* def fetchOhco2Text(urnString: String): Future[Either[String,CorpusJson]] = {
   	 try {

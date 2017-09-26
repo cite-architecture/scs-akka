@@ -55,8 +55,12 @@ Implemented:
 - implemented `/texts/ngram?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times
 - implemented `/texts/ngram/**CTS URN**?n=**N**` => compute histogram of all ngrams of size `N` within `CTS URN`
 - implemented `/texts/ngram/**CTS URN**?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times within **CTS URN**
+- implemented `/texts/ngram/urns?ng=**NGRAM*` => Find passages where ngram NGRAM occurs.
+- implemented `/texts/ngram/urns/**CTS URN?ng=NGRAM*` => Find passages within CTS URN where ngram NGRAM occurs.
 
 (By default, each of these ignores punctuation. To include punctuation, add `&ignorePunctuation=false` to any request.)
+
+**N.b.** The NGRAM string must be url-encoded. This is the responsibility of the calling app.
 
 ## Versions
 
