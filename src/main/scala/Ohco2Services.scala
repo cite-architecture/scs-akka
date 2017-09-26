@@ -44,29 +44,29 @@ case class CatalogJson(citeCatalog:Vector[(
   */
 
 
-trait Ohco2Service extends Protocols {
-  implicit val system: ActorSystem
-  implicit def executor: ExecutionContextExecutor
-  implicit val materializer: Materializer
-  implicit val cexLibrary:CiteLibrary
-  implicit val textRepository:Option[TextRepository]
+  trait Ohco2Service extends Protocols {
+    implicit val system: ActorSystem
+    implicit def executor: ExecutionContextExecutor
+    implicit val materializer: Materializer
+    implicit val cexLibrary:CiteLibrary
+    implicit val textRepository:Option[TextRepository]
 
-  def config: Config
-  val logger: LoggingAdapter
+    def config: Config
+    val logger: LoggingAdapter
 
-  def fetchCatalog(urnString:Option[String]):Future[Either[String,CatalogJson]] = {
-    try {
-      val cc:Vector[CatalogEntry] = urnString match {
-        case Some(us) => {
-          val urn:CtsUrn = CtsUrn(us).dropPassage
-          val preVector:Vector[CatalogEntry] = textRepository.get.catalog.texts
-          preVector.filter(_.urn ~~ urn)
-        } 
-        case None => {
-          textRepository.get.catalog.texts
+    def fetchCatalog(urnString:Option[String]):Future[Either[String,CatalogJson]] = {
+      try {
+        val cc:Vector[CatalogEntry] = urnString match {
+          case Some(us) => {
+            val urn:CtsUrn = CtsUrn(us).dropPassage
+            val preVector:Vector[CatalogEntry] = textRepository.get.catalog.texts
+            preVector.filter(_.urn ~~ urn)
+          } 
+          case None => {
+            textRepository.get.catalog.texts
+          }
         }
-      }
-      val v = cc.map(l => 
+        val v = cc.map(l => 
           Map("urn" -> l.urn.toString, 
            "citationScheme" -> l.citationScheme,
            "lang" -> l.lang,
@@ -75,16 +75,16 @@ trait Ohco2Service extends Protocols {
            "versionLabel" -> l.versionLabel.toString,
            "exemplarLabel" -> l.exemplarLabel.toString
          ))
-      val n:CatalogJson = CatalogJson(v) 
-      Unmarshal(n).to[CatalogJson].map(Right(_))
-    } catch {
-      case e: Exception => {
-        Future.successful(Left(s"${new IOException(e)}"))
+        val n:CatalogJson = CatalogJson(v) 
+        Unmarshal(n).to[CatalogJson].map(Right(_))
+      } catch {
+        case e: Exception => {
+          Future.successful(Left(s"${new IOException(e)}")) // was IOException
+        }
       }
     }
-  }
 
-  def fetchReff1(urnString: String): Future[Either[String,ReffJson]] = {
+/* def fetchReff1(urnString: String): Future[Either[String,ReffJson]] = {
      try {
       val urn:CtsUrn = CtsUrn(urnString)
       val c:Corpus = textRepository.get.corpus >= urn 
@@ -96,23 +96,23 @@ trait Ohco2Service extends Protocols {
         Future.successful(Left(s"${new IOException(e)}"))
       }
     }
-  }
+  } */
 
   def fetchReff(urnString: String): Future[Either[String,ReffJson]] = {
-     try {
-      val urn:CtsUrn = CtsUrn(urnString)
+   try {
+    val urn:CtsUrn = CtsUrn(urnString)
 
-      urn.versionOption match {
-        case Some(v) => {
-          val c:Corpus = cexLibrary.textRepository.get.corpus >= urn 
-          val v:Vector[String] = c.urns.map(u => u.toString)
-          val n:ReffJson = ReffJson(v) 
-          Unmarshal(n).to[ReffJson].map(Right(_))
-        }
-        case None => {
-          val passageComp:String = urn.passageComponentOption match {
-            case Some(s) => s
-            case None => ""
+    urn.versionOption match {
+      case Some(v) => {
+        val c:Corpus = cexLibrary.textRepository.get.corpus >= urn 
+        val v:Vector[String] = c.urns.map(u => u.toString)
+        val n:ReffJson = ReffJson(v) 
+        Unmarshal(n).to[ReffJson].map(Right(_))
+      }
+      case None => {
+        val passageComp:String = urn.passageComponentOption match {
+          case Some(s) => s
+          case None => ""
           }
           val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
           val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
@@ -137,7 +137,7 @@ trait Ohco2Service extends Protocols {
     }
   }
 
-  def fetchOhco2Text(urnString: String): Future[Either[String,CorpusJson]] = {
+  /* def fetchOhco2Text(urnString: String): Future[Either[String,CorpusJson]] = {
   	 try {
       val urn:CtsUrn = CtsUrn(urnString)
       val c:Corpus = textRepository.get.corpus >= urn 
@@ -149,25 +149,25 @@ trait Ohco2Service extends Protocols {
         Future.successful(Left(s"${new IOException(e)}"))
       }
     }
-  }
+  } */
 
-  def testFetchOhco2Text(urnString: String): Future[Either[String,CorpusJson]] = {
-     try {
-      val urn:CtsUrn = CtsUrn(urnString)
+  def fetchOhco2Text(urnString: String): Future[Either[String,CorpusJson]] = {
+   try {
+    val urn:CtsUrn = CtsUrn(urnString)
 
-      //if (urn.passageComponentOption == None){ throw new ScsException("No passage component. This service will not return a whole text.") }
+    //if (urn.passageComponentOption == None){ throw new ScsException("No passage component. This service will not return a whole text.") }
 
-      urn.versionOption match {
-        case Some(v) => {
-          val c:Corpus = cexLibrary.textRepository.get.corpus >= urn 
-          val v:Vector[Map[String,String]] = c.nodes.map(l => Map("urn" -> l.urn.toString, "text" -> l.text))
-          val n:CorpusJson = CorpusJson(v) 
-          Unmarshal(n).to[CorpusJson].map(Right(_))
-        }
-        case None => {
-          val passageComp:String = urn.passageComponentOption match {
-            case Some(s) => s
-            case None => ""
+    urn.versionOption match {
+      case Some(v) => {
+        val c:Corpus = cexLibrary.textRepository.get.corpus >= urn 
+        val v:Vector[Map[String,String]] = c.nodes.map(l => Map("urn" -> l.urn.toString, "text" -> l.text))
+        val n:CorpusJson = CorpusJson(v) 
+        Unmarshal(n).to[CorpusJson].map(Right(_))
+      }
+      case None => {
+        val passageComp:String = urn.passageComponentOption match {
+          case Some(s) => s
+          case None => ""
           }
           val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
           val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
@@ -192,72 +192,151 @@ trait Ohco2Service extends Protocols {
   }
 
   def fetchFirstNode(urnString: String): Future[Either[String,CitableNodeJson]] = {
-     try {
-      val urn:CtsUrn = CtsUrn(urnString)
-      val cn:CitableNode = textRepository.get.corpus.firstNode(urn)
-      val cnj:Map[String,String] = Map("urn" -> cn.urn.toString, "text" -> cn.text)
-      val n:CitableNodeJson = CitableNodeJson(cnj) 
-      Unmarshal(n).to[CitableNodeJson].map(Right(_))
-    } catch {
-      case e: Exception => {
-        Future.successful(Left(s"${new IOException(e)}"))
-      }
+   try {
+    val urn:CtsUrn = CtsUrn(urnString)
+    val cn:CitableNode = textRepository.get.corpus.firstNode(urn)
+    val cnj:Map[String,String] = Map("urn" -> cn.urn.toString, "text" -> cn.text)
+    val n:CitableNodeJson = CitableNodeJson(cnj) 
+    Unmarshal(n).to[CitableNodeJson].map(Right(_))
+  } catch {
+    case e: Exception => {
+      Future.successful(Left(s"${new IOException(e)}"))
     }
   }
+}
 
-  def fetchNgram(n:Int, t:Int, so:Option[String], urn:Option[String], ignorePunctuation:Boolean): Future[Either[String,NgramHistoJson]] = {
-    try {
-      val ngh:StringHistogram = {
-        urn match {
-           case Some(u) => {
-              val ctsU = CtsUrn(u)
-              val filteredCorpus:Corpus = textRepository.get.corpus >= ctsU 
-              so match {
-                case Some(s) => {
-                  val ngh:StringHistogram = filteredCorpus.ngramHisto(s,n,t,ignorePunctuation)
-                  ngh
-                }
-                case None =>  {
-                  val ngh:StringHistogram = filteredCorpus.ngramHisto(n,t,ignorePunctuation)
-                  ngh
-                }
-              }
-           }
-           case None => {
-              so match {
-                case Some(s) => { 
-                  val ngh:StringHistogram = textRepository.get.corpus.ngramHisto(s,n,t,ignorePunctuation)
-                  ngh
-                }
-                case None => {
-                  val ngh:StringHistogram = textRepository.get.corpus.ngramHisto(n,t,ignorePunctuation)
-                  ngh
-                }
-              }
-           }
-        } 
+def fetchFirstUrn(urnString: String): Future[Either[String,CtsUrnString]] = {
+ try {
+  val urn:CtsUrn = CtsUrn(urnString).dropPassage
+  //if (urn.versionOption == None){ throw new ScsException("It is invalid to request 'firstUrn' on a notional work.") }
+  val cn:CitableNode = textRepository.get.corpus.firstNode(urn)
+  val urnReply = CtsUrnString(cn.urn.toString)
+  Unmarshal(urnReply).to[CtsUrnString].map(Right(_))
+} catch {
+  case e: Exception => {
+    Future.successful(Left(s"${new IOException(e)}"))
+  }
+}
+}
+
+def fetchPrevUrn(urnString: String): Future[Either[String,CtsUrnString]] = {
+ try {
+  val urn:CtsUrn = CtsUrn(urnString)
+  if (urn.versionOption == None){ throw new ScsException("It is invalid to request 'prevUrn' on a notional work.") }
+  val cn:Option[CtsUrn] = textRepository.get.corpus.prevUrn(urn)
+  val urnReply = cn match {
+    case Some(u) => CtsUrnString(u.toString)
+    case None => CtsUrnString("")
+  }
+  Unmarshal(urnReply).to[CtsUrnString].map(Right(_))
+} catch {
+  case e: Exception => {
+    Future.successful(Left(s"${new IOException(e)}"))
+  }
+}
+}
+
+def fetchNextUrn(urnString: String): Future[Either[String,CtsUrnString]] = {
+ try {
+  val urn:CtsUrn = CtsUrn(urnString)
+  if (urn.versionOption == None){ throw new ScsException("It is invalid to request 'nextUrn' on a notional work.") }
+  val cn:Option[CtsUrn] = textRepository.get.corpus.nextUrn(urn)
+  val urnReply = cn match {
+    case Some(u) => CtsUrnString(u.toString)
+    case None => CtsUrnString("")
+  }
+  Unmarshal(urnReply).to[CtsUrnString].map(Right(_))
+} catch {
+  case e: Exception => {
+    Future.successful(Left(s"${new IOException(e)}"))
+  }
+}
+}
+
+def fetchPrevText(urnString: String): Future[Either[String,CorpusJson]] = {
+ try {
+  val urn:CtsUrn = CtsUrn(urnString)
+  if (urn.versionOption == None){ throw new ScsException("It is invalid to request 'prev' on a notional work.") }
+  val vcn:Vector[CitableNode] = textRepository.get.corpus.prev(urn) 
+  val v:Vector[Map[String,String]] = vcn.map(l => Map("urn" -> l.urn.toString, "text" -> l.text))
+  val n:CorpusJson = CorpusJson(v) 
+  Unmarshal(n).to[CorpusJson].map(Right(_))
+} catch {
+  case e: Exception => {
+    Future.successful(Left(s"${new IOException(e)}"))
+  }
+}
+}
+
+def fetchNextText(urnString: String): Future[Either[String,CorpusJson]] = {
+ try {
+  val urn:CtsUrn = CtsUrn(urnString)
+  if (urn.versionOption == None){ throw new ScsException("It is invalid to request 'next' on a notional work.") }
+  val vcn:Vector[CitableNode] = textRepository.get.corpus.next(urn) 
+  val v:Vector[Map[String,String]] = vcn.map(l => Map("urn" -> l.urn.toString, "text" -> l.text))
+  val n:CorpusJson = CorpusJson(v) 
+  Unmarshal(n).to[CorpusJson].map(Right(_))
+} catch {
+  case e: Exception => {
+    Future.successful(Left(s"${new IOException(e)}"))
+  }
+}
+}
+
+
+def fetchNgram(n:Int, t:Int, so:Option[String], urn:Option[String], ignorePunctuation:Boolean): Future[Either[String,NgramHistoJson]] = {
+  try {
+    val ngh:StringHistogram = {
+      urn match {
+       case Some(u) => {
+        val ctsU = CtsUrn(u)
+        val filteredCorpus:Corpus = textRepository.get.corpus >= ctsU 
+        so match {
+          case Some(s) => {
+            val ngh:StringHistogram = filteredCorpus.ngramHisto(s,n,t,ignorePunctuation)
+            ngh
+          }
+          case None =>  {
+            val ngh:StringHistogram = filteredCorpus.ngramHisto(n,t,ignorePunctuation)
+            ngh
+          }
+        }
       }
-
-      val nghv:NgramHistoJson = NgramHistoJson(ngh.histogram.map(h => ( Map[String,String]("s" -> h.s.toString) , Map[String,Int]("count" -> h.count.toInt) ) ))
-      Unmarshal(nghv).to[NgramHistoJson].map(Right(_)) 
-
-    } catch {
-      case e: Exception => {
-        Future.successful(Left(s"${new IOException(e)}"))
+      case None => {
+        so match {
+          case Some(s) => { 
+            val ngh:StringHistogram = textRepository.get.corpus.ngramHisto(s,n,t,ignorePunctuation)
+            ngh
+          }
+          case None => {
+            val ngh:StringHistogram = textRepository.get.corpus.ngramHisto(n,t,ignorePunctuation)
+            ngh
+          }
+        }
       }
-    }
+    } 
   }
 
-  def fetchCtsUrn(urnString: String): Future[Either[String, CtsUrnString]] = {
-    try {
-      val urn:CtsUrn = CtsUrn(urnString)
-      val urnReply = CtsUrnString(urn.toString)
-      Unmarshal(urnReply).to[CtsUrnString].map(Right(_))
-    } catch {
-      case e: Exception => {
-        Future.successful(Left(s"${new IOException(e)}"))
-      }
+  val nghv:NgramHistoJson = NgramHistoJson(ngh.histogram.map(h => ( Map[String,String]("s" -> h.s.toString) , Map[String,Int]("count" -> h.count.toInt) ) ))
+  Unmarshal(nghv).to[NgramHistoJson].map(Right(_)) 
+
+} catch {
+  case e: Exception => {
+    Future.successful(Left(s"${new IOException(e)}"))
+  }
+}
+}
+
+def fetchCtsUrn(urnString: String): Future[Either[String, CtsUrnString]] = {
+  try {
+    val urn:CtsUrn = CtsUrn(urnString)
+    val urnReply = CtsUrnString(urn.toString)
+    Unmarshal(urnReply).to[CtsUrnString].map(Right(_))
+  } catch {
+    case e: Exception => {
+      Future.successful(Left(s"${new IOException(e)}"))
     }
   }
+}
 
 }

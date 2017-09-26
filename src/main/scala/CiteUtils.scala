@@ -26,4 +26,6 @@ object CexRepos{
 	}
 }
 
-case class ScsException(extext:String) extends Exception
+case class ScsException(message: String = "", cause: Option[Throwable] = None) extends Exception(message) {
+    cause.foreach(initCause)
+  }

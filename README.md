@@ -2,7 +2,7 @@
 
 Based on [https://github.com/theiterators/akka-http-microservice](https://github.com/theiterators/akka-http-microservice) and used according to that project's MIT License. Thanks to Łukasz Sowa from [Iterators](http://www.theiterators.com).
 
-## Version: 0.1.1
+## Version: 0.1.2
 
 Status:  **experimental**.  No binary releases yet.
 
@@ -14,17 +14,15 @@ The following services are under development.
 
 Implemented:
 
-- implemented `/texts`**CTS URN** => list of citable nodes matching **CTS URN**
-- implemented `/texts/first/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
 - implemented `/texts` => lists all distinct work-components appearing in cited text nodes
+- implemented `/texts`**CTS URN** => list of citable nodes matching **CTS URN**
 - implemented `/texts/reff/`**CTS URN** => (possibly empty) list of CTS URNs matching **CTS URN**
-
-To be implemented:
-
-- `/texts/nexturn/`**CTS URN** => (possibly empty) Vector of CTS URNs identifying the next chunk of text
-- `/texts/prevurn/`**CTS URN** => (possibly empty) Vector of CTS URNs identifying the previous chunk of text
-- `/texts/next/`**CTS URN** => (possibly empty) Corpus of the next chunk of text
-- `/texts/prev/`**CTS URN** => (possibly empty) Corpus of the previous chunk of text
+- implemented `/texts/first/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
+- implemented `/texts/firsturn/`**CTS URN** => CTS URN identifying the first citable node in a text
+- implemented `/texts/next/`**CTS URN** => (possibly empty) Corpus of the next chunk of text
+- implemented `/texts/nexturn/`**CTS URN** => Option[CtsUrn] identifying the next chunk (node or range), or None
+- implemented `/texts/prev/`**CTS URN** => (possibly empty) Corpus of the previous chunk of text
+- implemented `/texts/prevurn/`**CTS URN** => Option[CtsUrn] identifying the previous chunk (node or range), or None
 
 ### Text catalog services
 
@@ -62,6 +60,7 @@ Implemented:
 
 ## Versions
 
+- **0.1.2** Added next and prev functions.
 - **0.1.1** Added endpints for ngrams and catalog.
 - **0.1.0** First version that responds to some CITE queries, and has tested them.
 - **0.0.1** Initial framework setup; modify template for Scala 2.12.

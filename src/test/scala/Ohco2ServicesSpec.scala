@@ -73,6 +73,110 @@ class Ohco2ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wi
     }
   }
 
+  it should """respond to "/texts/prev/URN" correctly """ in {
+    Get(s"/texts/prev/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.10") ~> routes ~> check {
+      val r:CorpusJson  = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.citableNodes(0)("urn") should equal ("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.9")
+    }
+  }
+
+  it should """respond to "/texts/next/URN" correctly """ in {
+    Get(s"/texts/next/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.10") ~> routes ~> check {
+      val r:CorpusJson  = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.citableNodes(0)("urn") should equal ("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.11")
+    }
+  }
+
+  it should """respond to "/texts/prev/URN" with an error if URN is at the work-level only.""" in {
+    Get(s"/texts/prev/urn:cts:greekLit:tlg0012.tlg001:1.10") ~> routes ~> check {
+      status shouldBe BadRequest
+      responseAs[String].length should be > 0
+    }
+  }
+
+  it should """respond to "/texts/next/URN" with an error if URN is at the work-level only.""" in {
+    Get(s"/texts/next/urn:cts:greekLit:tlg0012.tlg001:1.10") ~> routes ~> check {
+      status shouldBe BadRequest
+      responseAs[String].length should be > 0
+    }
+  }
+
+  it should """respond to "/texts/prevurn/URN" with an error if URN is at the work-level only.""" in {
+    Get(s"/texts/prevurn/urn:cts:greekLit:tlg0012.tlg001:1.10") ~> routes ~> check {
+      status shouldBe BadRequest
+      responseAs[String].length should be > 0
+    }
+  }
+
+  it should """respond to "/texts/nexturn/URN" with an error if URN is at the work-level only.""" in {
+    Get(s"/texts/nexturn/urn:cts:greekLit:tlg0012.tlg001:1.10") ~> routes ~> check {
+      status shouldBe BadRequest
+      responseAs[String].length should be > 0
+    }
+  }
+
+  it should """respond to "/texts/firsturn/URN" correctly """ in {
+    Get(s"/texts/firsturn/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:") ~> routes ~> check {
+      val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1")
+      val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      responseAs[CtsUrnString] shouldBe urnStringReply
+    }
+  }
+
+  it should """respond to "/texts/firsturn/URN" with the first URN of the work, even if URN specifies a passage """ in {
+    Get(s"/texts/firsturn/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.20-1.23") ~> routes ~> check {
+      val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1")
+      val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      responseAs[CtsUrnString] shouldBe urnStringReply
+    }
+  }
+
+  it should """respond to "/texts/nexturn/URN" correctly """ in {
+    Get(s"/texts/nexturn/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.12") ~> routes ~> check {
+      val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.13")
+      val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      responseAs[CtsUrnString] shouldBe urnStringReply
+    }
+  }
+
+  it should """respond to "/texts/prevurn/URN" correctly """ in {
+    Get(s"/texts/prevurn/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.12") ~> routes ~> check {
+      val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.11")
+      val urnStringReply:CtsUrnString = CtsUrnString(u.toString)
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      responseAs[CtsUrnString] shouldBe urnStringReply
+    }
+  }
+
+  it should """respond to "/texts/prevurn/URN" with an empty string when URN is the first node """ in {
+    Get(s"/texts/prevurn/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1") ~> routes ~> check {
+      val urnStringReply:CtsUrnString = CtsUrnString("")
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      responseAs[CtsUrnString] shouldBe urnStringReply
+    }
+  }
+
+  it should """respond to "/texts/nexturn/URN" with an empty string when URN is the last node """ in {
+    Get(s"/texts/nexturn/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:24.804") ~> routes ~> check {
+      val urnStringReply:CtsUrnString = CtsUrnString("")
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      responseAs[CtsUrnString] shouldBe urnStringReply
+    }
+  }
+
   it should """respond correctly to "/texts/ngram" with an "n" and "t" param """ in {
     Get(s"/texts/ngram?n=8&t=9") ~> routes ~> check {
       val r:NgramHistoJson  = responseAs[NgramHistoJson]

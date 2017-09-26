@@ -111,16 +111,6 @@ trait Service extends Protocols with Ohco2Service {
           } 
         }
       } ~
-      pathPrefix("texts2") {
-        (get & path(Segment)) { urnString =>
-            complete {
-              testFetchOhco2Text(urnString).map[ToResponseMarshallable] {
-                case Right(corpusString) => corpusString
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-        }
-      } ~
       pathPrefix("texts"  ) {
         (get & path("first" / Segment)) { (urnString) =>
           complete {
@@ -130,6 +120,46 @@ trait Service extends Protocols with Ohco2Service {
             }
           }
         } ~
+        (get & path("firsturn" / Segment)) { (urnString) =>
+          complete {
+            fetchFirstUrn(urnString).map[ToResponseMarshallable] {
+              case Right(ctsUrnString) => ctsUrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~
+        (get & path("prev" / Segment)) { (urnString) =>
+          complete {
+            fetchPrevText(urnString).map[ToResponseMarshallable] {
+              case Right(corpusString) => corpusString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~
+        (get & path("prevurn" / Segment)) { (urnString) =>
+          complete {
+            fetchPrevUrn(urnString).map[ToResponseMarshallable] {
+              case Right(ctsUrnString) => ctsUrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~
+        (get & path("next" / Segment)) { (urnString) =>
+          complete {
+            fetchNextText(urnString).map[ToResponseMarshallable] {
+              case Right(corpusString) => corpusString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~
+        (get & path("nexturn" / Segment)) { (urnString) =>
+          complete {
+            fetchNextUrn(urnString).map[ToResponseMarshallable] {
+              case Right(ctsUrnString) => ctsUrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~ 
         (get & path( "ngram" )) { 
           parameters('n.as[Int] ? 3, 't.as[Int] ? 1, 's.as[String] ?, 'ignorePunctuation.as[Boolean] ? true) { (n, t, s, ignorePunctuation) =>
             complete {
@@ -152,7 +182,7 @@ trait Service extends Protocols with Ohco2Service {
         } ~ 
         (get & path(Segment)) { urnString =>
           complete {
-            testFetchOhco2Text(urnString).map[ToResponseMarshallable] {
+            fetchOhco2Text(urnString).map[ToResponseMarshallable] {
               case Right(corpusString) => corpusString
               case Left(errorMessage) => BadRequest -> errorMessage
             }
