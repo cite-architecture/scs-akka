@@ -90,6 +90,40 @@ trait Service extends Protocols with Ohco2Service {
     cl
   }
 
+
+/*
+  val routes1 = {
+    pathPrefix("ctsurn"  ) {
+        (get & path(Segment)) { (urnString) =>
+          complete {
+            fetchCtsUrn(urnString).map[ToResponseMarshallable] {
+              case Right(ctsUrnString) => ctsUrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } 
+  }
+
+  val routes2 = {
+    pathPrefix("object"  ) {
+        (get & path(Segment)) { (urnString) =>
+          complete {
+            fetchCtsUrn(urnString).map[ToResponseMarshallable] {
+              case Right(ctsUrnString) => ctsUrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } 
+  }
+  val routes = {
+    logRequestResult("cite-microservice") {
+        routes1 ~routes2
+    }
+  }
+  */
+
   val routes = {
     logRequestResult("cite-microservice") {
     pathPrefix("ctsurn"  ) {
