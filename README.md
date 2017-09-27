@@ -2,7 +2,7 @@
 
 Based on [https://github.com/theiterators/akka-http-microservice](https://github.com/theiterators/akka-http-microservice) and used according to that project's MIT License. Thanks to Łukasz Sowa from [Iterators](http://www.theiterators.com).
 
-## Version: 0.1.2
+## Version: 0.1.3
 
 Status:  **experimental**.  No binary releases yet.
 
@@ -64,6 +64,7 @@ Implemented:
 
 ## Versions
 
+- **0.1.3** Parameterized local vs. remote CEX file.
 - **0.1.2** Added next and prev functions.
 - **0.1.1** Added endpints for ngrams and catalog.
 - **0.1.0** First version that responds to some CITE queries, and has tested them.

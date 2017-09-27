@@ -21,6 +21,7 @@ import java.io.File
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.math._
 import scala.util.{Success, Failure}
+import scala.io.Source
 
 import spray.json.DefaultJsonProtocol
 
@@ -64,11 +65,29 @@ trait Service extends Protocols with Ohco2Service {
       cl
   }
 
-  lazy val cexLibrary:CiteLibrary = {
+  lazy val cexLibraryLocal:CiteLibrary = {
       val f:String = config.getString("cex.library")
       logger.info(s"\n\nUsing CEX file: ${f}\n")
       val cl:CiteLibrary = CiteLibrarySource.fromFile( f , "#", ",")
       cl
+  }
+
+  lazy val cexLibraryRemote:CiteLibrary = {
+      val url:String = config.getString("cex.libraryUrl")
+      logger.info(s"\n\nUsing CEX file from URL: ${url}\n")
+      val cexFile = scala.io.Source.fromURL(url)
+      val cexString = cexFile.mkString
+      val repo:CiteLibrary = CiteLibrary(cexString, "#", ",")
+      repo
+  }
+
+  lazy val cexLibrary:CiteLibrary = {
+    val useRemote:Boolean = config.getBoolean("cex.useRemote")
+    val cl:CiteLibrary = useRemote match {
+      case true => cexLibraryRemote
+      case _ => cexLibraryLocal
+    }
+    cl
   }
 
   val routes = {
