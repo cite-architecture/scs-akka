@@ -41,7 +41,7 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val reffFormat = jsonFormat1(ReffJson.apply)
 }
 
-trait Service extends Protocols with Ohco2Service {
+trait Service extends Protocols with Ohco2Service with Ohco2Router with CiteObjectRouter {
   implicit val system: ActorSystem
   implicit def executor: ExecutionContextExecutor
   implicit val materializer: Materializer
@@ -124,7 +124,9 @@ trait Service extends Protocols with Ohco2Service {
   }
   */
 
-  val routes = {
+  val routes = ohco2Routes ~ citeObjectRoutes
+
+  val routesX = {
     logRequestResult("cite-microservice") {
     pathPrefix("ctsurn"  ) {
         (get & path(Segment)) { (urnString) =>
@@ -275,7 +277,7 @@ trait Service extends Protocols with Ohco2Service {
 }
 
 
-object CiteMicroservice extends App with Service with Ohco2Service {
+object CiteMicroservice extends App with Service  {
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
   override implicit val materializer = ActorMaterializer()
