@@ -10,15 +10,23 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.scaladsl.Flow
 import org.scalatest._
 
+import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
+
+import akka.http.scaladsl.unmarshalling.Unmarshaller._ 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import edu.holycross.shot.ohco2._
 import edu.holycross.shot.cite._
 import edu.holycross.shot.citeobj._
 import edu.holycross.shot.scm._
+import edu.furman.akkascs._
 
 
 class ServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Service {
   override def testConfigSource = "akka.loglevel = WARNING"
   override def config = testConfig
+
   override val logger = Logging(system.eventStream, "edu.furman.akkascs")
 
   val textRepository:Option[TextRepository] = cexLibrary.textRepository 

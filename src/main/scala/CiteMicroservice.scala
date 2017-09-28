@@ -6,17 +6,19 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.client.RequestBuilding
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.http.scaladsl.marshalling.Marshaller._ 
 import akka.http.scaladsl.model.{HttpResponse, HttpRequest}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import java.io.IOException
 import java.io.File
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.math._
@@ -32,7 +34,7 @@ import edu.holycross.shot.scm._
 
 
 
-trait Protocols extends DefaultJsonProtocol {
+trait Protocols extends DefaultJsonProtocol  {
   implicit val ctsUrnStringFormat = jsonFormat1(CtsUrnString.apply)
   implicit val corpusFormat = jsonFormat1(CorpusJson.apply)
   implicit val citableNodeFormat = jsonFormat1(CitableNodeJson.apply)
@@ -41,7 +43,7 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val reffFormat = jsonFormat1(ReffJson.apply)
 }
 
-trait Service extends Protocols with Ohco2Service with Ohco2Router with CiteObjectRouter {
+trait Service extends Protocols with Ohco2Router  with CiteObjectRouter with Ohco2Service {
   implicit val system: ActorSystem
   implicit def executor: ExecutionContextExecutor
   implicit val materializer: Materializer
@@ -90,41 +92,11 @@ trait Service extends Protocols with Ohco2Service with Ohco2Router with CiteObje
     cl
   }
 
-
-/*
-  val routes1 = {
-    pathPrefix("ctsurn"  ) {
-        (get & path(Segment)) { (urnString) =>
-          complete {
-            fetchCtsUrn(urnString).map[ToResponseMarshallable] {
-              case Right(ctsUrnString) => ctsUrnString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        }
-      } 
-  }
-
-  val routes2 = {
-    pathPrefix("object"  ) {
-        (get & path(Segment)) { (urnString) =>
-          complete {
-            fetchCtsUrn(urnString).map[ToResponseMarshallable] {
-              case Right(ctsUrnString) => ctsUrnString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        }
-      } 
-  }
-  val routes = {
+  val routes = { 
     logRequestResult("cite-microservice") {
-        routes1 ~routes2
+      { ohco2Routes ~ citeObjectRoutes }
     }
   }
-  */
-
-  val routes = ohco2Routes ~ citeObjectRoutes
 
   val routesX = {
     logRequestResult("cite-microservice") {
