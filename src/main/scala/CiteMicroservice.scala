@@ -90,42 +90,10 @@ trait Service extends Protocols with Ohco2Service {
     cl
   }
 
-
-/*
-  val routes1 = {
-    pathPrefix("ctsurn"  ) {
-        (get & path(Segment)) { (urnString) =>
-          complete {
-            fetchCtsUrn(urnString).map[ToResponseMarshallable] {
-              case Right(ctsUrnString) => ctsUrnString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        }
-      } 
-  }
-
-  val routes2 = {
-    pathPrefix("object"  ) {
-        (get & path(Segment)) { (urnString) =>
-          complete {
-            fetchCtsUrn(urnString).map[ToResponseMarshallable] {
-              case Right(ctsUrnString) => ctsUrnString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        }
-      } 
-  }
   val routes = {
     logRequestResult("cite-microservice") {
-        routes1 ~routes2
-    }
-  }
-  */
 
-  val routes = {
-    logRequestResult("cite-microservice") {
+    // Validate a URN 
     pathPrefix("ctsurn"  ) {
         (get & path(Segment)) { (urnString) =>
           complete {
@@ -137,6 +105,7 @@ trait Service extends Protocols with Ohco2Service {
         }
       } ~
       pathPrefix("textcatalog") {
+      // Get Text Catalog
         (get & path( Segment)) { urnString => 
           complete {
             fetchCatalog(Some(urnString)).map[ToResponseMarshallable] {
@@ -155,6 +124,7 @@ trait Service extends Protocols with Ohco2Service {
         }
       } ~
       pathPrefix("reff") {
+      // Reff
         (get & path(Segment)) { urnString =>
           complete {
             fetchReff(urnString).map[ToResponseMarshallable] {
@@ -165,6 +135,7 @@ trait Service extends Protocols with Ohco2Service {
         }
       } ~
       pathPrefix("texts"  ) {
+      // All the '/texts' routes
         (get & path("first" / Segment)) { (urnString) =>
           complete {
             fetchFirstNode(urnString).map[ToResponseMarshallable] {
@@ -270,6 +241,7 @@ trait Service extends Protocols with Ohco2Service {
           }
         }  
       } 
+
     }
   }
 }

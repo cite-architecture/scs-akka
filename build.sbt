@@ -7,6 +7,15 @@ organization := "edu.furman.classics"
 version := "0.1.2"
 scalaVersion := "2.12.3"
 
+fork in run := true
+
+javaOptions in run ++= Seq(
+    "-Xms256M", 
+    "-Xmx4G", 
+    "-XX:MaxPermSize=4096M", 
+    "-XX:+UseConcMarkSweepGC"
+)
+
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
 resolvers += Resolver.jcenterRepo
