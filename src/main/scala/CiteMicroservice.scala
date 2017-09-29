@@ -34,6 +34,7 @@ import edu.holycross.shot.scm._
 
 trait Protocols extends DefaultJsonProtocol {
   implicit val ctsUrnStringFormat = jsonFormat1(CtsUrnString.apply)
+  implicit val cite2UrnStringFormat = jsonFormat1(Cite2UrnString.apply)
   implicit val corpusFormat = jsonFormat1(CorpusJson.apply)
   implicit val citableNodeFormat = jsonFormat1(CitableNodeJson.apply)
   implicit val ngramHistoFormat = jsonFormat1(NgramHistoJson.apply)
@@ -41,7 +42,7 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val reffFormat = jsonFormat1(ReffJson.apply)
 }
 
-trait Service extends Protocols with Ohco2Service {
+trait Service extends Protocols with Ohco2Service with CiteCollectionService {
   implicit val system: ActorSystem
   implicit def executor: ExecutionContextExecutor
   implicit val materializer: Materializer
@@ -93,8 +94,8 @@ trait Service extends Protocols with Ohco2Service {
   val routes = {
     logRequestResult("cite-microservice") {
 
-    // Validate a URN 
     pathPrefix("ctsurn"  ) {
+    // Validate a CTS URN 
         (get & path(Segment)) { (urnString) =>
           complete {
             fetchCtsUrn(urnString).map[ToResponseMarshallable] {
@@ -240,14 +241,33 @@ trait Service extends Protocols with Ohco2Service {
             }
           }
         }  
-      } 
-
+      } ~
+      pathPrefix("cite2urn"){
+        // Validate a Cite2 URN
+        (get & path(Segment)) { (urnString) =>
+          complete {
+            fetchCite2Urn(urnString).map[ToResponseMarshallable] {
+              case Right(cite2UrnString) => cite2UrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      pathPrefix("collection") {
+        complete { "'/collection' Not implemented yet."}
+      } ~
+      pathPrefix("object") {
+        complete { "'/object' Not implemented yet."}
+      } ~
+      pathPrefix("extension") {
+        complete { "'/extension' Not implemented yet."}
+      }
     }
   }
 }
 
 
-object CiteMicroservice extends App with Service with Ohco2Service {
+object CiteMicroservice extends App with Service with Ohco2Service with CiteCollectionService {
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
   override implicit val materializer = ActorMaterializer()
