@@ -45,6 +45,8 @@ case class CiteCollectionDefJson(citeCollectionDef:Option[
       )]
   )
 
+case class VectorOfCiteCollectionDefsJson(citeCollectionDefs:Vector[CiteCollectionDefJson])
+
 case class CitePropertyDefJson(
   citePropertyDef:Vector[
    (Map[String,String], Map[String,String], Map[String, String], Map[String, Vector[String]] )  
@@ -92,9 +94,39 @@ def fetchCite2Urn(urnString: String): Future[Either[String, Cite2UrnString]] = {
   }
 }
 
-def fetchCiteCollectionDef(urnString: String): Future[Either[String, CiteCollectionDefJson]] = {
+def fetchCiteCollectionDefJson(urnString: String): Future[Either[String, CiteCollectionDefJson]] = {
   try {
     val urn:Cite2Urn = Cite2Urn(urnString)
+    val ccdj:CiteCollectionDefJson = fetchCiteCollectionDef(urn)
+    Unmarshal(ccdj).to[CiteCollectionDefJson].map(Right(_))
+  } catch {
+    case e: Exception => {
+      Future.successful(Left(s"${new IOException(e)}"))
+    }
+  }
+}
+
+def fetchVectorOfCiteCollectonDefsJson: Future[Either[String, VectorOfCiteCollectionDefsJson]] ={
+  try {
+    val collVec:VectorOfCiteCollectionDefsJson = VectorOfCiteCollectionDefsJson(
+      collectionRepository.get.catalog.collections.map( cc => {
+       val ccd:CiteCollectionDefJson = fetchCiteCollectionDef(cc.urn)
+       ccd
+    }))
+    Unmarshal(collVec).to[VectorOfCiteCollectionDefsJson].map(Right(_))
+  } catch {
+    case e: Exception => {
+      Future.successful(Left(s"${new IOException(e)}"))
+    }
+  }
+}
+
+
+
+
+//def fetchCiteCollectionDef(urnString: String): Future[Either[String, CiteCollectionDefJson]] = {
+def fetchCiteCollectionDef(urn: Cite2Urn) : CiteCollectionDefJson = {
+  try {
     val ccd:Option[CiteCollectionDef] = collectionRepository.get.collectionDefinition(urn.dropSelector)
     val urnReply:CiteCollectionDefJson = ccd match {
       case Some(d) => {
@@ -133,69 +165,15 @@ def fetchCiteCollectionDef(urnString: String): Future[Either[String, CiteCollect
       }
       case None => CiteCollectionDefJson(None)
     }
-
-    Unmarshal(urnReply).to[CiteCollectionDefJson].map(Right(_))
+    urnReply
+    //Unmarshal(urnReply).to[CiteCollectionDefJson].map(Right(_))
   } catch {
     case e: Exception => {
-      Future.successful(Left(s"${new IOException(e)}"))
+      throw new ScsException(s"Exception creating collection definition for ${urn}.")
     }
   }
 
 }
-
-/*
-def fetchCiteCatalog: Future[Either[String,CiteCatalogJson]] = {
-  try {
-    val cat:CiteCatalog = collectionRepository match {
-      case Some(cr) => {
-        cr.catalog
-      }
-      case None => { throw new ScsException("No collectionRepository present.") }
-    }
-    val catReply = cat.collections.map( c => {
-        val urn:String = c.urn.toString
-        val collectionLabel:String = c.collectionLabel
-        val license:String = c.license
-        val labellingProperty:Option[String] = c.labellingProperty match {
-          case Some(l) => Some(l.toString)
-          case _ => None
-        }
-        val orderingProperty:Option[String] = c.orderingProperty match {
-          case Some(o) => Some(o.toString)
-          case _ => None
-        }
-        val propDefs:Vector[ ( Map[String, String], Map[String,String], Map[String,String], Map[String,Vector[String]] ) ] = c.propertyDefs.map( pd => {
-          val label:String = pd.label  
-          val urn:String = pd.urn.toString
-          val propertyType:String = pd.propertyType.toString
-          val vocabularyList:Vector[String] = pd.vocabularyList
-          val thisPropDef = Map(
-            "label" -> label, 
-            "urn" -> urn, 
-            "propertyType" -> propertyType, 
-            "vocabularyList" -> vocabularyList 
-          )
-          thisPropDef
-        } )
-        val thisCatalogEntry = Map(
-          "urn" -> urn, 
-          "collectionLabel" -> collectionLabel, 
-          "license" -> license, 
-          "labellingProperty" -> labellingProperty, 
-          "orderingProperty" -> orderingProperty,
-          "propertyDefs" -> propDefs
-        )
-        thisCatalogEntry
-      }
-    )
-    Unmarshal(catReply).to[CiteCatalogJson].map(Right(_))
-  } catch {
-    case e: Exception => {
-      Future.successful(Left(s"${new IOException(e)}"))
-    }
-  }
-}
-*/
 
 def fetchCiteObject(urnString: String): Future[Either[String, CiteObjectJson]] = {
   try {

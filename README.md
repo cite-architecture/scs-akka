@@ -12,8 +12,6 @@ The following services are under development.
 
 ## Text services
 
-Implemented:
-
 - implemented `/texts` => lists all distinct work-components appearing in cited text nodes
 - implemented `/texts`**CTS URN** => list of citable nodes matching **CTS URN**
 - implemented `/texts/reff/`**CTS URN** => (possibly empty) list of CTS URNs matching **CTS URN**
@@ -25,8 +23,6 @@ Implemented:
 - implemented `/texts/prevurn/`**CTS URN** => Option[CtsUrn] identifying the previous chunk (node or range), or None
 
 ### Text catalog services
-
-Implemented:
 
 - implemented `/textcatalog` => lists catalog entries for all cataloged texts
 - implemented `/textcatalog/`**CTS URN** =>  (possibly empty) list of catalog entries matching **CTS URN**
@@ -49,8 +45,6 @@ To be implemented:
 
 ### Ngram histograms
 
-Implemented:
-
 - implemented `/texts/ngram?n=**N**` => compute histogram of all ngrams of size `N`
 - implemented `/texts/ngram?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times
 - implemented `/texts/ngram/**CTS URN**?n=**N**` => compute histogram of all ngrams of size `N` within `CTS URN`
@@ -64,10 +58,11 @@ Implemented:
 
 ## CITE Collection Services
 
+- implemented `/collections/def/CITE2URN` => return the CiteCollectionDef of the Collections identified by CITE2URN
+- implemented `/collections` => return the catalog of Cite Collections in the repository
+
 Not Implemented
 
-- `/collections` => return the catalog of Cite Collections in the repository
-- `/collections/def/CITE2URN` => return the CiteCollectionDef of the Collections identified by CITE2URN
 - `/collection/props/CITE2URN` => returns the properties for collection CITE2URN
 - `/objects/CITE2URN` => returns all objects identified by a CITE2URN
 - `/collection/hasobj/CITE2URN`

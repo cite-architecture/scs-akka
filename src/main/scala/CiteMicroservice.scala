@@ -43,6 +43,7 @@ trait Protocols extends DefaultJsonProtocol {
   //implicit val citeCatalogFormat = jsonFormat1(CiteCatalogJson.apply)
   implicit val citePropertyDefFormat = jsonFormat1(CitePropertyDefJson.apply)
   implicit val citeCollectionDefFormat = jsonFormat1(CiteCollectionDefJson.apply)
+  implicit val vectorOfCiteCollectionDefsFormat = jsonFormat1(VectorOfCiteCollectionDefsJson.apply)
 }
 
 trait Service extends Protocols with Ohco2Service with CiteCollectionService {
@@ -257,10 +258,18 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
         }
       } ~
       pathPrefix("collections") {
-        (get & path("def" / Segment )) { urnString =>
+        (get & path( Segment )) { urnString =>
           complete { 
-            fetchCiteCollectionDef(urnString).map[ToResponseMarshallable]{
+            fetchCiteCollectionDefJson(urnString).map[ToResponseMarshallable]{
               case Right(citeCollectionDefJson) => citeCollectionDefJson
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~
+        (get & pathEndOrSingleSlash )  {
+          complete {
+            fetchVectorOfCiteCollectonDefsJson.map[ToResponseMarshallable]{
+              case Right(citeObject) => citeObject
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
@@ -270,8 +279,8 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
         (get & path(Segment)) { (urnString) =>
             complete { 
               fetchCiteObject(urnString).map[ToResponseMarshallable]{
-              case Right(citeObject) => citeObject
-              case Left(errorMessage) => BadRequest -> errorMessage
+                case Right(citeObject) => citeObject
+                case Left(errorMessage) => BadRequest -> errorMessage
               }              
             }
          }
