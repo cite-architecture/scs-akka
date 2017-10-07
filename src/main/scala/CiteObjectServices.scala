@@ -35,6 +35,8 @@ case class CiteObjectJson(citeObject:Option[
      )]
    )
 
+case class VectorOfCiteObjectsJson(citeObjects:Vector[CiteObjectJson])
+
 case class CiteCollectionDefJson(citeCollectionDef:Option[
       ( Map[String,String],
         Map[String,String],
@@ -175,36 +177,82 @@ def fetchCiteCollectionDef(urn: Cite2Urn) : CiteCollectionDefJson = {
 
 }
 
-def fetchCiteObject(urnString: String): Future[Either[String, CiteObjectJson]] = {
+def fetchCiteObjectJson(urnString: String): Future[Either[String, VectorOfCiteObjectsJson]] = {
   try {
     val urn:Cite2Urn = Cite2Urn(urnString)
-    //val objectVector:Vector[CiteObject] = collectionRepository.get ~~ urn
-    val objectVector:Vector[CiteObject] = citableObjects.get.filter(_.urn == urn)
-    val objectReply = {
-      objectVector.size match {
-        case x if x > 0 => {
-          val objectFound = objectVector(0)
-          val objectUrn:Map[String,String] = Map("urn" -> objectFound.urn.toString)
-          val objectLabel:Map[String,String] = Map("label" -> objectFound.label)
-          val objectPropertiesVector:Vector[Map[String,String]] = objectFound.propertyList.map( p => {
-            val m = Map("propertyUrn" -> p.urn.toString, "propertyValue" -> p.propertyValue.toString )
-            m 
-          })
-          val objreply = CiteObjectJson( Some(objectUrn, objectLabel, objectPropertiesVector) )
-          objreply
-        }
-        case _  => {
-          val objreply = CiteObjectJson( None )
-          objreply
-        }
-      }
-    }
-    Unmarshal(objectReply).to[CiteObjectJson].map(Right(_))
+    val objectReply:VectorOfCiteObjectsJson = fetchCiteObjects(urn)
+    Unmarshal(objectReply).to[VectorOfCiteObjectsJson].map(Right(_))
   } catch {
     case e: Exception => {
       Future.successful(Left(s"${new IOException(e)}"))
     }
   }
+
+}
+
+def fetchCiteObjects(urn: Cite2Urn):VectorOfCiteObjectsJson = {
+  try {
+    val vectorReply:VectorOfCiteObjectsJson = urn match {
+      case u if (urn.objectComponentOption == None)  => {
+        // Notional Collection
+        val vo:Vector[CiteObject] = citableObjects.get.filter(_.urn ~~ urn)
+        val replyVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(vo.map( v => {
+          val c:CiteObjectJson = makeCiteObjectJson(v) 
+          c
+        }))
+        replyVector
+      }
+      case u if (urn.isRange) => {
+        // Range
+        val thisCollectionUrn:Cite2Urn = urn.dropSelector
+        val thisCollectionDef:Option[CiteCollectionDef] = collectionRepository.get.catalog.collection(thisCollectionUrn) 
+        thisCollectionDef match {
+          case Some(tcd) => {
+            tcd.orderingProperty match {
+               case Some(op) => {
+
+               } 
+               case _ => VectorOfCiteObjectsJson(Vector(CiteObjectJson(None)))
+            }
+
+          }
+          case _ => VectorOfCiteObjectsJson(Vector(CiteObjectJson(None)))
+        }
+        VectorOfCiteObjectsJson(Vector(CiteObjectJson(None)))
+      }
+      case u => {
+        // Object
+        val objectVector:Vector[CiteObject] = citableObjects.get.filter(_.urn == urn)
+        objectVector.size match {
+          case x if x > 0 => {
+            val objectFound = objectVector(0)
+            val objReply:CiteObjectJson = makeCiteObjectJson(objectFound)
+            VectorOfCiteObjectsJson(Vector(objReply))
+          }
+          case _  => {
+            val objReply = CiteObjectJson( None )
+            VectorOfCiteObjectsJson(Vector(objReply))
+          }
+        }
+      }
+    }
+    vectorReply
+  } catch {
+    case e: Exception => {
+      throw new ScsException(s"Exception creating collection definition for ${urn}.")
+    }
+  }
+}
+
+def makeCiteObjectJson(objectFound:CiteObject):CiteObjectJson = {
+    val objectUrn:Map[String,String] = Map("urn" -> objectFound.urn.toString)
+    val objectLabel:Map[String,String] = Map("label" -> objectFound.label)
+    val objectPropertiesVector:Vector[Map[String,String]] = objectFound.propertyList.map( p => {
+      val m = Map("propertyUrn" -> p.urn.toString, "propertyValue" -> p.propertyValue.toString )
+      m 
+    })
+    val objreply = CiteObjectJson( Some(objectUrn, objectLabel, objectPropertiesVector) )
+    objreply
 }
 
 
