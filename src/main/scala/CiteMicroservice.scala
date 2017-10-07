@@ -286,6 +286,16 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
         }
       } ~
       pathPrefix("objects") {
+        (get & path( "paged" / Segment)) { urnString => 
+          parameters('offset.as[Int] ? 1, 'limit.as[Int] ? 25) { (offset, limit) => 
+            complete { 
+              fetchPagedCiteObjectJson(urnString, offset, limit).map[ToResponseMarshallable]{
+                case Right(citeObject) => citeObject
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+            }
+          }
+        } ~
         (get & path(Segment)) { (urnString) =>
             complete { 
               fetchCiteObjectJson(urnString).map[ToResponseMarshallable]{

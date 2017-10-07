@@ -62,12 +62,12 @@ To be implemented:
 - implemented `/collections/def/CITE2URN` => return the CiteCollectionDef of the Collections identified by CITE2URN
 - implemented `/collections/hasobject/CITE2URN`
 - implemented `/objects/CITE2URN` => returns all objects identified by a CITE2URN
+- implemented `/objects/paged/CITE2URN?offset=X&limit=Z` => returns a subset of object identified by CITE2URN, starting at X (1-based), and showing Z objects. If X is greater than the number, returns an empty vector; if Z is greater, returns as many as are present.
 
 Not Implemented
 
-- `/objects/paged/CITE2URN?index=X&limit=Z` => returns a subset of object identified by CITE2URN, starting at X (1-based), and showing Z objects. If X is greater than the number, returns an empty vector; if Z is greater, returns as many as are present.
 - `/collection/props/CITE2URN` => returns the properties for collection CITE2URN
-- `/objects/CITE2URN` => returns all objects identified by a CITE2URN
+- all object searching
 
 ## Versions
 
