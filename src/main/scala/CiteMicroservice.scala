@@ -31,7 +31,6 @@ import edu.holycross.shot.citeobj._
 import edu.holycross.shot.scm._
 
 
-
 trait Protocols extends DefaultJsonProtocol {
   implicit val ctsUrnStringFormat = jsonFormat1(CtsUrnString.apply)
   implicit val cite2UrnStringFormat = jsonFormat1(Cite2UrnString.apply)
@@ -40,6 +39,10 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val ngramHistoFormat = jsonFormat1(NgramHistoJson.apply)
   implicit val catalogFormat = jsonFormat1(CatalogJson.apply)
   implicit val reffFormat = jsonFormat1(ReffJson.apply)
+  implicit val citeObjectFormat = jsonFormat1(CiteObjectJson.apply)
+  //implicit val citeCatalogFormat = jsonFormat1(CiteCatalogJson.apply)
+  implicit val citePropertyDefFormat = jsonFormat1(CitePropertyDefJson.apply)
+  implicit val citeCollectionDefFormat = jsonFormat1(CiteCollectionDefJson.apply)
 }
 
 trait Service extends Protocols with Ohco2Service with CiteCollectionService {
@@ -253,14 +256,28 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
           }
         }
       } ~
-      pathPrefix("collection") {
-        complete { "'/collection' Not implemented yet."}
+      pathPrefix("collections") {
+        (get & path("def" / Segment )) { urnString =>
+          complete { 
+            fetchCiteCollectionDef(urnString).map[ToResponseMarshallable]{
+              case Right(citeCollectionDefJson) => citeCollectionDefJson
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
       } ~
       pathPrefix("object") {
-        complete { "'/object' Not implemented yet."}
+        (get & path(Segment)) { (urnString) =>
+            complete { 
+              fetchCiteObject(urnString).map[ToResponseMarshallable]{
+              case Right(citeObject) => citeObject
+              case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+            }
+         }
       } ~
-      pathPrefix("extension") {
-        complete { "'/extension' Not implemented yet."}
+      pathPrefix("extensions") {
+        complete { "'/extensions' Not implemented yet."}
       }
     }
   }
@@ -275,15 +292,38 @@ object CiteMicroservice extends App with Service with Ohco2Service with CiteColl
   override val config = ConfigFactory.load()
   override val logger = Logging(system, getClass)
 
+  logger.debug(s"\n\nSTARTING…\n")
+
+  
+  logger.debug(s"\nGETTING TEXTS…\n")
   val textRepository:Option[TextRepository] = cexLibrary.textRepository 
+  logger.debug(s"\nGETTING COLLECTIONS…\n")
+  val collectionRepository:Option[CiteCollectionRepository] = cexLibrary.collectionRepository 
+  logger.debug(s"\nGETTING COLLECTION OBJECTS…\n")
+  val citableObjects:Option[Vector[CiteObject]] = collectionRepository match {
+    case Some(cr) => Some(collectionRepository.get.citableObjects)
+    case None => None
+  }
+  logger.debug(s"\nDONE GETTING COLLECTION OBJECTS…\n")
+
+
 
   textRepository match {
     case Some(tr) => { 
-        logger.debug(s"\n\nREADY\nCorpus-size: ${cexLibrary.textRepository.get.corpus.size}\n\n")
-        cexLibrary.textRepository.get
+        logger.debug(s"\n\nCorpus-size: ${tr.corpus.size}\n\n")
+       // cexLibrary.textRepository.get
       } 
     case None => {
-        logger.debug(s"\n\nREADY\nNO TEXT REPOSITORY IN THIS CEX FILE!\n\n")
+        logger.debug(s"\n\nNO TEXT REPOSITORY IN THIS CEX FILE!\n\n")
+    }
+  }
+
+  collectionRepository match {
+    case Some(cr) => { 
+        logger.debug(s"\n\nCollection-size: ${cr.citableObjects.size}\n\n")
+      } 
+    case None => {
+        logger.debug(s"\n\nNO COLLECTION REPOSITORY IN THIS CEX FILE!\n\n")
     }
   }
 

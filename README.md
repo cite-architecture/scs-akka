@@ -10,7 +10,7 @@ Status:  **experimental**.  No binary releases yet.
 
 The following services are under development.
 
-### Text services
+## Text services
 
 Implemented:
 
@@ -61,6 +61,16 @@ Implemented:
 (By default, each of these ignores punctuation. To include punctuation, add `&ignorePunctuation=false` to any request.)
 
 **N.b.** The NGRAM string must be url-encoded. This is the responsibility of the calling app.
+
+## CITE Collection Services
+
+Not Implemented
+
+- `/collections` => return the catalog of Cite Collections in the repository
+- `/collections/def/CITE2URN` => return the CiteCollectionDef of the Collections identified by CITE2URN
+- `/collection/props/CITE2URN` => returns the properties for collection CITE2URN
+- `/objects/CITE2URN` => returns all objects identified by a CITE2URN
+- `/collection/hasobj/CITE2URN`
 
 ## Versions
 
