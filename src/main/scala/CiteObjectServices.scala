@@ -203,6 +203,7 @@ def fetchCiteObjects(urn: Cite2Urn):VectorOfCiteObjectsJson = {
         replyVector
       }
       case u if (urn.isRange) => {
+        logger.debug(s"\n\nhere\n\n")
         // Range
         val thisCollectionUrn:Cite2Urn = urn.dropSelector
         val thisCollectionDef:Option[CiteCollectionDef] = collectionRepository.get.catalog.collection(thisCollectionUrn) 
@@ -210,15 +211,33 @@ def fetchCiteObjects(urn: Cite2Urn):VectorOfCiteObjectsJson = {
           case Some(tcd) => {
             tcd.orderingProperty match {
                case Some(op) => {
-
+                  val collectionUrn:Cite2Urn = urn.dropSelector
+                  val thisCollection:Vector[CiteObject] = citableObjects.get.filter(_.urn.dropSelector == collectionUrn)
+        logger.debug(s"\n\nthisCollection.size = ${thisCollection.size}")
+                  val rangeBegin:Cite2Urn = urn.rangeBeginUrn
+                  val rangeEnd:Cite2Urn = urn.rangeEndUrn
+        logger.debug(s"\n\nfrom ${rangeBegin} to ${rangeEnd}\n\n")
+                  val beginSeq:Double = thisCollection.filter(_.urn == rangeBegin)(0).propertyValue(op).asInstanceOf[Double]
+                  val endSeq:Double = thisCollection.filter(_.urn == rangeEnd)(0).propertyValue(op).asInstanceOf[Double]
+        logger.debug(s"\n\nfrom ${beginSeq} to ${endSeq}\n\n")
+                  val thisRange:Vector[CiteObject] = thisCollection.filter(
+                       _.propertyValue(op).asInstanceOf[Double] >= beginSeq
+                  ).filter(
+                       _.propertyValue(op).asInstanceOf[Double] <= endSeq
+                  )
+        logger.debug(s"\n\nthisRange.size = ${thisRange.size}")
+                  val replyVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(thisRange.map(v => {
+                    val c:CiteObjectJson = makeCiteObjectJson(v)
+                    c
+                  } ))
+                  replyVector
                } 
-               case _ => VectorOfCiteObjectsJson(Vector(CiteObjectJson(None)))
+               case _ => throw new ScsException(s"${urn} is not an ordered collection.")
             }
-
           }
           case _ => VectorOfCiteObjectsJson(Vector(CiteObjectJson(None)))
         }
-        VectorOfCiteObjectsJson(Vector(CiteObjectJson(None)))
+        //VectorOfCiteObjectsJson(Vector(CiteObjectJson(None)))
       }
       case u => {
         // Object

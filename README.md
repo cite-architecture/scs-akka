@@ -60,6 +60,7 @@ To be implemented:
 
 - implemented `/collections/def/CITE2URN` => return the CiteCollectionDef of the Collections identified by CITE2URN
 - implemented `/collections` => return the catalog of Cite Collections in the repository
+- implemented `/objects/CITE2URN` => returns all objects identified by a CITE2URN
 
 Not Implemented
 
