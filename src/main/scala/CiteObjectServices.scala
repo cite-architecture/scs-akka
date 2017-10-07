@@ -263,6 +263,18 @@ def fetchCiteObjects(urn: Cite2Urn):VectorOfCiteObjectsJson = {
   }
 }
 
+def hasObject(urnString:String):Future[Either[String, Boolean]] = {
+  try {
+    val urn:Cite2Urn = Cite2Urn(urnString)
+    val hasIt:Boolean = citableObjects.get.filter(_.urn == urn).size > 0
+    Unmarshal(hasIt).to[Boolean].map(Right(_))
+  } catch{
+    case e: Exception => {
+      throw new ScsException(s"Invalid URN: ${urnString}.")
+    }
+  }
+}
+
 def makeCiteObjectJson(objectFound:CiteObject):CiteObjectJson = {
     val objectUrn:Map[String,String] = Map("urn" -> objectFound.urn.toString)
     val objectLabel:Map[String,String] = Map("label" -> objectFound.label)

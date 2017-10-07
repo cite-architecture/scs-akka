@@ -267,6 +267,15 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
             }
           }
         } ~
+        (get & path( "hasobject" / Segment)) { urnString =>
+          complete{
+             hasObject(urnString).map[ToResponseMarshallable] {
+              case Right(b) => b.toString
+              case Left(errorMessage) => BadRequest -> errorMessage
+             }
+          }
+
+        } ~
         (get & pathEndOrSingleSlash )  {
           complete {
             fetchVectorOfCiteCollectonDefsJson.map[ToResponseMarshallable]{
