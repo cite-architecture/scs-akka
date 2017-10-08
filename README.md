@@ -6,6 +6,12 @@ Based on [https://github.com/theiterators/akka-http-microservice](https://github
 
 Status:  **experimental**.  No binary releases yet.
 
+## Running
+
+- Clone this repository
+- Get [SBT](http://www.scala-sbt.org)
+- At the top-level of this repository, type `sbt run`
+
 ## Available microservices
 
 The following services are under development.
