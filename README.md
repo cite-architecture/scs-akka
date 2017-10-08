@@ -35,19 +35,9 @@ The following services are under development.
 
 ### String searching services
 
-To be implemented:
+- implemented `/texts/find?s=**String**` => find all passages in repository with text content matching **String**
+- implemented `/texts/find/**CTS URN**?s=**String**/`  => find all passages in **CTS URN** with text content matching **String**
 
-- `/texts/find/**String**` => find all passages in repository with text content matching **String**
-- `/texts/find/`**String**/**CTS URN**/  => find all passages in **CTS URN** with text content matching **String**
-- `/texts/findAll/?t=`**String**`[&t=`**String**`]...` => find all passages in repository with content matching each **token**
-- `/texts/findAll/`**CTS URN**`?t=`**token**`[&t=`**String**`]...` => find all passages in **CTS URN** with content matching each **String**
-
-To be implemented:
-
-- `/texts/token/**String**` => find all passages in repository with white-space delimited token matching **String**
-- `/texts/token/`**String**/**CTS URN**/  => find all passages in **CTS URN** with white-space delimited token matching **String**
-- `/texts/allTokens/?t=`**tokens**`[&t=`**tokens**`]...` => find all passages in repository with content matching each **token**
-- `/texts/allTokens/`**CTS URN**`?t=`**token**`[&t=`**String**`]...` => find all passages in **CTS URN** with content matching each **token**
 
 ### Ngram histograms
 
@@ -62,10 +52,11 @@ To be implemented:
 
 **N.b.** The NGRAM string must be url-encoded. This is the responsibility of the calling app.
 
+
 ## CITE Collection Services
 
 - implemented `/collections` => return the catalog of Cite Collections in the repository
-- implemented `/collections/def/CITE2URN` => return the CiteCollectionDef of the Collections identified by CITE2URN
+- implemented `/collections/CITE2URN` => return the CiteCollectionDef of the Collections identified by CITE2URN
 - implemented `/collections/hasobject/CITE2URN`
 - implemented `/objects/CITE2URN` => returns all objects identified by a CITE2URN
 - implemented `/objects/paged/CITE2URN?offset=X&limit=Z` => returns a subset of object identified by CITE2URN, starting at X (1-based), and showing Z objects. If X is greater than the number, returns an empty vector; if Z is greater, returns as many as are present.

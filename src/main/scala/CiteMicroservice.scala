@@ -129,17 +129,6 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
           }
         }
       } ~
-      pathPrefix("reff") {
-      // Reff
-        (get & path(Segment)) { urnString =>
-          complete {
-            fetchReff(urnString).map[ToResponseMarshallable] {
-              case Right(reffString) => reffString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          } 
-        }
-      } ~
       pathPrefix("texts"  ) {
       // All the '/texts' routes
         (get & path("first" / Segment)) { (urnString) =>
@@ -156,6 +145,17 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
               case Right(ctsUrnString) => ctsUrnString
               case Left(errorMessage) => BadRequest -> errorMessage
             }
+          }
+        } ~
+        pathPrefix("reff") {
+        // Reff
+          (get & path(Segment)) { urnString =>
+            complete {
+              fetchReff(urnString).map[ToResponseMarshallable] {
+                case Right(reffString) => reffString
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            } 
           }
         } ~
         (get & path("prev" / Segment)) { (urnString) =>
@@ -230,6 +230,28 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
             }
           }
         } ~
+        (get & path( "find" )) { 
+          parameters( 's.as[String].* ) { strings => 
+            complete {
+              val stringVector = strings.toVector
+              fetchFind(stringVector, None).map[ToResponseMarshallable] {
+                case Right(corpusString) => corpusString
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~
+        (get & path( "find" / Segment )){ urnString =>
+          parameters( 's.as[String].* ) { strings => 
+            complete {
+              val stringVector = strings.toVector
+              fetchFind(stringVector, Some(urnString)).map[ToResponseMarshallable] {
+                case Right(corpusString) => corpusString
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~
         (get & path(Segment)) { urnString =>
           complete {
             fetchOhco2Text(urnString).map[ToResponseMarshallable] {
@@ -287,7 +309,7 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
       } ~
       pathPrefix("objects") {
         (get & path( "paged" / Segment)) { urnString => 
-          parameters('offset.as[Int] ? 1, 'limit.as[Int] ? 25) { (offset, limit) => 
+          parameters('offset.as[Int] ? 1, 'limit.as[Int] ? 10) { (offset, limit) => 
             complete { 
               fetchPagedCiteObjectJson(urnString, offset, limit).map[ToResponseMarshallable]{
                 case Right(citeObject) => citeObject

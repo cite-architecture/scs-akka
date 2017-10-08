@@ -86,20 +86,6 @@ case class CatalogJson(citeCatalog:Vector[(
       }
     }
 
-/* def fetchReff1(urnString: String): Future[Either[String,ReffJson]] = {
-     try {
-      val urn:CtsUrn = CtsUrn(urnString)
-      val c:Corpus = textRepository.get.corpus >= urn 
-      val v:Vector[String] = c.urns.map(u => u.toString)
-      val n:ReffJson = ReffJson(v) 
-      Unmarshal(n).to[ReffJson].map(Right(_))
-    } catch {
-      case e: Exception => {
-        Future.successful(Left(s"${new IOException(e)}"))
-      }
-    }
-  } */
-
   def fetchReff(urnString: String): Future[Either[String,ReffJson]] = {
    try {
     val urn:CtsUrn = CtsUrn(urnString)
@@ -308,6 +294,27 @@ def fetchNextText(urnString: String): Future[Either[String,CorpusJson]] = {
     Future.successful(Left(s"${new IOException(e)}"))
   }
 }
+}
+
+def fetchFind(s:Vector[String], urnString:Option[String]): Future[Either[String,CorpusJson]] = {
+  try {
+    val findInCorpus:Corpus = urnString match {
+      case Some(s) => {
+        val urn:CtsUrn = CtsUrn(s)
+        val newCorpus:Corpus = textRepository.get.corpus >= urn 
+        newCorpus
+      } 
+      case None => textRepository.get.corpus
+    } 
+    val foundCorpus:Corpus = findInCorpus.find(s)
+    val v:Vector[Map[String,String]] = foundCorpus.nodes.map(l => Map("urn" -> l.urn.toString, "text" -> l.text))
+    val n:CorpusJson = CorpusJson(v) 
+    Unmarshal(n).to[CorpusJson].map(Right(_))
+  } catch {
+    case e: Exception => {
+      Future.successful(Left(s"${new IOException(e)}"))
+    }
+  }
 }
 
 
