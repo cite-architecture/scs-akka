@@ -319,53 +319,84 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
           }
         } ~
         (get & path("find" / "urnmatch" / Segment )) { urnString =>
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterurn) => 
-            complete {s"'/find/urnmatch/${urnString}' with parameter ${urn} Not implemented yet."}
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterUrn) => 
+            //complete {s"'/find/urnmatch/${urnString}' with parameter ${urn} Not implemented yet."}
+            complete {
+              doUrnMatch(Some(urnString), urn, parameterUrn).map[ToResponseMarshallable]{
+                case Right(citeObjects) => citeObjects
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+            }
           }
         } ~
         (get & path("find" / "urnmatch" )) { 
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterurn) => 
-            complete {s"'/find/urnmatch' with parameter ${urn} Not implemented yet."}
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterUrn) => 
+            complete {
+              doUrnMatch(None, urn, parameterUrn).map[ToResponseMarshallable]{
+                case Right(citeObjects) => citeObjects
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+            }
           }
         } ~
         (get & path("find" / "regexmatch" / Segment )) { urnString =>
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (rx, parameterurn) => 
-            complete {s"'/find/regexmatch/${urnString}' with parameter '${rx}'' Not implemented yet."}
+          parameters( 'find.as[String], 'parameterurn.as[String] ?) { (rx, parameterUrn) => 
+            complete {
+              doRegexMatch(Some(urnString), rx, parameterUrn).map[ToResponseMarshallable]{
+                case Right(citeObjects) => citeObjects
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+            }
           }
         } ~
         (get & path("find" / "regexmatch" )) { 
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (rx, parameterurn) => 
-            complete {s"'/find/regexmatch' with parameter '${rx}' Not implemented yet."}
+          parameters( 'find.as[String], 'parameterurn.as[String] ?) { (rx, parameterUrn) => 
+            complete {
+              doRegexMatch(None, rx, parameterUrn).map[ToResponseMarshallable]{
+                case Right(citeObjects) => citeObjects
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+            }
           }
         } ~
         (get & path("find" / "stringcontains" / Segment )) { urnString =>
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (s, parameterurn) => 
-            complete {s"'/find/stringcontains/${urnString}' with parameter '${s}'' Not implemented yet."}
+          parameters( 'find.as[String], 'casesensitive.as[Boolean] ? true ) { (s, caseSensitive) => 
+            complete {
+              doStringContains(Some(urnString), s, caseSensitive).map[ToResponseMarshallable]{
+                case Right(citeObjects) => citeObjects
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+            }
           }
         } ~
         (get & path("find" / "stringcontains" )) { 
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (s, parameterurn) => 
-            complete {s"'/find/stringcontains' with parameter '${s}' Not implemented yet."}
+          parameters( 'find.as[String], 'casesensitive.as[Boolean] ? true ) { (s, caseSensitive) => 
+            complete {
+              doStringContains(None, s, caseSensitive).map[ToResponseMarshallable]{
+                case Right(citeObjects) => citeObjects
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+            }
           }
         } ~
         (get & path("find" / "valueequals" / Segment )) { urnString =>
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (v, parameterurn) => 
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (v, parameterUrn) => 
             complete {s"'/find/valueequals/${urnString}' with parameter '${v}'' Not implemented yet."}
           }
         } ~
         (get & path("find" / "valueequals" )) { 
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (v, parameterurn) => 
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (v, parameterUrn) => 
             complete {s"'/find/valueequals' with parameter '${v}' Not implemented yet."}
           }
         } ~
         (get & path("find" / "numeric" / Segment )) { urnString =>
-          parameters(  'n1.as[Int], 'op.as[String], 'n2.as[Int] ?, 'parameterurn.as[String] ? ) { (n1, op, n2, parameterurn) => 
-            complete {s"'/find/numeric/${urnString}' with parameters ${n1}, ${op}, ${n2}, ${parameterurn} Not implemented yet."}
+          parameters(  'n1.as[Int], 'op.as[String], 'n2.as[Int] ?, 'parameterurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
+            complete {s"'/find/numeric/${urnString}' with parameters ${n1}, ${op}, ${n2}, ${parameterUrn} Not implemented yet."}
           }
         } ~
         (get & path("find" / "numeric" )) { 
-          parameters( 'n1.as[Int], 'op.as[String], 'n2.as[Int] ?,'parameterurn.as[String] ? ) { (n1, op, n2, parameterurn) => 
-            complete {s"'/find/numeric' with parameters ${n1}, ${op}, ${n2}, ${parameterurn} Not implemented yet."}
+          parameters( 'n1.as[Int], 'op.as[String], 'n2.as[Int] ?,'parameterurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
+            complete {s"'/find/numeric' with parameters ${n1}, ${op}, ${n2}, ${parameterUrn} Not implemented yet."}
           }
         } ~
         (get & path(Segment)) { (urnString) =>
@@ -405,9 +436,8 @@ object CiteMicroservice extends App with Service with Ohco2Service with CiteColl
     case Some(cr) => Some(collectionRepository.get.citableObjects)
     case None => None
   }
+
   logger.debug(s"\nDONE GETTING COLLECTION OBJECTS…\n")
-
-
 
   textRepository match {
     case Some(tr) => { 

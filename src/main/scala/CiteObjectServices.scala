@@ -255,6 +255,76 @@ trait CiteCollectionService extends Protocols {
 }
 }
 
+def doUrnMatch(collectionUrnStr:Option[String], urnToMatchStr:String, parameterUrnStr:Option[String] ): Future[Either[String, VectorOfCiteObjectsJson]] = {
+  try {
+    val urnToMatch:Urn = {
+      if (urnToMatchStr.startsWith("urn:cts:")) { CtsUrn(urnToMatchStr) } 
+      else { Cite2Urn(urnToMatchStr) }
+    }
+    val co:Vector[CiteObject] = collectionUrnStr match {
+      case Some(u) => {
+        val collectionUrn:Cite2Urn = Cite2Urn(u).dropSelector
+        val thisVec:Vector[CiteObject] = collectionRepository.get.citableObjects.filter(_.urn.dropSelector == collectionUrn)
+        thisVec
+      }
+      case None => collectionRepository.get.citableObjects
+    }
+    val findResults:Vector[CiteObject] = parameterUrnStr match {
+      case Some(pus) => co.filter(_.urnMatch(Cite2Urn(pus), urnToMatch))
+      case None => co.filter(_.urnMatch(urnToMatch))
+    }
+    val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+    Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
+  } catch {
+    case e: Exception => {
+      throw new ScsException(s"UrnMatch error: ${e}.")
+    }
+  }
+}
+
+def doRegexMatch(collectionUrnStr:Option[String], regexToMatchStr:String, parameterUrnStr:Option[String] ): Future[Either[String, VectorOfCiteObjectsJson]] = {
+  try {
+    val co:Vector[CiteObject] = collectionUrnStr match {
+      case Some(u) => {
+        val collectionUrn:Cite2Urn = Cite2Urn(u).dropSelector
+        val thisVec:Vector[CiteObject] = collectionRepository.get.citableObjects.filter(_.urn.dropSelector == collectionUrn)
+        thisVec
+      }
+      case None => collectionRepository.get.citableObjects
+    }
+    val findResults:Vector[CiteObject] = parameterUrnStr match {
+      case Some(pus) => co.filter(_.regexMatch(Cite2Urn(pus), regexToMatchStr))
+      case None => co.filter(_.regexMatch(regexToMatchStr))
+    }
+    val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+    Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
+  } catch {
+    case e: Exception => {
+      throw new ScsException(s"UrnMatch error: ${e}.")
+    }
+  }
+}
+
+def doStringContains(collectionUrnStr:Option[String], stringToMatchStr:String, caseSensitive:Boolean = true): Future[Either[String, VectorOfCiteObjectsJson]] = {
+  try {
+    val co:Vector[CiteObject] = collectionUrnStr match {
+      case Some(u) => {
+        val collectionUrn:Cite2Urn = Cite2Urn(u).dropSelector
+        val thisVec:Vector[CiteObject] = collectionRepository.get.citableObjects.filter(_.urn.dropSelector == collectionUrn)
+        thisVec
+      }
+      case None => collectionRepository.get.citableObjects
+    }
+    val findResults:Vector[CiteObject] = co.filter(_.stringContains(stringToMatchStr, caseSensitive))
+    val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+    Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
+  } catch {
+    case e: Exception => {
+      throw new ScsException(s"UrnMatch error: ${e}.")
+    }
+  }
+}
+
 def hasObject(urnString:String):Future[Either[String, Boolean]] = {
   try {
     val urn:Cite2Urn = Cite2Urn(urnString)

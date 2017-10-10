@@ -63,7 +63,6 @@ The following services are under development.
 
 Not Implemented
 
-- `/collection/props/CITE2URN` => returns the properties for collection CITE2URN
 - `/objects/find/urnmatch?urn=URN`
 - `/objects/find/urnmatch/URN1?find=URN2[&propertyurn=CITE2URN]`
 - `/objects/find/regexmatch?find=URN`

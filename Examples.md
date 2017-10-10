@@ -71,8 +71,9 @@
 
 urn-match
 
-- <http://localhost:9000/objects/find/urnmatch?find=urn:cite2:hmt:msA.2017a:156>
-- <http://localhost:9000/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:msA.2017a:156>
+- <http://localhost:9000/objects/find/urnmatch?find=urn:cite2:hmt:msA.2017a:12r>
+- <http://localhost:9000/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:msA.2017a:12r>
+- <http://localhost:9000/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:msA.2017a:12r&parameterurn=urn:cite2:hmt:textblock.2017a.folio>
 
 regexmatch
 
