@@ -318,6 +318,56 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
             }
           }
         } ~
+        (get & path("find" / "urnmatch" / Segment )) { urnString =>
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterurn) => 
+            complete {s"'/find/urnmatch/${urnString}' with parameter ${urn} Not implemented yet."}
+          }
+        } ~
+        (get & path("find" / "urnmatch" )) { 
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterurn) => 
+            complete {s"'/find/urnmatch' with parameter ${urn} Not implemented yet."}
+          }
+        } ~
+        (get & path("find" / "regexmatch" / Segment )) { urnString =>
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (rx, parameterurn) => 
+            complete {s"'/find/regexmatch/${urnString}' with parameter '${rx}'' Not implemented yet."}
+          }
+        } ~
+        (get & path("find" / "regexmatch" )) { 
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (rx, parameterurn) => 
+            complete {s"'/find/regexmatch' with parameter '${rx}' Not implemented yet."}
+          }
+        } ~
+        (get & path("find" / "stringcontains" / Segment )) { urnString =>
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (s, parameterurn) => 
+            complete {s"'/find/stringcontains/${urnString}' with parameter '${s}'' Not implemented yet."}
+          }
+        } ~
+        (get & path("find" / "stringcontains" )) { 
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (s, parameterurn) => 
+            complete {s"'/find/stringcontains' with parameter '${s}' Not implemented yet."}
+          }
+        } ~
+        (get & path("find" / "valueequals" / Segment )) { urnString =>
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (v, parameterurn) => 
+            complete {s"'/find/valueequals/${urnString}' with parameter '${v}'' Not implemented yet."}
+          }
+        } ~
+        (get & path("find" / "valueequals" )) { 
+          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (v, parameterurn) => 
+            complete {s"'/find/valueequals' with parameter '${v}' Not implemented yet."}
+          }
+        } ~
+        (get & path("find" / "numeric" / Segment )) { urnString =>
+          parameters(  'n1.as[Int], 'op.as[String], 'n2.as[Int] ?, 'parameterurn.as[String] ? ) { (n1, op, n2, parameterurn) => 
+            complete {s"'/find/numeric/${urnString}' with parameters ${n1}, ${op}, ${n2}, ${parameterurn} Not implemented yet."}
+          }
+        } ~
+        (get & path("find" / "numeric" )) { 
+          parameters( 'n1.as[Int], 'op.as[String], 'n2.as[Int] ?,'parameterurn.as[String] ? ) { (n1, op, n2, parameterurn) => 
+            complete {s"'/find/numeric' with parameters ${n1}, ${op}, ${n2}, ${parameterurn} Not implemented yet."}
+          }
+        } ~
         (get & path(Segment)) { (urnString) =>
             complete { 
               fetchCiteObjectJson(urnString).map[ToResponseMarshallable]{
@@ -325,7 +375,7 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
                 case Left(errorMessage) => BadRequest -> errorMessage
               }              
             }
-         }
+         } 
       } ~
       pathPrefix("extensions") {
         complete { "'/extensions' Not implemented yet."}
@@ -361,20 +411,20 @@ object CiteMicroservice extends App with Service with Ohco2Service with CiteColl
 
   textRepository match {
     case Some(tr) => { 
-        logger.debug(s"\n\nCorpus-size: ${tr.corpus.size}\n\n")
+        logger.info(s"\n\nCorpus-size: ${tr.corpus.size}\n\n")
        // cexLibrary.textRepository.get
       } 
     case None => {
-        logger.debug(s"\n\nNO TEXT REPOSITORY IN THIS CEX FILE!\n\n")
+        logger.info(s"\n\nNO TEXT REPOSITORY IN THIS CEX FILE!\n\n")
     }
   }
 
   collectionRepository match {
     case Some(cr) => { 
-        logger.debug(s"\n\nCollection-size: ${cr.citableObjects.size}\n\n")
+        logger.info(s"\n\nCollection-size: ${cr.citableObjects.size}\n\n")
       } 
     case None => {
-        logger.debug(s"\n\nNO COLLECTION REPOSITORY IN THIS CEX FILE!\n\n")
+        logger.info(s"\n\nNO COLLECTION REPOSITORY IN THIS CEX FILE!\n\n")
     }
   }
 

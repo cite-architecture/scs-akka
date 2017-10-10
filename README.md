@@ -64,7 +64,18 @@ The following services are under development.
 Not Implemented
 
 - `/collection/props/CITE2URN` => returns the properties for collection CITE2URN
-- all object searching
+- `/objects/find/urnmatch?urn=URN`
+- `/objects/find/urnmatch/URN1?find=URN2[&propertyurn=CITE2URN]`
+- `/objects/find/regexmatch?find=URN`
+- `/objects/find/regexmatch/URN1?find=URN2[&propertyurn=CITE2URN]`
+- `/objects/find/stringcontains?find=STRING`
+- `/objects/find/stringcontains/CITE2URN?find=STRING[&propertyurn=CITE2URN]`
+- `/objects/find/valueequals?find=ANY`
+- `/objects/find/valueequals/CITE2URN?find=ANY[&propertyurn=CITE2URN]`
+- `/objects/find/valueequals?find=ANY`
+- `/objects/find/valueequals/CITE2URN?find=ANY[&propertyurn=CITE2URN]`
+- `/objects/find/numeric?n1=NUMBER&op=[lt|lteq|eq|gt|gteq|within][&n2=NUMBER]
+- `/objects/find/numeric/CITE2URN?n1=NUMBER&op=[lt|lteq|eq|gt|gteq|within][&n2=NUMBER][&propertyurn=CITE2URN]`
 
 ## Versions
 

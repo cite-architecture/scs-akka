@@ -66,3 +66,43 @@
 - <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:?offset=1&limit=10> 
 - <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:?offset=11&limit=10> 
 - <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:> 
+
+### Finding Objects
+
+urn-match
+
+- <http://localhost:9000/objects/find/urnmatch?find=urn:cite2:hmt:msA.2017a:156>
+- <http://localhost:9000/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:msA.2017a:156>
+
+regexmatch
+
+- <http://localhost:9000/objects/find/regexmatch?find=[0-9]{2}>
+- <http://localhost:9000/objects/find/regexmatch/urn:cite2:hmt:textblock.2017a:?find=[0-9]{2}>
+
+stringcontains
+
+- <http://localhost:9000/objects/find/stringcontains?find=block+20>
+- <http://localhost:9000/objects/find/stringcontains/urn:cite2:hmt:textblock.2017a:?find=block+20>
+
+valueequals
+
+- <http://localhost:9000/objects/find/valueequals?find=Text-block+20>
+- <http://localhost:9000/objects/find/valueequals/urn:cite2:hmt:textblock.2017a:?find=Text-block+20>
+
+numeric less-than
+
+- <http://localhost:9000/objects/find/numeric?n1=5&op=lt>
+- <http://localhost:9000/objects/find/numeric?n1=5&op=lt&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
+- <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=5&op=lt>
+
+numeric equals
+
+- <http://localhost:9000/objects/find/numeric?n1=5&op=eq>
+- <http://localhost:9000/objects/find/numeric?n1=5&op=eq&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
+- <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=5&op=eq>
+
+numeric greater-than 
+
+- <http://localhost:9000/objects/find/numeric?n1=5&op=gt>
+- <http://localhost:9000/objects/find/numeric?n1=5&op=gt&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
+- <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=5&op=gt>
