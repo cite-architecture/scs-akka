@@ -339,4 +339,49 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
   }
 
 
+  it should """respond to "/collections" with all collection definitions """ in {
+    Get(s"/collections") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteCollectionDefsJson = responseAs[VectorOfCiteCollectionDefsJson]
+      r.citeCollectionDefs.size should equal (8) 
+    }
+  }
+
+  it should """respond to "/collections/COLLECTION-URN" with a single collection definition """ in {
+    Get(s"/collections/urn:cite2:hmt:e4.v1:1r") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:CiteCollectionDefJson = responseAs[CiteCollectionDefJson]
+      r.citeCollectionDef.size should equal (1) 
+    }
+  }
+
+  // /collections/hasobject/urn:cite2:hmt:e4.v1:1r
+  it should """respond to "/collections/hasobject/OBJECT-URN" with "true" when the object is present """ in {
+    Get(s"/collections/hasobject/urn:cite2:hmt:e4.v1:1r") ~> routes ~> check {
+      status shouldBe OK
+      val r:String = responseAs[String]
+      r should equal ("true")
+    }
+  }
+
+  it should """respond to "/collections/hasobject/OBJECT-URN" with "false" when the object is present """ in {
+    Get(s"/collections/hasobject/urn:cite2:hmt:e4.v1:NOTPRESENT") ~> routes ~> check {
+      status shouldBe OK
+      val r:String = responseAs[String]
+      r should equal ("false")
+    }
+  }
+
+  it should """respond to "/objects/COLLECTION-URN" with all objects in a collection """ in {
+    Get(s"/objects/urn:cite2:hmt:e4.v1:") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (18) 
+    }
+  }
+
+
 }
