@@ -12,6 +12,14 @@ Status:  **experimental**.  No binary releases yet.
 - Get [SBT](http://www.scala-sbt.org)
 - At the top-level of this repository, type `sbt run`
 
+## Testing
+
+`sbt test` will run all tests.
+
+By default the service uses the CEX file at `src/main/resources/cex/test.cex`. There is another, much larger CEX file at `src/main/resources/cex/cite-test-huge.cex`.
+
+The CEX file is configured in the file `src/main/resources/application.conf`. 
+
 ## Available microservices
 
 The following services are under development.
