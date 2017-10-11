@@ -383,5 +383,22 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
     }
   }
 
+  it should """respond to "/objects/OBJECT-URN" with an object  """ in pending
+  it should """respond to "/objects/RANGE-URN" with objects defined by a range URN """ in pending
+  it should """respond to "/paged/COLLECTION-URN?offset=1&limit=10" with the first 10 objects in a collection """ in pending 
+  it should """respond to "/paged/COLLECTION-URN?offset=11&limit=10" with the second 10 objects in a collection """ in pending 
+  it should """respond to "/paged/COLLECTION-URN" with the default first 10 objects in a collection """ in pending 
+
+  it should """respond to "/objects/find/urnmatch?find=URN" by finding objects in all collections with URN as a property value""" in pending
+  it should """respond to "/objects/find/urnmatch/COLLECTION-URN?find=URN" by finding objects in COLLECTION-URN with URN as a property value.""" in pending 
+  it should """respond to "/objects/find/urnmatch/COLLECTION-URN?find=URN&parameterurn=PROP-URN" by finding objects in COLLECTION-URN with URN as the value of poperty PROPERTY-URN""" in pending
+
+  it should """respond to "/objects/find/regexmatch" """ in pending
+  it should """respond to "/objects/find/stringcontains" """ in pending
+  it should """respond to "/objects/find/valueequals" """ in pending
+  it should """respond to "/objects/find/numeric" """ in pending
+
+
+
 
 }
