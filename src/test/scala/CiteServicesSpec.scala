@@ -395,7 +395,11 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
 
   it should """respond to "/objects/find/regexmatch" """ in pending
   it should """respond to "/objects/find/stringcontains" """ in pending
-  it should """respond to "/objects/find/valueequals" """ in pending
+  it should """respond to "/objects/find/valueequals" with a string value """ in pending
+  it should """respond to "/objects/find/valueequals" with a numeric value """ in pending
+  it should """respond to "/objects/find/valueequals" with a boolean value """ in pending
+  it should """respond to "/objects/find/valueequals" with a cts-urn value """ in pending
+  it should """respond to "/objects/find/valueequals" with a cite-urn value """ in pending
   it should """respond to "/objects/find/numeric" """ in pending
 
 
