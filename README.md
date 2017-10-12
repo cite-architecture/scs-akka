@@ -68,15 +68,15 @@ The following services are under development.
 - implemented `/collections/hasobject/CITE2URN`
 - implemented `/objects/CITE2URN` => returns all objects identified by a CITE2URN
 - implemented `/objects/paged/CITE2URN?offset=X&limit=Z` => returns a subset of object identified by CITE2URN, starting at X (1-based), and showing Z objects. If X is greater than the number, returns an empty vector; if Z is greater, returns as many as are present.
+- implemented `/objects/find/urnmatch?urn=URN`
+- implemented `/objects/find/urnmatch/URN1?find=URN2[&propertyurn=CITE2URN]`
+- implemented `/objects/find/regexmatch?find=URN`
+- implemented `/objects/find/regexmatch/URN1?find=URN2[&propertyurn=CITE2URN]`
+- implemented `/objects/find/stringcontains?find=STRING`
+- implemented `/objects/find/stringcontains/CITE2URN?find=STRING[&propertyurn=CITE2URN]`
 
 Not Implemented
 
-- `/objects/find/urnmatch?urn=URN`
-- `/objects/find/urnmatch/URN1?find=URN2[&propertyurn=CITE2URN]`
-- `/objects/find/regexmatch?find=URN`
-- `/objects/find/regexmatch/URN1?find=URN2[&propertyurn=CITE2URN]`
-- `/objects/find/stringcontains?find=STRING`
-- `/objects/find/stringcontains/CITE2URN?find=STRING[&propertyurn=CITE2URN]`
 - `/objects/find/valueequals?find=ANY`
 - `/objects/find/valueequals/CITE2URN?find=ANY[&propertyurn=CITE2URN]`
 - `/objects/find/valueequals?find=ANY`
