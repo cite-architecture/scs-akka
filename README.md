@@ -74,10 +74,10 @@ The following services are under development.
 - implemented `/objects/find/regexmatch/URN1?find=URN2[&propertyurn=CITE2URN]`
 - implemented `/objects/find/stringcontains?find=STRING`
 - implemented `/objects/find/stringcontains/CITE2URN?find=STRING[&propertyurn=CITE2URN]`
+- implemented `/objects/find/valueequals?propetyurn=CITE2URN&value=ANY`
 
 Not Implemented
 
-- `/objects/find/valueequals?propetyurn=CITE2URN&value=ANY`
 - `/objects/find/numeric?n1=NUMBER&op=[lt|lteq|eq|gt|gteq|within][&n2=NUMBER]
 - `/objects/find/numeric/CITE2URN?n1=NUMBER&op=[lt|lteq|eq|gt|gteq|within][&n2=NUMBER][&propertyurn=CITE2URN]`
 
