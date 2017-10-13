@@ -379,14 +379,14 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
             }
           }
         } ~
-        (get & path("find" / "valueequals" / Segment )) { urnString =>
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (v, parameterUrn) => 
-            complete {s"'/find/valueequals/${urnString}' with parameter '${v}'' Not implemented yet."}
-          }
-        } ~
-        (get & path("find" / "valueequals" )) { 
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (v, parameterUrn) => 
-            complete {s"'/find/valueequals' with parameter '${v}' Not implemented yet."}
+        (get & path("find" / "valueequals"  )) { 
+          parameters( 'value.as[String], 'propertyurn.as[String] ) { (valueToMatchStr, propertyUrnStr) => 
+            complete {
+              doValueEquals(propertyUrnStr, valueToMatchStr).map[ToResponseMarshallable]{
+                case Right(citeObjects) => citeObjects
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
           }
         } ~
         (get & path("find" / "numeric" / Segment )) { urnString =>

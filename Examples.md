@@ -87,8 +87,19 @@ stringcontains
 
 valueequals
 
-- <http://localhost:9000/objects/find/valueequals?find=Text-block+20>
-- <http://localhost:9000/objects/find/valueequals/urn:cite2:hmt:textblock.2017a:?find=Text-block+20>
+
+- <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:e4.v1.fakeboolean:&value=true>
+- <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:e4.v1.fakeboolean:&value=false>
+
+- <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:e4.v1.rv:&value=recto>
+- <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:e4.v1.rv:&value=verso>
+
+- <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:e4.v1.sequence:&value=3>
+
+- <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.image:&value=urn:cite2:hmt:vaimg.v1:VA013RN_0014>
+- <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.text:&value=urn:cts:greekLit:tlg0012.tlg001:1.151-1.175>
+- <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.siglum:&value=msA>
+
 
 numeric less-than
 

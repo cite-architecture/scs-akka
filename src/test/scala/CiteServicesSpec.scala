@@ -395,9 +395,31 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
 
   it should """respond to "/objects/find/regexmatch" """ in pending
   it should """respond to "/objects/find/stringcontains" """ in pending
-  it should """respond to "/objects/find/valueequals" with a string value """ in pending
-  it should """respond to "/objects/find/valueequals" with a numeric value """ in pending
-  it should """respond to "/objects/find/valueequals" with a boolean value """ in pending
+  it should """respond to "/objects/find/valueequals" with a string value """ in {
+    Get(s"/objects/find/valueequals?propertyurn=urn:cite2:hmt:e4.v1.rv:&value=recto") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (9) 
+    }
+  }
+  it should """respond to "/objects/find/valueequals" with a numeric value """ in {
+    Get(s"/objects/find/valueequals?propertyurn=urn:cite2:hmt:e4.v1.sequence:&value=3") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (1) 
+      r.citeObjects(0).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:2r")
+    }
+  }
+  it should """respond to "/objects/find/valueequals" with a boolean value """ in {
+    Get(s"/objects/find/valueequals?propertyurn=urn:cite2:hmt:e4.v1.fakeboolean:&value=true") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (12) 
+    }
+  }
   it should """respond to "/objects/find/valueequals" with a cts-urn value """ in pending
   it should """respond to "/objects/find/valueequals" with a cite-urn value """ in pending
   it should """respond to "/objects/find/numeric" """ in pending
