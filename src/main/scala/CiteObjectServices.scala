@@ -28,14 +28,16 @@ import edu.holycross.shot.citeobj._
 import edu.holycross.shot.scm._
 
 case class Cite2UrnString(urnString: String)
+
 case class CiteObjectJson(citeObject:Option[
-  ( Map[String,String], 
-    Map[String,String], 
-    Vector[Map[String,String]] 
-  )]
-)
+  ( Map[String,String],
+    Vector[Map[String,String]])
+  ])
 
 case class VectorOfCiteObjectsJson(citeObjects:Vector[CiteObjectJson])
+
+/* Below… need work */
+
 
 case class CiteCollectionDefJson(citeCollectionDef:Option[
   ( Map[String,String],
@@ -384,15 +386,37 @@ def hasObject(urnString:String):Future[Either[String, Boolean]] = {
   }
 }
 
+def getPropertyType(purn:Cite2Urn):String = {
+  try {
+    val propUrn:Cite2Urn = purn.dropSelector
+    val collectionUrn = purn.dropSelector.dropProperty
+    val cdefs = collectionRepository.get.catalog.collections.filter(_.urn == collectionUrn)
+    val cdef:CiteCollectionDef = cdefs(0)
+    val ptype:String = cdef.propertyDefs.filter(_.urn == propUrn)(0).propertyType.toString
+    ptype
+  } catch {
+    case e: Exception => {
+      throw new ScsException(s"Failed to find type for property ${purn}.")
+    }
+  }
+}
+
 def makeCiteObjectJson(objectFound:CiteObject):CiteObjectJson = {
-  val objectUrn:Map[String,String] = Map("urn" -> objectFound.urn.toString)
-  val objectLabel:Map[String,String] = Map("label" -> objectFound.label)
-  val objectPropertiesVector:Vector[Map[String,String]] = objectFound.propertyList.map( p => {
-    val m = Map("propertyUrn" -> p.urn.toString, "propertyValue" -> p.propertyValue.toString )
-    m 
-  })
-  val objreply = CiteObjectJson( Some(objectUrn, objectLabel, objectPropertiesVector) )
-  objreply
+  try {
+    val collectionUrn = objectFound.urn.dropSelector.dropProperty
+    val objectMap:Map[String,String] = Map("urn" -> objectFound.urn.toString, "label" -> objectFound.label )
+    val objectPropertiesVector:Vector[Map[String,String]] = objectFound.propertyList.map( p => {
+      val m = Map("propertyUrn" -> p.urn.toString, "propertyType" -> getPropertyType(p.urn), "propertyValue" -> p.propertyValue.toString )
+      m 
+    })
+    val objreply = CiteObjectJson( Some(objectMap, objectPropertiesVector) )
+    objreply
+
+  } catch {
+    case e: Exception => {
+      throw new ScsException(s"Failed to make CiteObjectJson.")
+    }
+  }
 }
 
 
