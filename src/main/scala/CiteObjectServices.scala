@@ -252,7 +252,7 @@ trait CiteCollectionService extends Protocols {
     vectorReply
   } catch {
     case e: Exception => {
-      throw new ScsException(s"Exception creating collection definition for ${urn}.")
+      throw new ScsException(s"""Failed to make vector of objects for ${urn}.""")
     }
 }
 }
@@ -279,7 +279,7 @@ def doUrnMatch(collectionUrnStr:Option[String], urnToMatchStr:String, parameterU
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
   } catch {
     case e: Exception => {
-      throw new ScsException(s"UrnMatch error: ${e}.")
+      Future.successful(Left(s"${new IOException(e)}"))
     }
   }
 }
@@ -302,7 +302,7 @@ def doRegexMatch(collectionUrnStr:Option[String], regexToMatchStr:String, parame
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
   } catch {
     case e: Exception => {
-      throw new ScsException(s"UrnMatch error: ${e}.")
+      Future.successful(Left(s"${new IOException(e)}"))
     }
   }
 }
@@ -322,7 +322,90 @@ def doStringContains(collectionUrnStr:Option[String], stringToMatchStr:String, c
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
   } catch {
     case e: Exception => {
-      throw new ScsException(s"UrnMatch error: ${e}.")
+      Future.successful(Left(s"${new IOException(e)}"))
+    }
+  }
+}
+
+def doNumeric(collectionUrnStr:Option[String], n1:Double, op:String, n2:Option[Double], propertyUrnStr:Option[String]):Future[Either[String,VectorOfCiteObjectsJson]] = {
+  try {  
+    val co:Vector[CiteObject] = collectionUrnStr match {
+      case Some(u) => {
+        val collectionUrn:Cite2Urn = Cite2Urn(u).dropSelector
+        val thisVec:Vector[CiteObject] = collectionRepository.get.citableObjects.filter(_.urn.dropSelector == collectionUrn)
+        thisVec
+      }
+      case None => collectionRepository.get.citableObjects
+    }
+    val findResults:Vector[CiteObject] = propertyUrnStr match {
+      case Some(purns) => {
+        val purn:Cite2Urn = Cite2Urn(purns)
+        purn.propertyOption match {
+          case Some(po) => {
+            op match {
+              case "lt" => {
+                  co.filter(_.numericLessThan(purn, n1))
+              }
+              case "lteq" => {
+                  co.filter(_.numericLessThanOrEqual(purn, n1))
+              }
+              case "eq" => {
+                  co.filter(_.numericWithin(purn, n1,n1))
+              }
+              case "gt" => {
+                  co.filter(_.numericGreaterThan(purn, n1))
+              }
+              case "gteq" => {
+                  co.filter(_.numericGreaterThanOrEqual(purn, n1))
+              }
+              case "within" => {
+                  n2 match {
+                    case Some(d) => {
+                      co.filter(_.numericWithin(purn, n1, d))
+                    }
+                    case _ => throw new ScsException(s"""Two parameters of type Double are required for "within". """)
+                  } 
+              }
+              case _ => throw new ScsException(s"""${op} is not a recognized operator. Should be "lt", "lteq", "eq", "gt", "gteq", or "within". """)
+            }    
+          }
+          case None => throw new ScsException(s"""${purns} lacks a property id.""")
+        }
+      }
+      case None => {
+        op match {
+          case "lt" => {
+              co.filter(_.numericLessThan(n1))
+          }
+          case "lteq" => {
+              co.filter(_.numericLessThanOrEqual(n1))
+          }
+          case "eq" => {
+              co.filter(_.numericWithin(n1,n1))
+          }
+          case "gt" => {
+              co.filter(_.numericGreaterThan(n1))
+          }
+          case "gteq" => {
+              co.filter(_.numericGreaterThanOrEqual(n1))
+          }
+          case "within" => {
+              n2 match {
+                case Some(d) => {
+                  co.filter(_.numericWithin(n1, d))
+                }
+                case _ => throw new ScsException(s"""Two parameters of type Double are required for "within". """)
+              } 
+          }
+          case _ => throw new ScsException(s"""${op} is not a recognized operator. Should be "lt", "lteq", "eq", "gt", "gteq", or "within". """)
+        }    
+      }
+    }
+    val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+    Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
+  } catch {
+    case e: Exception => {
+      Future.successful(Left(s"${new IOException(e)}"))
     }
   }
 }
@@ -369,7 +452,7 @@ def doValueEquals(propertyUrnStr:String, valueToMatchStr:String): Future[Either[
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
   } catch {
     case e: Exception => {
-      throw new ScsException(s"UrnMatch error: ${e}.")
+      Future.successful(Left(s"${new IOException(e)}"))
     }
   }
 }
@@ -381,7 +464,7 @@ def hasObject(urnString:String):Future[Either[String, Boolean]] = {
     Unmarshal(hasIt).to[Boolean].map(Right(_))
   } catch{
     case e: Exception => {
-      throw new ScsException(s"Invalid URN: ${urnString}.")
+      Future.successful(Left(s"${new IOException(e)}"))
     }
   }
 }

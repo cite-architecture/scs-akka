@@ -383,11 +383,46 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
     }
   }
 
-  it should """respond to "/objects/OBJECT-URN" with an object  """ in pending
-  it should """respond to "/objects/RANGE-URN" with objects defined by a range URN """ in pending
-  it should """respond to "/paged/COLLECTION-URN?offset=1&limit=10" with the first 10 objects in a collection """ in pending 
-  it should """respond to "/paged/COLLECTION-URN?offset=11&limit=10" with the second 10 objects in a collection """ in pending 
-  it should """respond to "/paged/COLLECTION-URN" with the default first 10 objects in a collection """ in pending 
+  it should """respond to "/objects/OBJECT-URN" with an object  """ in {
+    Get(s"/objects/urn:cite2:hmt:e4.v1:5r") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (1) 
+    }
+  }
+
+  it should """respond to "/objects/RANGE-URN" with objects defined by a range URN """ in {
+    Get(s"/objects/urn:cite2:hmt:e4.v1:1r-2r") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (3) 
+    }
+  }
+
+  it should """respond to "/objects/paged/COLLECTION-URN?offset=1&limit=10" with the first 10 objects in a collection """ in {
+    Get(s"/objects/paged/urn:cite2:hmt:e4.v1:?offset=1&limit=10") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (10) 
+      r.citeObjects(0).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:1r")
+      r.citeObjects(9).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:5v")
+    }
+  }
+
+  it should """respond to "/objects/paged/COLLECTION-URN?offset=6&limit=5" with the second 5 objects in a collection """ in {
+    Get(s"/objects/paged/urn:cite2:hmt:e4.v1:?offset=6&limit=5") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (5) 
+      r.citeObjects(0).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:3v")
+      r.citeObjects(4).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:5v")
+    }
+  }
+
 
   it should """respond to "/objects/find/urnmatch?find=URN" by finding objects in all collections with URN as a property value""" in pending
   it should """respond to "/objects/find/urnmatch/COLLECTION-URN?find=URN" by finding objects in COLLECTION-URN with URN as a property value.""" in pending 
@@ -420,9 +455,146 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       r.citeObjects.size should equal (12) 
     }
   }
-  it should """respond to "/objects/find/valueequals" with a cts-urn value """ in pending
-  it should """respond to "/objects/find/valueequals" with a cite-urn value """ in pending
-  it should """respond to "/objects/find/numeric" """ in pending
+  it should """respond to "/objects/find/valueequals" with a cts-urn value """ in {
+    Get(s"/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.text:&value=urn:cts:greekLit:tlg0012.tlg001.allen:1.1-1.25") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (1) 
+    }
+  }
+
+  it should """respond to "/objects/find/valueequals" with a cite2-urn value """ in {
+    Get(s"/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.image:&value=urn:cite2:hmt:vaimg.v1:VA012RN_0013") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (1) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric" with operator "lt" (6) """ in {
+    Get(s"/objects/find/numeric?n1=3&op=lt") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (6) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric/CITE2-URN" with operator "lt" (2) """ in {
+    Get(s"/objects/find/numeric/urn:cite2:hmt:e4.v1:?n1=3&op=lt") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (2) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric" with operator "lt" and a property-URN (2) """ in {
+    Get(s"/objects/find/numeric/urn:cite2:hmt:e4.v1:?n1=3&op=lt&propertyurn=urn:cite2:hmt:e4.v1.sequence:") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (2) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric" with operator "lt" and a property-URN-with-no-property with an error """ in {
+    Get(s"/objects/find/numeric/urn:cite2:hmt:e4.v1:?n1=3&op=lt&propertyurn=urn:cite2:hmt:e4.v1:") ~> routes ~> check {
+      status shouldBe BadRequest
+    }
+  }
+
+  it should """respond to "/objects/find/numeric" with operator "lteq" (9) """ in {
+    Get(s"/objects/find/numeric?n1=3&op=lteq") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (9) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric/CITE2-URN" with operator "lteq" (3) """ in {
+    Get(s"/objects/find/numeric/urn:cite2:hmt:e4.v1:?n1=3&op=lteq") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (3) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric" with operator "eq" (3) """ in {
+    Get(s"/objects/find/numeric?n1=3&op=eq") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (3) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric/CITE2-URN" with operator "eq" (1) """ in {
+    Get(s"/objects/find/numeric/urn:cite2:hmt:e4.v1:?n1=3&op=eq") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (1) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric" with operator "gt" (32) """ in {
+    Get(s"/objects/find/numeric?n1=3&op=gt") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (32) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric/CITE2-URN" with operator "gt" (15) """ in {
+    Get(s"/objects/find/numeric/urn:cite2:hmt:e4.v1:?n1=3&op=gt") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (15) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric" with operator "gteq" (35) """ in {
+    Get(s"/objects/find/numeric?n1=3&op=gteq") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (35) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric/CITE2-URN" with operator "gteq" (16) """ in {
+    Get(s"/objects/find/numeric/urn:cite2:hmt:e4.v1:?n1=3&op=gteq") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (16) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric" with operator "within" (2,4 == 9) """ in {
+    Get(s"/objects/find/numeric?n1=2&op=within&n2=4") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (9) 
+    }
+  }
+
+  it should """respond to "/objects/find/numeric/CITE2-URN" with operator "within" (2,4, == 3) """ in {
+    Get(s"/objects/find/numeric/urn:cite2:hmt:e4.v1:?n1=2&op=within&n2=4") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (3) 
+    }
+  }
 
 
 

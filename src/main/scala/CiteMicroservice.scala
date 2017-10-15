@@ -390,13 +390,23 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
           }
         } ~
         (get & path("find" / "numeric" / Segment )) { urnString =>
-          parameters(  'n1.as[Int], 'op.as[String], 'n2.as[Int] ?, 'parameterurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
-            complete {s"'/find/numeric/${urnString}' with parameters ${n1}, ${op}, ${n2}, ${parameterUrn} Not implemented yet."}
+          parameters(  'n1.as[Double], 'op.as[String], 'n2.as[Double] ?, 'propertyurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
+            complete {
+              doNumeric(Some(urnString), n1, op, n2, parameterUrn).map[ToResponseMarshallable]{
+                case Right(citeObjects) => citeObjects
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
           }
         } ~
         (get & path("find" / "numeric" )) { 
-          parameters( 'n1.as[Int], 'op.as[String], 'n2.as[Int] ?,'parameterurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
-            complete {s"'/find/numeric' with parameters ${n1}, ${op}, ${n2}, ${parameterUrn} Not implemented yet."}
+          parameters( 'n1.as[Double], 'op.as[String], 'n2.as[Double] ?,'propertyurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
+            complete {
+              doNumeric(None, n1, op, n2, parameterUrn).map[ToResponseMarshallable]{
+                case Right(citeObjects) => citeObjects
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
           }
         } ~
         (get & path(Segment)) { (urnString) =>
