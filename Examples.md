@@ -100,12 +100,17 @@ valueequals
 - <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.text:&value=urn:cts:greekLit:tlg0012.tlg001:1.151-1.175>
 - <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.siglum:&value=msA>
 
-
 numeric less-than
 
 - <http://localhost:9000/objects/find/numeric?n1=5&op=lt>
 - <http://localhost:9000/objects/find/numeric?n1=5&op=lt&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
 - <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=5&op=lt>
+
+numeric less-than-or-equal
+
+- <http://localhost:9000/objects/find/numeric?n1=5&op=lteq>
+- <http://localhost:9000/objects/find/numeric?n1=5&op=lteq&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
+- <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=5&op=lteq>
 
 numeric equals
 
@@ -118,3 +123,15 @@ numeric greater-than
 - <http://localhost:9000/objects/find/numeric?n1=5&op=gt>
 - <http://localhost:9000/objects/find/numeric?n1=5&op=gt&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
 - <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=5&op=gt>
+
+numeric greater-than-or-equal
+
+- <http://localhost:9000/objects/find/numeric?n1=5&op=gteq>
+- <http://localhost:9000/objects/find/numeric?n1=5&op=gteq&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
+- <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=5&op=gteq>
+
+numeric within
+
+- <http://localhost:9000/objects/find/numeric?n1=4&op=within&n2=6>
+- <http://localhost:9000/objects/find/numeric?n1=4&op=within&n2=6&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
+- <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=4&op=within&n2=6>
