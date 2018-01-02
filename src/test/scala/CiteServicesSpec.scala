@@ -398,22 +398,25 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
       r.citeObjects.size should equal (3) 
+      r.citeObjects(0).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:1r")
+      r.citeObjects(2).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:2r")
     }
   }
 
-  it should """respond to "/objects/paged/COLLECTION-URN?offset=1&limit=10" with the first 10 objects in a collection """ in {
-    Get(s"/objects/paged/urn:cite2:hmt:e4.v1:?offset=1&limit=10") ~> routes ~> check {
+  it should """respond to "/objects/paged/COLLECTION-URN?offset=0&limit=10" with the first 10 objects in a collection """ in {
+    Get(s"/objects/paged/urn:cite2:hmt:e4.v1:?offset=0&limit=10") ~> routes ~> check {
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
-      r.citeObjects.size should equal (10) 
+      logger.info(s"${r}")
       r.citeObjects(0).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:1r")
       r.citeObjects(9).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:5v")
+      r.citeObjects.size should equal (10) 
     }
   }
 
-  it should """respond to "/objects/paged/COLLECTION-URN?offset=6&limit=5" with the second 5 objects in a collection """ in {
-    Get(s"/objects/paged/urn:cite2:hmt:e4.v1:?offset=6&limit=5") ~> routes ~> check {
+  it should """respond to "/objects/paged/COLLECTION-URN?offset=5&limit=5" with the second 5 objects in a collection """ in {
+    Get(s"/objects/paged/urn:cite2:hmt:e4.v1:?offset=5&limit=5") ~> routes ~> check {
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]

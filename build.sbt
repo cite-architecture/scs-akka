@@ -12,7 +12,6 @@ fork in run := true
 javaOptions in run ++= Seq(
     "-Xms256M", 
     "-Xmx4G", 
-    "-XX:MaxPermSize=4096M", 
     "-XX:+UseConcMarkSweepGC"
 )
 
@@ -20,6 +19,7 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
 resolvers += Resolver.jcenterRepo
 resolvers += Resolver.bintrayRepo("neelsmith", "maven")
+resolvers += Resolver.bintrayRepo("eumaeus", "maven")
 
 libraryDependencies ++= {
   val scalaTestV  = "3.0.1"
@@ -37,7 +37,7 @@ libraryDependencies ++= {
     "edu.holycross.shot" %% "cex" % "6.1.0",
     "edu.holycross.shot" %% "ohco2" % "10.4.0",
     "edu.holycross.shot" %% "scm" % "5.1.6",
-    "edu.holycross.shot" %% "citeobj" % "5.0.0"
+    "edu.holycross.shot" %% "citeobj" % "5.0.1-m2" from "file:///cite/scala/unmanaged_jars/citeobj_2.12-5.0.1-m2.jar"
   )
 }
 

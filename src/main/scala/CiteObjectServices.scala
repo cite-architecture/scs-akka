@@ -172,7 +172,7 @@ trait CiteCollectionService extends Protocols {
 
     def fetchPagedCiteObjectJson(urnString: String, offset:Int, limit:Int): Future[Either[String, VectorOfCiteObjectsJson]] = {
       try {
-        val trueOffset = offset - 1
+        val trueOffset = offset 
         val urn:Cite2Urn = Cite2Urn(urnString)
         val unpagedReply:VectorOfCiteObjectsJson = fetchCiteObjects(urn)
         val pagedReply:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(unpagedReply.citeObjects.slice(trueOffset,(trueOffset + limit)) )
@@ -186,76 +186,19 @@ trait CiteCollectionService extends Protocols {
 
     def fetchCiteObjects(urn: Cite2Urn):VectorOfCiteObjectsJson = {
       try {
-        val vectorReply:VectorOfCiteObjectsJson = urn match {
-          case u if (urn.objectComponentOption == None)  => {
-            // Notional Collection
-            val vo:Vector[CiteObject] = citableObjects.get.filter(_.urn ~~ urn)
-            val replyVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(vo.map( v => {
-              val c:CiteObjectJson = makeCiteObjectJson(v) 
-              c
-            }))
-            replyVector
-          }
-          case u if (urn.isRange) => {
-            logger.debug(s"\n\nhere\n\n")
-            // Range
-            val thisCollectionUrn:Cite2Urn = urn.dropSelector
-            val thisCollectionDef:Option[CiteCollectionDef] = collectionRepository.get.catalog.collection(thisCollectionUrn) 
-            thisCollectionDef match {
-              case Some(tcd) => {
-                tcd.orderingProperty match {
-                 case Some(op) => {
-                  val collectionUrn:Cite2Urn = urn.dropSelector
-                  val thisCollection:Vector[CiteObject] = citableObjects.get.filter(_.urn.dropSelector == collectionUrn)
-                  logger.debug(s"\n\nthisCollection.size = ${thisCollection.size}")
-                  val rangeBegin:Cite2Urn = urn.rangeBeginUrn
-                  val rangeEnd:Cite2Urn = urn.rangeEndUrn
-                  logger.debug(s"\n\nfrom ${rangeBegin} to ${rangeEnd}\n\n")
-                  val beginSeq:Double = thisCollection.filter(_.urn == rangeBegin)(0).propertyValue(op).asInstanceOf[Double]
-                  val endSeq:Double = thisCollection.filter(_.urn == rangeEnd)(0).propertyValue(op).asInstanceOf[Double]
-                  logger.debug(s"\n\nfrom ${beginSeq} to ${endSeq}\n\n")
-                  val thisRange:Vector[CiteObject] = thisCollection.filter(
-                   _.propertyValue(op).asInstanceOf[Double] >= beginSeq
-                 ).filter(
-                   _.propertyValue(op).asInstanceOf[Double] <= endSeq
-                 )
-                 logger.debug(s"\n\nthisRange.size = ${thisRange.size}")
-                 val replyVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(thisRange.map(v => {
-                  val c:CiteObjectJson = makeCiteObjectJson(v)
-                  c
-                } ))
-                 replyVector
-               } 
-             case _ => throw new ScsException(s"${urn} is not an ordered collection.")
-             }
-           }
-         case _ => VectorOfCiteObjectsJson(Vector(CiteObjectJson(None)))
-         }
-         //VectorOfCiteObjectsJson(Vector(CiteObjectJson(None)))
-       }
-       case u => {
-        // Object
-        val objectVector:Vector[CiteObject] = citableObjects.get.filter(_.urn == urn)
-        objectVector.size match {
-          case x if x > 0 => {
-            val objectFound = objectVector(0)
-            val objReply:CiteObjectJson = makeCiteObjectJson(objectFound)
-            VectorOfCiteObjectsJson(Vector(objReply))
-          }
-          case _  => {
-            val objReply = CiteObjectJson( None )
-            VectorOfCiteObjectsJson(Vector(objReply))
-          }
+        logger.info(s"++++ fetchCiteObjects for ${urn}")
+        val vectorReply:Vector[CiteObject] = collectionRepository.get ~~ urn
+        logger.info(s"++++ got ${vectorReply.size}")
+        VectorOfCiteObjectsJson(vectorReply.map( v => {
+          val c:CiteObjectJson = makeCiteObjectJson(v) 
+          c
+        }))
+      } catch {
+        case e: Exception => {
+          throw new ScsException(s"""Failed to make vector of objects for ${urn}.""")
         }
       }
     }
-    vectorReply
-  } catch {
-    case e: Exception => {
-      throw new ScsException(s"""Failed to make vector of objects for ${urn}.""")
-    }
-}
-}
 
 def doUrnMatch(collectionUrnStr:Option[String], urnToMatchStr:String, parameterUrnStr:Option[String] ): Future[Either[String, VectorOfCiteObjectsJson]] = {
   try {
