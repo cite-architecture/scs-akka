@@ -105,7 +105,7 @@ case class CatalogJson(citeCatalog:Vector[(
           val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
           val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
           val corpora:Vector[Corpus] = realUrns.map(ru => {
-            logger.info(ru.toString)
+            //logger.info(ru.toString)
             textRepository.get.corpus >= CtsUrn(s"${ru.dropPassage}${passageComp}")
           })
           val assembledVector:Vector[String] = {

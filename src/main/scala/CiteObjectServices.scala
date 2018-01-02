@@ -186,9 +186,9 @@ trait CiteCollectionService extends Protocols {
 
     def fetchCiteObjects(urn: Cite2Urn):VectorOfCiteObjectsJson = {
       try {
-        logger.info(s"++++ fetchCiteObjects for ${urn}")
+        //logger.info(s"++++ fetchCiteObjects for ${urn}")
         val vectorReply:Vector[CiteObject] = collectionRepository.get ~~ urn
-        logger.info(s"++++ got ${vectorReply.size}")
+        //logger.info(s"++++ got ${vectorReply.size}")
         VectorOfCiteObjectsJson(vectorReply.map( v => {
           val c:CiteObjectJson = makeCiteObjectJson(v) 
           c
