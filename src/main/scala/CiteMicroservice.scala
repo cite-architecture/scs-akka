@@ -29,6 +29,7 @@ import edu.holycross.shot.ohco2._
 import edu.holycross.shot.cite._
 import edu.holycross.shot.citeobj._
 import edu.holycross.shot.scm._
+import edu.holycross.shot.citerelation._
 
 
 trait Protocols extends DefaultJsonProtocol {
@@ -418,8 +419,22 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
             }
          } 
       } ~
-      pathPrefix("extensions") {
-        complete { "'/extensions' Not implemented yet."}
+      pathPrefix("image") {
+        (get & path(Segment)) { urnString => 
+          val u:Cite2Urn = Cite2Urn(urnString)
+          redirect("http://www.homermultitext.org/iipsrv?OBJ=IIP,1.0&FIF=/project/homer/pyramidal/VenA/VA012RN-0013.tif&RGN=0.164,0.0541,0.49,0.1366&WID=9000&CVT=JPEG", StatusCodes.PermanentRedirect)
+        } ~
+        (get & path(Segment / Segment)) { (urnString, widthString) =>
+          val u:Cite2Urn = Cite2Urn(urnString)
+          val w:Long = widthString.toLong
+          redirect("http://www.homermultitext.org/iipsrv?OBJ=IIP,1.0&FIF=/project/homer/pyramidal/VenA/VA024RN-0025.tif&RGN=0.164,0.0541,0.49,0.1366&WID=9000&CVT=JPEG", StatusCodes.PermanentRedirect)
+        } ~
+        (get & path(Segment / Segment / Segment)) { (urnString, maxWidthString, maxHeightString) =>
+          val u:Cite2Urn = Cite2Urn(urnString)
+          val w:Long = maxWidthString.toLong
+          val h:Long = maxHeightString.toLong
+          redirect("http://www.homermultitext.org/iipsrv?OBJ=IIP,1.0&FIF=/project/homer/pyramidal/VenA/VA024RN-0025.tif&RGN=0.164,0.0541,0.49,0.1366&WID=9000&CVT=JPEG", StatusCodes.PermanentRedirect)
+        } 
       }
     }
   }

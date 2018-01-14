@@ -408,7 +408,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
-      logger.info(s"${r}")
+      //logger.info(s"${r}")
       r.citeObjects(0).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:1r")
       r.citeObjects(9).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:5v")
       r.citeObjects.size should equal (10) 
@@ -427,9 +427,44 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
   }
 
 
-  it should """respond to "/objects/find/urnmatch?find=URN" by finding objects in all collections with URN as a property value""" in pending
-  it should """respond to "/objects/find/urnmatch/COLLECTION-URN?find=URN" by finding objects in COLLECTION-URN with URN as a property value.""" in pending 
-  it should """respond to "/objects/find/urnmatch/COLLECTION-URN?find=URN&parameterurn=PROP-URN" by finding objects in COLLECTION-URN with URN as the value of poperty PROPERTY-URN""" in pending
+  it should """respond to "/objects/find/urnmatch?find=URN" by finding objects in all collections with URN as a property value""" in {
+    Get(s"/objects/find/urnmatch?find=urn:cite2:hmt:msA.2017a:12v") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (3) 
+    }
+  }
+
+
+  it should """respond to "/objects/find/urnmatch/COLLECTION-URN?find=URN" by finding objects in COLLECTION-URN with URN as a property value.""" in {
+    Get(s"/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:msA.2017a:12v") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (1) 
+    }
+  }
+
+  it should """respond to "/objects/find/urnmatch/COLLECTION-URN?find=URN&parameterurn=PROP-URN" by finding objects in COLLECTION-URN with URN as the value of property PROPERTY-URN""" in {
+    Get(s"/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:vaimg.2017a:VA012VN_0514&parameterurn=urn:cite2:hmt:textblock.2017a.image:") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (1) 
+    }
+
+  }
+
+  it should """respond to "/objects/find/urnmatch/COLLECTION-URN?find=URN&parameterurn=PROP-URN" even when the URN in data contains an extension""" in {
+    Get(s"/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:vaimg.2017a:VA012VN_0514&parameterurn=urn:cite2:hmt:textblock.2017a.imageroi:") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (1) 
+    }
+
+  }
 
   it should """respond to "/objects/find/regexmatch" """ in pending
   it should """respond to "/objects/find/stringcontains" """ in pending
