@@ -38,7 +38,7 @@ libraryDependencies ++= {
     "edu.holycross.shot" %% "citerelations" % "2.0.1",
     "edu.holycross.shot" %% "ohco2" % "10.4.0",
     "edu.holycross.shot" %% "citebinaryimage" % "1.0.0" from "file:///cite/scala/unmanaged_jars/citebinaryimage_2.12-1.0.0.jar",
-    "edu.holycross.shot" %% "scm" % "5.1.7" from "file:///cite/scala/unmanaged_jars/scm_2.12-5.1.7.jar",
+    "edu.holycross.shot" %% "scm" % "5.1.9" from "file:///cite/scala/unmanaged_jars/scm_2.12-5.1.9.jar",
     "edu.holycross.shot" %% "citeobj" % "5.0.1-m2" from "file:///cite/scala/unmanaged_jars/citeobj_2.12-5.0.1-m2.jar"
   )
 }

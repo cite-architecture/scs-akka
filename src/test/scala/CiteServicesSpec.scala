@@ -344,7 +344,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteCollectionDefsJson = responseAs[VectorOfCiteCollectionDefsJson]
-      r.citeCollectionDefs.size should equal (8) 
+      r.citeCollectionDefs.size should equal (10) 
     }
   }
 
@@ -503,7 +503,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
   }
 
   it should """respond to "/objects/find/valueequals" with a cite2-urn value """ in {
-    Get(s"/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.image:&value=urn:cite2:hmt:vaimg.v1:VA012RN_0013") ~> routes ~> check {
+    Get(s"/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.image:&value=urn:cite2:hmt:vaimg.2017a:VA012RN_0013") ~> routes ~> check {
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
@@ -631,6 +631,44 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
       r.citeObjects.size should equal (3) 
+    }
+  }
+
+  it should """respond to "/image/URN?resolveImage=false" with a valid IIIF-API URL """ in {
+    Get(s"/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013?resolveImage=false") ~> routes ~> check {
+      status shouldBe OK
+      val u:String = responseAs[String]
+      u should equal ("http://www.homermultitext.org/iipsrv?IIIF=/project/homer/pyramidal/VenA/VA012RN_0013.tif/full/2000,/0/default.jpg")
+    }
+  }
+
+  it should """respond to "/image/URN-with-ROI?resolveImage=false" with a valid IIIF-API URL """ in {
+    Get(s"/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.1,0.2,0.3,0.4?resolveImage=false") ~> routes ~> check {
+      status shouldBe OK
+      val u:String = responseAs[String]
+      u should equal ("http://www.homermultitext.org/iipsrv?IIIF=/project/homer/pyramidal/VenA/VA012RN_0013.tif/pct:10,20,30,40/2000,/0/default.jpg")
+    }
+  }
+
+  it should """respond to "/image/WIDTH/URN?resolveImage=false" with a valid IIIF-API URL """ in {
+    Get(s"/image/200/urn:cite2:hmt:vaimg.2017a:VA012RN_0013?resolveImage=false") ~> routes ~> check {
+      status shouldBe OK
+      val u:String = responseAs[String]
+      u should equal ("http://www.homermultitext.org/iipsrv?IIIF=/project/homer/pyramidal/VenA/VA012RN_0013.tif/full/200,/0/default.jpg")
+    }
+  }
+
+  it should """respond to "/image/MAXWIDTH/MAXHEIGHT/URN-with-ROI?resolveImage=false" with a valid IIIF-API URL """ in {
+    Get(s"/image/300/600/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@?resolveImage=false") ~> routes ~> check {
+      status shouldBe OK
+      val u:String = responseAs[String]
+      u should equal ("http://www.homermultitext.org/iipsrv?IIIF=/project/homer/pyramidal/VenA/VA012RN_0013.tif/full/!600,300/0/default.jpg")
+    }
+  }
+
+  it should """respond to "/image/URN?resolveImage=false" when the object is not present with an error """ in {
+    Get(s"/image/urn:cite2:hmt:vaimg.2017a:NOTPRESENT?resolveImage=false") ~> routes ~> check {
+      status shouldBe BadRequest
     }
   }
 

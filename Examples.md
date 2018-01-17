@@ -135,3 +135,25 @@ numeric within
 - <http://localhost:9000/objects/find/numeric?n1=4&op=within&n2=6>
 - <http://localhost:9000/objects/find/numeric?n1=4&op=within&n2=6&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
 - <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=4&op=within&n2=6>
+
+### Images
+
+Basic Image Retrieval
+
+- <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013>
+- <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.04506,0.2196,0.1344,0.10093>
+
+Defining a width
+
+- <http://localhost:9000/image/200/urn:cite2:hmt:vaimg.2017a:VA012RN_0013>
+- <http://localhost:9000/image/200/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.04506,0.2196,0.1344,0.10093>
+
+Defining MaxWidth and MaxHeight
+
+- <http://localhost:9000/image/500/500/urn:cite2:hmt:vaimg.2017a:VA012RN_0013>
+- <http://localhost:9000/image/500/500/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.04506,0.2196,0.1344,0.10093>
+
+Embedding
+
+- ![12-recto](http://localhost:9000/image/500/500/urn:cite2:hmt:vaimg.2017a:VA012RN_0013)
+- ![12-recto-detail](http://localhost:9000/image/500/500/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.04506,0.2196,0.1344,0.10093)

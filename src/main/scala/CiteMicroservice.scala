@@ -6,6 +6,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.client.RequestBuilding
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.{HttpResponse, HttpRequest}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
@@ -46,9 +47,10 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val citePropertyDefFormat = jsonFormat1(CitePropertyDefJson.apply)
   implicit val citeCollectionDefFormat = jsonFormat1(CiteCollectionDefJson.apply)
   implicit val vectorOfCiteCollectionDefsFormat = jsonFormat1(VectorOfCiteCollectionDefsJson.apply)
+  implicit val ServiceUrlStringFormat = jsonFormat1(ServiceUrlString.apply)
 }
 
-trait Service extends Protocols with Ohco2Service with CiteCollectionService {
+trait Service extends Protocols with Ohco2Service with CiteCollectionService with CiteImageService {
   implicit val system: ActorSystem
   implicit def executor: ExecutionContextExecutor
   implicit val materializer: Materializer
@@ -420,20 +422,70 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
          } 
       } ~
       pathPrefix("image") {
-        (get & path(Segment)) { urnString => 
-          val u:Cite2Urn = Cite2Urn(urnString)
-          redirect("http://www.homermultitext.org/iipsrv?OBJ=IIP,1.0&FIF=/project/homer/pyramidal/VenA/VA012RN-0013.tif&RGN=0.164,0.0541,0.49,0.1366&WID=9000&CVT=JPEG", StatusCodes.PermanentRedirect)
+        (get & path(Segment)) {  urnString =>
+          parameters( 'resolveImage.as[Boolean] ? true ) { (resolveImage) => 
+            val u:Cite2Urn = Cite2Urn(urnString)
+            resolveImage match {
+              case false => {
+                complete {
+                  iiifApiUrl(u).map[ToResponseMarshallable]{
+                    case Right(su) => {
+                      su
+                    }
+                    case Left(errorMessage) => BadRequest -> errorMessage
+                  }
+                }
+              }
+              case _ => {
+                redirect(iiifApiResolver(urn = u),StatusCodes.TemporaryRedirect) 
+              }
+            }
+          }
         } ~
-        (get & path(Segment / Segment)) { (urnString, widthString) =>
-          val u:Cite2Urn = Cite2Urn(urnString)
-          val w:Long = widthString.toLong
-          redirect("http://www.homermultitext.org/iipsrv?OBJ=IIP,1.0&FIF=/project/homer/pyramidal/VenA/VA024RN-0025.tif&RGN=0.164,0.0541,0.49,0.1366&WID=9000&CVT=JPEG", StatusCodes.PermanentRedirect)
+        (get & path(Segment / Segment)) { (widthString, urnString) =>
+          parameters( 'resolveImage.as[Boolean] ? true ) { (resolveImage) => 
+            val u:Cite2Urn = Cite2Urn(urnString)
+            logger.info(s"urn = ${u}")
+            val w:Int = widthString.toInt
+            logger.info(s"width = ${w}")
+            resolveImage match {
+              case false => {
+                complete {
+                  iiifApiUrl(urn = u, width = Some(w)).map[ToResponseMarshallable]{
+                    case Right(su) => {
+                      su
+                    }
+                    case Left(errorMessage) => BadRequest -> errorMessage
+                  }
+                }
+              }
+              case _ => {
+                redirect(iiifApiResolver(urn = u, width = Some(w)),StatusCodes.TemporaryRedirect) 
+              }
+            }
+          }
         } ~
-        (get & path(Segment / Segment / Segment)) { (urnString, maxWidthString, maxHeightString) =>
-          val u:Cite2Urn = Cite2Urn(urnString)
-          val w:Long = maxWidthString.toLong
-          val h:Long = maxHeightString.toLong
-          redirect("http://www.homermultitext.org/iipsrv?OBJ=IIP,1.0&FIF=/project/homer/pyramidal/VenA/VA024RN-0025.tif&RGN=0.164,0.0541,0.49,0.1366&WID=9000&CVT=JPEG", StatusCodes.PermanentRedirect)
+        (get & path(Segment / Segment / Segment)) { (maxHeightString, maxWidthString, urnString) =>
+          parameters( 'resolveImage.as[Boolean] ? true ) { (resolveImage) => 
+            val u:Cite2Urn = Cite2Urn(urnString)
+            val mw:Int = maxWidthString.toInt
+            val mh:Int = maxHeightString.toInt
+            resolveImage match {
+              case false => {
+                complete {
+                  iiifApiUrl(urn = u, maxWidth = Some(mw), maxHeight = Some(mh)).map[ToResponseMarshallable]{
+                    case Right(su) => {
+                      su
+                    }
+                    case Left(errorMessage) => BadRequest -> errorMessage
+                  }
+                }
+              }
+              case _ => {
+                redirect(iiifApiResolver(urn = u, maxWidth = Some(mw), maxHeight = Some(mh)),StatusCodes.TemporaryRedirect) 
+              }
+            }
+          }
         } 
       }
     }
@@ -441,7 +493,7 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService {
 }
 
 
-object CiteMicroservice extends App with Service with Ohco2Service with CiteCollectionService {
+object CiteMicroservice extends App with Service with Ohco2Service with CiteCollectionService with CiteImageService {
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
   override implicit val materializer = ActorMaterializer()
