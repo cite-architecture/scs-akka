@@ -12,11 +12,36 @@ Status:  **experimental**.  No binary releases yet.
 - Get [SBT](http://www.scala-sbt.org)
 - At the top-level of this repository, type `sbt run`
 
+## Building & Running a JAR
+
+### Configure and Build
+
+In `src/main/resources/application.conf`, specify a path to a CEX library; the default is `library=cex/library.cex`. That path will be relative to the directory from which you invoke the `.jar`. 
+
+In SBT:
+
+- `sbt`
+- `++2.12.3`
+- `assembly`
+
+The result will be in:
+
+> `scs-akka/target/scala-2.12/scs.jar`
+
+### Run
+
+Be sure your datafile is in the proper place with the proper name. By default it is `cex/library.cex` relative to the directory from which you invoke the `scs.jar`. 
+
+Invoke it with `java -jar scs.jar`.
+
+The service should be running at `http://localhost:9000`. 
+
+
 ## Testing
 
 `sbt test` will run all tests.
 
-By default the service uses the CEX file at `src/main/resources/cex/test.cex`. There is another, much larger CEX file at `src/main/resources/cex/cite-test-huge.cex`.
+By default the service uses the CEX file at `cex/library.cex`. There is another, much larger CEX file at `cex/cite-test-huge.cex`.
 
 The CEX file is configured in the file `src/main/resources/application.conf`. 
 
@@ -77,6 +102,12 @@ The following services are under development.
 - implemented `/objects/find/valueequals?propetyurn=CITE2URN&value=ANY`
 - implemented `/objects/find/numeric?n1=NUMBER&op=[lt|lteq|eq|gt|gteq|within][&n2=NUMBER]`
 - implemented `/objects/find/numeric/CITE2URN?n1=NUMBER&op=[lt|lteq|eq|gt|gteq|within][&n2=NUMBER][&propertyurn=CITE2URN]`
+
+## CITE Image Services
+
+- implemented `/image/CITE2URN` => 
+- implemented `/image/WIDTH/CITE2URN` => 
+- implemented `/image/MAXWIDTH/MAXHEIGHT/CITE2URN` => 
 
 ## Versions
 

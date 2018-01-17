@@ -43,5 +43,7 @@ libraryDependencies ++= {
   )
 }
 
+assemblyJarName in assembly := "scs.jar"
+test in assembly := {}
 
 Revolver.settings
