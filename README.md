@@ -105,9 +105,11 @@ The following services are under development.
 
 ## CITE Image Services
 
-- implemented `/image/CITE2URN` => 
-- implemented `/image/WIDTH/CITE2URN` => 
-- implemented `/image/MAXWIDTH/MAXHEIGHT/CITE2URN` => 
+- implemented `/image/CITE2URN` => delivers binary image data 
+- implemented `/image/WIDTH/CITE2URN` => delivers binary image data scaled to WIDTH
+- implemented `/image/MAXWIDTH/MAXHEIGHT/CITE2URN` => delivers binary image data scaled to fit MAXWIDTH and MAXHEIGHT
+
+For all of these, an optional `?resolveImage=false` parameter will deliver a service-URL, rather than binary image data.
 
 ## Versions
 
