@@ -33,7 +33,7 @@ case class CorpusJson(citableNodes:Vector[Map[String, String]])
 case class ReffJson(reff:Vector[String])
 case class CitableNodeJson(citableNode:Map[String, String])
 case class NgramHistoJson(ngramHisto:Vector[ (Map[String,String], Map[String,Int] ) ] )
-case class CatalogJson(citeCatalog:Vector[ Map[String,String] ] )
+case class CatalogJson(ctsCatalog:Vector[ Map[String,String] ] )
 /*
 case class CatalogJson(citeCatalog:Vector[(
   Map[String,String], 

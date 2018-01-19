@@ -267,7 +267,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.citeCatalog.size should equal (12)
+      r.ctsCatalog.size should equal (12)
     }  
   }
 
@@ -276,7 +276,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.citeCatalog.size should equal (12)
+      r.ctsCatalog.size should equal (12)
     }  
   }
 
@@ -285,7 +285,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.citeCatalog.size should equal (12)
+      r.ctsCatalog.size should equal (12)
     }  
   }
 
@@ -294,7 +294,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.citeCatalog.size should equal (12)
+      r.ctsCatalog.size should equal (12)
     }  
   }
 
@@ -303,7 +303,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.citeCatalog.size should equal (3)
+      r.ctsCatalog.size should equal (3)
     }  
   }
 
