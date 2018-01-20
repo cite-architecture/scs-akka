@@ -74,8 +74,18 @@ case class CatalogJson(citeCatalog:Vector[(
            "lang" -> l.lang,
            "groupName" -> l.groupName,
            "workTitle" -> l.workTitle,
-           "versionLabel" -> l.versionLabel.toString,
-           "exemplarLabel" -> l.exemplarLabel.toString
+           "versionLabel" -> {
+              l.versionLabel match {
+                case Some(vl) => vl
+                case _ => ""
+              }
+            },
+           "exemplarLabel" -> {
+              l.exemplarLabel match {
+                case Some(el) => el
+                case _ => ""
+              }
+            }
          ))
         val n:CatalogJson = CatalogJson(v) 
         Unmarshal(n).to[CatalogJson].map(Right(_))
