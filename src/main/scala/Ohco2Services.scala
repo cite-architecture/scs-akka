@@ -32,7 +32,7 @@ case class CexLibraries(repos:Vector[CiteLibrary])
 case class CorpusJson(citableNodes:Vector[Map[String, String]])
 case class ReffJson(reff:Vector[String])
 case class CitableNodeJson(citableNode:Map[String, String])
-case class NgramHistoJson(ngramHisto:Vector[ (Map[String,String], Map[String,Int] ) ] )
+case class NgramHistoJson(ngramHisto:Vector[Map[String,String]] )
 case class CatalogJson(ctsCatalog:Vector[ Map[String,String] ] )
 /*
 case class CatalogJson(citeCatalog:Vector[(
@@ -361,7 +361,7 @@ def fetchNgram(n:Int, t:Int, so:Option[String], urn:Option[String], ignorePunctu
     } 
   }
 
-  val nghv:NgramHistoJson = NgramHistoJson(ngh.histogram.map(h => ( Map[String,String]("s" -> h.s.toString) , Map[String,Int]("count" -> h.count.toInt) ) ))
+  val nghv:NgramHistoJson = NgramHistoJson(ngh.histogram.map(h => ( Map[String,String]("s" -> h.s.toString, "count" -> h.count.toString) ) ))
   Unmarshal(nghv).to[NgramHistoJson].map(Right(_)) 
 
 } catch {

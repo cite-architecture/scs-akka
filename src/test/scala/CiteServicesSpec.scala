@@ -190,7 +190,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       status shouldBe OK
       contentType shouldBe `application/json`
       r.ngramHisto.size should equal (1)
-      r.ngramHisto(0)._2("count") should equal (10)
+      r.ngramHisto(0)("count").toInt should equal (10)
     }  
   }
 
@@ -202,7 +202,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       status shouldBe OK
       contentType shouldBe `application/json`
       r.ngramHisto.size should equal (2)
-      r.ngramHisto(0)._2("count") should equal (29)
+      r.ngramHisto(0)("count").toInt should equal (29)
     }  
   }
 
@@ -214,7 +214,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       status shouldBe OK
       contentType shouldBe `application/json`
       r.ngramHisto.size should equal (1)
-      r.ngramHisto(0)._2("count") should equal (6)
+      r.ngramHisto(0)("count").toInt should equal (6)
     }  
   }
 
@@ -224,7 +224,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       status shouldBe OK
       contentType shouldBe `application/json`
       r.ngramHisto.size should equal (1)
-      r.ngramHisto(0)._2("count") should equal (10)
+      r.ngramHisto(0)("count").toInt should equal (10)
     }  
   }
 
@@ -234,7 +234,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       status shouldBe OK
       contentType shouldBe `application/json`
       r.ngramHisto.size should equal (1)
-      r.ngramHisto(0)._2("count") should equal (6)
+      r.ngramHisto(0)("count").toInt should equal (6)
     }  
   }
 
