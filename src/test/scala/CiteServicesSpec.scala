@@ -353,7 +353,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:CiteCollectionDefJson = responseAs[CiteCollectionDefJson]
-      r.citeCollectionDef.size should equal (1) 
+      r.citeCollectionDef.citeCollectionInfo("urn") should equal ("urn:cite2:hmt:e4.v1:") 
     }
   }
 

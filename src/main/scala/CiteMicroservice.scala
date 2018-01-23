@@ -34,6 +34,7 @@ import edu.holycross.shot.citerelation._
 
 
 trait Protocols extends DefaultJsonProtocol {
+  // Ohco2
   implicit val ctsUrnStringFormat = jsonFormat1(CtsUrnString.apply)
   implicit val cite2UrnStringFormat = jsonFormat1(Cite2UrnString.apply)
   implicit val corpusFormat = jsonFormat1(CorpusJson.apply)
@@ -41,18 +42,15 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val ngramHistoFormat = jsonFormat1(NgramHistoJson.apply)
   implicit val catalogFormat = jsonFormat1(CatalogJson.apply)
   implicit val reffFormat = jsonFormat1(ReffJson.apply)
+  // CiteObject
   implicit val citeObjectFormat = jsonFormat1(CiteObjectJson.apply)
-  implicit val vectorOfCiteObjectsFormat = jsonFormat1(VectorOfCiteObjectsJson.apply)
-  //implicit val citeCatalogFormat = jsonFormat1(CiteCatalogJson.apply)
-  implicit val citePropertyDefFormat = jsonFormat1(CitePropertyDefJson.apply)
-  implicit val citeCollectionDefFormat = jsonFormat1(CiteCollectionDefJson.apply)
-  implicit val vectorOfCiteCollectionDefsFormat = jsonFormat1(VectorOfCiteCollectionDefsJson.apply)
   implicit val ServiceUrlStringFormat = jsonFormat1(ServiceUrlString.apply)
-  // New ones
-  implicit val new_citePropertyDefFormat = jsonFormat1(NewCitePropertyDefJson.apply)
-  implicit val new_citeCollectionPropertyDefsFormat = jsonFormat1(NewCiteCollectionPropertyDefsJson.apply)
-  implicit val new_citeCollectionInfoFormat = jsonFormat1(NewCiteCollectionInfoJson.apply)
-  implicit val new_citeCollectionDefFormat = jsonFormat2(NewCiteCollectionDefJson.apply)
+  implicit val citePropertyDefFormat = jsonFormat1(CitePropertyDefJson.apply)
+  implicit val citeCollectionPropertyDefsFormat = jsonFormat1(CiteCollectionPropertyDefsJson.apply)
+  implicit val citeCollectionInfoFormat = jsonFormat1(CiteCollectionInfoJson.apply)
+  implicit val citeCollectionDefFormat = jsonFormat2(CiteCollectionDefJson.apply)
+  implicit val vectorOfCiteObjectsFormat = jsonFormat1(VectorOfCiteObjectsJson.apply)
+  implicit val vectorOfCiteCollectionDefsFormat = jsonFormat1(VectorOfCiteCollectionDefsJson.apply)
 }
 
 trait Service extends Protocols with Ohco2Service with CiteCollectionService with CiteImageService {
@@ -111,18 +109,10 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
       // All-purpose tesing
       (get & path(Segment)) { (urnString) => 
         complete {
-          new_fetchCiteCollectionDefJson(urnString).map[ToResponseMarshallable]{
+          fetchCiteCollectionDefJson(urnString).map[ToResponseMarshallable]{
             case Right(collDefString) => collDefString
             case Left(errorMessage) => BadRequest -> errorMessage
           }
-          /*
-
-           urn:cite2:hmt:e4.v1: 
-          new_fetchPropertyDefJson(urnString).map[ToResponseMarshallable]{
-            case Right(propDefString) => propDefString
-            case Left(errorMessage) => BadRequest -> errorMessage
-          }
-          */
         }
       }
     } ~
@@ -327,7 +317,7 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         } ~
         (get & pathEndOrSingleSlash )  {
           complete {
-            fetchVectorOfCiteCollectonDefsJson.map[ToResponseMarshallable]{
+            fetchVectorOfCiteCollectionDefsJson.map[ToResponseMarshallable]{
               case Right(citeObject) => citeObject
               case Left(errorMessage) => BadRequest -> errorMessage
             }

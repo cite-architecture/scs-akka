@@ -33,38 +33,12 @@ case class CiteObjectJson(citeObject:Option[
   ( Map[String,String],
     Vector[Map[String,String]])
   ])
-
 case class VectorOfCiteObjectsJson(citeObjects:Vector[CiteObjectJson])
-
-/* New Defs */
-
-case class NewCitePropertyDefJson(citePropertyDef:Map[String,String])
-case class NewCiteCollectionInfoJson(citeCollectionInfo:Map[String,String])
-case class NewCiteCollectionPropertyDefsJson(citeCollectionPropertyDefs:Vector[NewCitePropertyDefJson])
-
-case class NewCiteCollectionDefJson(citeCollectionDef:NewCiteCollectionInfoJson, citeProperties:NewCiteCollectionPropertyDefsJson)
-
-
-/* Below… need work */
-
-
-case class CiteCollectionDefJson(citeCollectionDef:Option[
-  ( Map[String,String],
-    Map[String,String],
-    Map[String,String],
-    Map[String,Option[String]],
-    Map[String,Option[String]],
-    Map[String,CitePropertyDefJson]
-  )]
-)
-
+case class CitePropertyDefJson(citePropertyDef:Map[String,String])
+case class CiteCollectionInfoJson(citeCollectionInfo:Map[String,String])
+case class CiteCollectionPropertyDefsJson(citeCollectionPropertyDefs:Vector[CitePropertyDefJson])
+case class CiteCollectionDefJson(citeCollectionDef:CiteCollectionInfoJson, citeProperties:CiteCollectionPropertyDefsJson)
 case class VectorOfCiteCollectionDefsJson(citeCollectionDefs:Vector[CiteCollectionDefJson])
-
-case class CitePropertyDefJson(
-  citePropertyDef:Vector[
-  (Map[String,String], Map[String,String], Map[String, String], Map[String, Vector[String]] )  
-  ]
-)
 
 
 trait CiteCollectionService extends Protocols {
@@ -92,10 +66,10 @@ trait CiteCollectionService extends Protocols {
     }
   }
 
-  def new_fetchPropertyDefJson(cpd:CitePropertyDef): Future[Either[String,NewCitePropertyDefJson]] = {
+  def fetchPropertyDefJson(cpd:CitePropertyDef): Future[Either[String,CitePropertyDefJson]] = {
      try {
-       val ncopd:NewCitePropertyDefJson = new_fetchPropertyDef(cpd:CitePropertyDef)
-       Unmarshal(ncopd).to[NewCitePropertyDefJson].map(Right(_))
+       val ncopd:CitePropertyDefJson = fetchPropertyDef(cpd:CitePropertyDef)
+       Unmarshal(ncopd).to[CitePropertyDefJson].map(Right(_))
       } catch {
       case e: Exception => {
         Future.successful(Left(s"${new IOException(e)}"))
@@ -103,12 +77,12 @@ trait CiteCollectionService extends Protocols {
     }
   }
 
-  def new_fetchPropertyDef(cpd:CitePropertyDef):NewCitePropertyDefJson = {
+  def fetchPropertyDef(cpd:CitePropertyDef):CitePropertyDefJson = {
     val urn:String = cpd.urn.toString
     val label:String = cpd.label
     val propertyType:String = cpd.propertyType.toString
     val vocabularyList:String = cpd.vocabularyList.mkString(",")
-    val ncpd:NewCitePropertyDefJson = NewCitePropertyDefJson(Map(
+    val ncpd:CitePropertyDefJson = CitePropertyDefJson(Map(
       "urn" -> urn,
       "label" -> label,
       "propertyType" -> propertyType, 
@@ -117,10 +91,10 @@ trait CiteCollectionService extends Protocols {
     ncpd
   }
 
-  def new_fetchCiteCollectionDef(urn: Cite2Urn) : Option[NewCiteCollectionDefJson] = {
+  def fetchCiteCollectionDef(urn: Cite2Urn) : Option[CiteCollectionDefJson] = {
     try {
       val ccd:Option[CiteCollectionDef] = collectionRepository.get.collectionDefinition(urn.dropSelector)
-      val urnReply:Option[NewCiteCollectionDefJson] = ccd match {
+      val urnReply:Option[CiteCollectionDefJson] = ccd match {
         case Some(d) => {
           val dUrn:String = d.urn.toString
           val dLabel:String = d.collectionLabel
@@ -133,16 +107,16 @@ trait CiteCollectionService extends Protocols {
               case Some(lp) => lp.toString
               case None => ""
           }
-          val dPropertyDefs:NewCiteCollectionPropertyDefsJson = {
-            NewCiteCollectionPropertyDefsJson(
+          val dPropertyDefs:CiteCollectionPropertyDefsJson = {
+            CiteCollectionPropertyDefsJson(
               d.propertyDefs.map( cpd => {
-                val tempPd = new_fetchPropertyDef(cpd)
+                val tempPd = fetchPropertyDef(cpd)
                 tempPd
               })
             )
           }
-          Some(NewCiteCollectionDefJson(
-              NewCiteCollectionInfoJson(Map("urn" -> dUrn,
+          Some(CiteCollectionDefJson(
+              CiteCollectionInfoJson(Map("urn" -> dUrn,
               "collectionLabel" -> dLabel,
               "license" -> dLicense,
               "labellingProperty" -> dLabelling,
@@ -160,12 +134,12 @@ trait CiteCollectionService extends Protocols {
     }
   }
 
-   def new_fetchCiteCollectionDefJson(urnString: String): Future[Either[String, NewCiteCollectionDefJson]] = {
+   def fetchCiteCollectionDefJson(urnString: String): Future[Either[String, CiteCollectionDefJson]] = {
     try {
       val urn:Cite2Urn = Cite2Urn(urnString)
-      val ccdj:Option[NewCiteCollectionDefJson] = new_fetchCiteCollectionDef(urn)
+      val ccdj:Option[CiteCollectionDefJson] = fetchCiteCollectionDef(urn)
       ccdj match {
-        case Some(cc) => Unmarshal(cc).to[NewCiteCollectionDefJson].map(Right(_))
+        case Some(cc) => Unmarshal(cc).to[CiteCollectionDefJson].map(Right(_))
         case _ => Future.successful(Left(s"No collection found"))
       }
     } catch {
@@ -175,26 +149,17 @@ trait CiteCollectionService extends Protocols {
     }
   }
 
-
-  def fetchCiteCollectionDefJson(urnString: String): Future[Either[String, CiteCollectionDefJson]] = {
+  def fetchVectorOfCiteCollectionDefsJson: Future[Either[String, VectorOfCiteCollectionDefsJson]] ={
     try {
-      val urn:Cite2Urn = Cite2Urn(urnString)
-      val ccdj:CiteCollectionDefJson = fetchCiteCollectionDef(urn)
-      Unmarshal(ccdj).to[CiteCollectionDefJson].map(Right(_))
-    } catch {
-      case e: Exception => {
-        Future.successful(Left(s"${new IOException(e)}"))
-      }
-    }
-  }
-
-  def fetchVectorOfCiteCollectonDefsJson: Future[Either[String, VectorOfCiteCollectionDefsJson]] ={
-    try {
-      val collVec:VectorOfCiteCollectionDefsJson = VectorOfCiteCollectionDefsJson(
+      val tempVec:Vector[CiteCollectionDefJson] = (
         collectionRepository.get.catalog.collections.map( cc => {
-         val ccd:CiteCollectionDefJson = fetchCiteCollectionDef(cc.urn)
-         ccd
-       }))
+         val ccd:Option[CiteCollectionDefJson] = fetchCiteCollectionDef(cc.urn)
+         ccd match {
+            case Some(c:CiteCollectionDefJson) => c 
+            case None => null
+         }
+       })).toVector
+      val collVec:VectorOfCiteCollectionDefsJson = VectorOfCiteCollectionDefsJson(tempVec)
       Unmarshal(collVec).to[VectorOfCiteCollectionDefsJson].map(Right(_))
     } catch {
       case e: Exception => {
@@ -204,7 +169,7 @@ trait CiteCollectionService extends Protocols {
   }
 
 
-
+/*
   def fetchCiteCollectionDef(urn: Cite2Urn) : CiteCollectionDefJson = {
     try {
       val ccd:Option[CiteCollectionDef] = collectionRepository.get.collectionDefinition(urn.dropSelector)
@@ -253,6 +218,9 @@ trait CiteCollectionService extends Protocols {
           }
       }
     }
+    */
+
+
     def fetchCiteObjectJson(urnString: String): Future[Either[String, VectorOfCiteObjectsJson]] = {
       try {
         val urn:Cite2Urn = Cite2Urn(urnString)
