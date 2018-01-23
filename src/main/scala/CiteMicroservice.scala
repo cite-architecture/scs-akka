@@ -48,6 +48,11 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val citeCollectionDefFormat = jsonFormat1(CiteCollectionDefJson.apply)
   implicit val vectorOfCiteCollectionDefsFormat = jsonFormat1(VectorOfCiteCollectionDefsJson.apply)
   implicit val ServiceUrlStringFormat = jsonFormat1(ServiceUrlString.apply)
+  // New ones
+  implicit val new_citePropertyDefFormat = jsonFormat1(NewCitePropertyDefJson.apply)
+  implicit val new_citeCollectionPropertyDefsFormat = jsonFormat1(NewCiteCollectionPropertyDefsJson.apply)
+  implicit val new_citeCollectionInfoFormat = jsonFormat1(NewCiteCollectionInfoJson.apply)
+  implicit val new_citeCollectionDefFormat = jsonFormat2(NewCiteCollectionDefJson.apply)
 }
 
 trait Service extends Protocols with Ohco2Service with CiteCollectionService with CiteImageService {
@@ -102,6 +107,25 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
   val routes = {
     logRequestResult("cite-microservice") {
 
+    pathPrefix("test"){
+      // All-purpose tesing
+      (get & path(Segment)) { (urnString) => 
+        complete {
+          new_fetchCiteCollectionDefJson(urnString).map[ToResponseMarshallable]{
+            case Right(collDefString) => collDefString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+          /*
+
+           urn:cite2:hmt:e4.v1: 
+          new_fetchPropertyDefJson(urnString).map[ToResponseMarshallable]{
+            case Right(propDefString) => propDefString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+          */
+        }
+      }
+    } ~
     pathPrefix("ctsurn"  ) {
     // Validate a CTS URN 
         (get & path(Segment)) { (urnString) =>
