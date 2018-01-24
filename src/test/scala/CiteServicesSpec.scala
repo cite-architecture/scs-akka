@@ -398,8 +398,8 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
       r.citeObjects.size should equal (3) 
-      r.citeObjects(0).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:1r")
-      r.citeObjects(2).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:2r")
+      r.citeObjects(0).citeObject.get("urn") should equal (Some("urn:cite2:hmt:e4.v1:1r"))
+      r.citeObjects(2).citeObject.get("urn") should equal (Some("urn:cite2:hmt:e4.v1:2r"))
     }
   }
 
@@ -409,8 +409,8 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
       //logger.info(s"${r}")
-      r.citeObjects(0).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:1r")
-      r.citeObjects(9).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:5v")
+      r.citeObjects(0).citeObject.get("urn") should equal (Some("urn:cite2:hmt:e4.v1:1r"))
+      r.citeObjects(9).citeObject.get("urn") should equal (Some("urn:cite2:hmt:e4.v1:5v"))
       r.citeObjects.size should equal (10) 
     }
   }
@@ -421,8 +421,8 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
       r.citeObjects.size should equal (5) 
-      r.citeObjects(0).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:3v")
-      r.citeObjects(4).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:5v")
+      r.citeObjects(0).citeObject.get("urn") should equal (Some("urn:cite2:hmt:e4.v1:3v"))
+      r.citeObjects(4).citeObject.get("urn") should equal (Some("urn:cite2:hmt:e4.v1:5v"))
     }
   }
 
@@ -482,7 +482,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
       r.citeObjects.size should equal (1) 
-      r.citeObjects(0).citeObject.get._1("urn") should equal ("urn:cite2:hmt:e4.v1:2r")
+      r.citeObjects(0).citeObject.get("urn") should equal (Some("urn:cite2:hmt:e4.v1:2r"))
     }
   }
   it should """respond to "/objects/find/valueequals" with a boolean value """ in {

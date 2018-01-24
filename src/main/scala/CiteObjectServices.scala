@@ -29,10 +29,8 @@ import edu.holycross.shot.scm._
 
 case class Cite2UrnString(urnString: String)
 
-case class CiteObjectJson(citeObject:Option[
-  ( Map[String,String],
+case class CiteObjectJson(citeObject:Map[String,String],citePropertyValues:
     Vector[Map[String,String]])
-  ])
 case class VectorOfCiteObjectsJson(citeObjects:Vector[CiteObjectJson])
 case class CitePropertyDefJson(citePropertyDef:Map[String,String])
 case class CiteCollectionInfoJson(citeCollectionInfo:Map[String,String])
@@ -495,10 +493,17 @@ def makeCiteObjectJson(objectFound:CiteObject):CiteObjectJson = {
     val collectionUrn = objectFound.urn.dropSelector.dropProperty
     val objectMap:Map[String,String] = Map("urn" -> objectFound.urn.toString, "label" -> objectFound.label )
     val objectPropertiesVector:Vector[Map[String,String]] = objectFound.propertyList.map( p => {
-      val m = Map("propertyUrn" -> p.urn.toString, "propertyType" -> getPropertyType(p.urn), "propertyValue" -> p.propertyValue.toString )
+      val m = Map(
+        "propertyUrn" -> p.urn.toString, 
+        "propertyType" -> getPropertyType(p.urn), 
+        "propertyValue" -> p.propertyValue.toString,
+        "propertyDefLabel" -> p.propertyDef.label,
+        "propertyDefType" -> p.propertyDef.propertyType.toString,
+        "propertyDefVocab" -> p.propertyDef.vocabularyList.mkString(",")
+      )
       m 
     })
-    val objreply = CiteObjectJson( Some(objectMap, objectPropertiesVector) )
+    val objreply = CiteObjectJson( objectMap, objectPropertiesVector )
     objreply
 
   } catch {

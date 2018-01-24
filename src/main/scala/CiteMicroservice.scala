@@ -43,7 +43,7 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val catalogFormat = jsonFormat1(CatalogJson.apply)
   implicit val reffFormat = jsonFormat1(ReffJson.apply)
   // CiteObject
-  implicit val citeObjectFormat = jsonFormat1(CiteObjectJson.apply)
+  implicit val citeObjectFormat = jsonFormat2(CiteObjectJson.apply)
   implicit val ServiceUrlStringFormat = jsonFormat1(ServiceUrlString.apply)
   implicit val citePropertyDefFormat = jsonFormat1(CitePropertyDefJson.apply)
   implicit val citeCollectionPropertyDefsFormat = jsonFormat1(CiteCollectionPropertyDefsJson.apply)
