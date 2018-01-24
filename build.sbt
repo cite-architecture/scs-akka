@@ -11,8 +11,7 @@ fork in run := true
 
 javaOptions in run ++= Seq(
     "-Xms256M", 
-    "-Xmx4G", 
-    "-XX:+UseConcMarkSweepGC"
+    "-Xmx4G"
 )
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
