@@ -136,6 +136,10 @@ numeric within
 - <http://localhost:9000/objects/find/numeric?n1=4&op=within&n2=6&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
 - <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=4&op=within&n2=6>
 
+### Data Models
+
+- <http://localhost:9000/datamodels>
+
 ### Images
 
 Basic Image Retrieval

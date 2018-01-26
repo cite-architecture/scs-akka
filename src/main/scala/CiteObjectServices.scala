@@ -37,6 +37,9 @@ case class CiteCollectionInfoJson(citeCollectionInfo:Map[String,String])
 case class CiteCollectionPropertyDefsJson(citeCollectionPropertyDefs:Vector[CitePropertyDefJson])
 case class CiteCollectionDefJson(citeCollectionDef:CiteCollectionInfoJson, citeProperties:CiteCollectionPropertyDefsJson)
 case class VectorOfCiteCollectionDefsJson(citeCollectionDefs:Vector[CiteCollectionDefJson])
+// Data Model
+case class DataModelDefJson(dataModel:Map[String,String])
+case class VectorOfDataModelsDefJson(dataModels:Vector[DataModelDefJson])
 
 
 trait CiteCollectionService extends Protocols {
@@ -64,30 +67,6 @@ trait CiteCollectionService extends Protocols {
     }
   }
 
-  def fetchPropertyDefJson(cpd:CitePropertyDef): Future[Either[String,CitePropertyDefJson]] = {
-     try {
-       val ncopd:CitePropertyDefJson = fetchPropertyDef(cpd:CitePropertyDef)
-       Unmarshal(ncopd).to[CitePropertyDefJson].map(Right(_))
-      } catch {
-      case e: Exception => {
-        Future.successful(Left(s"${new IOException(e)}"))
-      }
-    }
-  }
-
-  def fetchPropertyDef(cpd:CitePropertyDef):CitePropertyDefJson = {
-    val urn:String = cpd.urn.toString
-    val label:String = cpd.label
-    val propertyType:String = cpd.propertyType.toString
-    val vocabularyList:String = cpd.vocabularyList.mkString(",")
-    val ncpd:CitePropertyDefJson = CitePropertyDefJson(Map(
-      "urn" -> urn,
-      "label" -> label,
-      "propertyType" -> propertyType, 
-      "vocabularyList" -> vocabularyList
-    ))
-    ncpd
-  }
 
   def fetchCiteCollectionDef(urn: Cite2Urn) : Option[CiteCollectionDefJson] = {
     try {
@@ -498,7 +477,6 @@ def makeCiteObjectJson(objectFound:CiteObject):CiteObjectJson = {
         "propertyType" -> getPropertyType(p.urn), 
         "propertyValue" -> p.propertyValue.toString,
         "propertyDefLabel" -> p.propertyDef.label,
-        "propertyDefType" -> p.propertyDef.propertyType.toString,
         "propertyDefVocab" -> p.propertyDef.vocabularyList.mkString(",")
       )
       m 
@@ -512,6 +490,71 @@ def makeCiteObjectJson(objectFound:CiteObject):CiteObjectJson = {
     }
   }
 }
+
+  def fetchPropertyDefJson(cpd:CitePropertyDef): Future[Either[String,CitePropertyDefJson]] = {
+     try {
+       val ncopd:CitePropertyDefJson = fetchPropertyDef(cpd:CitePropertyDef)
+       Unmarshal(ncopd).to[CitePropertyDefJson].map(Right(_))
+      } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
+
+  def fetchPropertyDef(cpd:CitePropertyDef):CitePropertyDefJson = {
+    val urn:String = cpd.urn.toString
+    val label:String = cpd.label
+    val propertyType:String = cpd.propertyType.toString
+    val vocabularyList:String = cpd.vocabularyList.mkString(",")
+    val ncpd:CitePropertyDefJson = CitePropertyDefJson(Map(
+      "urn" -> urn,
+      "label" -> label,
+      "propertyType" -> propertyType, 
+      "vocabularyList" -> vocabularyList
+    ))
+    ncpd
+  }
+
+    def fetchDataModelsJson: Future[Either[String, VectorOfDataModelsDefJson]] = {
+     try {
+       val ovdm:Option[VectorOfDataModelsDefJson] = fetchDataModels
+       ovdm match {
+          case Some(vdm) => Unmarshal(vdm).to[VectorOfDataModelsDefJson].map(Right(_))
+          case None => Future.successful(Left(s"No Data Models in Collection"))
+       }
+      } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
+
+    def fetchDataModels:Option[VectorOfDataModelsDefJson] = {
+      val dataModelsOpt:Option[Vector[DataModel]] = cexLibrary.dataModels
+      val returnVal:Option[VectorOfDataModelsDefJson] = {
+        dataModelsOpt match {
+          case Some(vdm) => {
+
+             val dms:Vector[DataModelDefJson] = {
+              vdm.map(dm => {
+                val coll:String = dm.collection.toString
+                val desc:String = dm.description
+                val lab:String = dm.label
+                val mod:String = dm.model.toString
+                val dmdjm:DataModelDefJson = DataModelDefJson(Map("collection" -> coll,"description"->desc,"label"->lab,"model"->mod))
+                dmdjm
+              }).toVector
+             } 
+             val vdmdj:VectorOfDataModelsDefJson = VectorOfDataModelsDefJson(dms)
+             Some(vdmdj)
+          }
+          case None => None
+        } 
+      }
+      returnVal
+
+    }
 
 
 }
