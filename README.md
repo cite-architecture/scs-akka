@@ -2,7 +2,7 @@
 
 Based on [https://github.com/theiterators/akka-http-microservice](https://github.com/theiterators/akka-http-microservice) and used according to that project's MIT License. Thanks to Łukasz Sowa from [Iterators](http://www.theiterators.com).
 
-## Version: 0.1.3
+## Version: 0.2.0
 
 Status:  **experimental**.  No binary releases yet.
 
@@ -69,7 +69,15 @@ The following services are under development.
 ### String searching services
 
 - implemented `/texts/find?s=**String**` => find all passages in repository with text content matching **String**
-- implemented `/texts/find/**CTS URN**?s=**String**/`  => find all passages in **CTS URN** with text content matching **String**
+- implemented `/texts/find/**CTS URN**?s=**String**`  => find all passages in **CTS URN** with text content matching **String**
+
+### Token searching services
+
+- implemented `/texts/token?t=**String**` => find all passages in repository containing token **String**
+- implemented `/texts/token/**CTS URN**?t=**String**`  => find all passages in **CTS URN** containing **String**
+- implemented `/texts/allTokens?t=**String**&t=**String**…` => find all passages in repository with all tokens, **String**, **String**…
+- implemented `/texts/allTokens/**CTS URN**?t=**String**&t=**String**…`  => find all passages in **CTS URN** with all tokens, **String**, **String**…
+
 
 
 ### Ngram histograms
