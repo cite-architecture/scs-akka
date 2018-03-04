@@ -46,6 +46,9 @@
 ### Token Searches
 - <http://localhost:9000/texts/token?t=water>
 - <http://localhost:9000/texts/token/urn:cts:greekLit:tlg0016.tlg001.eng:?t=water>
+
+Not implemented yet:
+
 - <http://localhost:9000/texts/allTokens?t=earth&t=water>
 - <http://localhost:9000/texts/allTokens/urn:cts:greekLit:tlg0016.tlg001.eng:?t=earth&t=water>
 

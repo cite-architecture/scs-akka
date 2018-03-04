@@ -273,6 +273,26 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
             }
           }
         } ~
+        (get & path( "token" / Segment )){ urnString =>
+          parameters( 't.as[String], 'ignorePunctuation.as[Boolean] ? true ) { (tokenString, ignorePunctuation) => 
+            complete {
+              fetchTokenFind(tokenString, Some(urnString), ignorePunctuation).map[ToResponseMarshallable] {
+                case Right(corpusString) => corpusString
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~
+        (get & path( "token" )){ 
+          parameters( 't.as[String], 'ignorePunctuation.as[Boolean] ? true ) { (tokenString, ignorePunctuation) => 
+            complete {
+              fetchTokenFind(tokenString, None, ignorePunctuation).map[ToResponseMarshallable] {
+                case Right(corpusString) => corpusString
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~
         (get & path(Segment)) { urnString =>
           complete {
             fetchOhco2Text(urnString).map[ToResponseMarshallable] {

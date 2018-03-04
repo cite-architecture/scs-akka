@@ -262,6 +262,83 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
     }
   }
 
+  it should """respond correctly to "/texts/token?t=STRING" correctly """ in {
+    val tokenString:String = "Halicarnassos"
+    val encodedString:String = URLEncoder.encode(tokenString, "UTF-8")
+    Get(s"/texts/token?t=${encodedString}") ~> routes ~> check {
+      val i:Int = 8 
+      val vu:CorpusJson = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      vu.citableNodes.size should equal(i)
+    }
+  }
+
+  it should """respond correctly to "/texts/token?t=STRING&ignorePunctuation=false" correctly """ in {
+    val tokenString:String = "Halicarnassos"
+    val encodedString:String = URLEncoder.encode(tokenString, "UTF-8")
+    Get(s"/texts/token?t=${encodedString}&ignorePunctuation=false") ~> routes ~> check {
+      val i:Int = 2 
+      val vu:CorpusJson = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      vu.citableNodes.size should equal(i)
+    }
+  }
+
+  it should """respond correctly to "/texts/CTS-URN/token?t=STRING" correctly """ in {
+    val searchUrn:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0016.tlg001.eng:1")
+    val tokenString:String = "Halicarnassos"
+    val encodedString:String = URLEncoder.encode(tokenString, "UTF-8")
+    Get(s"/texts/token/${searchUrn}?t=${encodedString}") ~> routes ~> check {
+      val i:Int = 3 
+      val vu:CorpusJson = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      vu.citableNodes.size should equal(i)
+    }
+  }
+
+  it should """respond correctly to "/texts/CTS-URN/token?t=STRING&ignorePunctuation=false" correctly """ in {
+    val searchUrn:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0016.tlg001.eng:1")
+    val tokenString:String = "Halicarnassos"
+    val encodedString:String = URLEncoder.encode(tokenString, "UTF-8")
+    Get(s"/texts/token/${searchUrn}?t=${encodedString}&ignorePunctuation=false") ~> routes ~> check {
+      val i:Int = 1 
+      val vu:CorpusJson = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      vu.citableNodes.size should equal(i)
+    }
+  }
+
+  it should "respond to a token search when there are tokenized exemplars in the mix" in {
+    val searchUrn:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1")
+    val tokenString:String = "μῆνιν"
+    val encodedString:String = URLEncoder.encode(tokenString, "UTF-8")
+    Get(s"/texts/token/${searchUrn}?t=${encodedString}") ~> routes ~> check {
+      val i:Int = 1 
+      val vu:CorpusJson = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      vu.citableNodes.size should equal(i)
+    }
+  }
+
+  it should "respond to a token search when there are tokenized exemplars in the mix and we're searching for a single punctuation mark" in {
+    val searchUrn:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2.tokens:1.2")
+    val tokenString:String = ","
+    val encodedString:String = URLEncoder.encode(tokenString, "UTF-8")
+    Get(s"/texts/token/${searchUrn}?t=${encodedString}&ignorePunctuation=false") ~> routes ~> check {
+      val i:Int = 2 
+      val vu:CorpusJson = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      vu.citableNodes.size should equal(i)
+    }
+  }
+
+
   it should """respond correctly to "/textcatalog """ in {
     Get(s"/textcatalog") ~> routes ~> check {
       val r:CatalogJson  = responseAs[CatalogJson]
