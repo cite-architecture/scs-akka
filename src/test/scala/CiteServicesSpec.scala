@@ -338,6 +338,34 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
     }
   }
 
+it should """respond correctly to "/texts/allTokens?t=STRING&t=STRING" correctly """ in {
+    val tokenString1:String = "earth"
+    val tokenString2:String = "water"
+    val encodedString1:String = URLEncoder.encode(tokenString1, "UTF-8")
+    val encodedString2:String = URLEncoder.encode(tokenString2, "UTF-8")
+    Get(s"/texts/allTokens?t=${encodedString1}&t=${encodedString2}") ~> routes ~> check {
+      val i:Int = 25 
+      val vu:CorpusJson = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      vu.citableNodes.size should equal(i)
+    }
+  }
+
+it should """respond correctly to "/texts/allTokens/CTS-URN?t=STRING&t=STRING" correctly """ in {
+    val searchUrn:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0016.tlg001.eng:")
+    val tokenString1:String = "earth"
+    val tokenString2:String = "water"
+    val encodedString1:String = URLEncoder.encode(tokenString1, "UTF-8")
+    val encodedString2:String = URLEncoder.encode(tokenString2, "UTF-8")
+    Get(s"/texts/allTokens/${searchUrn}?t=${encodedString1}&t=${encodedString2}") ~> routes ~> check {
+      val i:Int = 24 
+      val vu:CorpusJson = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      vu.citableNodes.size should equal(i)
+    }
+  }
 
   it should """respond correctly to "/textcatalog """ in {
     Get(s"/textcatalog") ~> routes ~> check {
