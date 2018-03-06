@@ -77,8 +77,8 @@ The following services are under development.
 - implemented `/texts/token/**CTS URN**?t=**String**`  => find all passages in **CTS URN** containing **String**
 - implemented `/texts/tokens?t=**String**&t=**String**…` => find all passages in repository with all tokens, **String**, **String**…
 - implemented `/texts/tokens/**CTS URN**?t=**String**&t=**String**…`  => find all passages in **CTS URN** with all tokens, **String**, **String**…
-- **Not implemented** `/texts/tokens?dist=N&t=**String**&t=**String**…`  => find all passages  with tokens, **String**, **String**, within N tokens of each other.
-- **Not implemented** `/texts/tokens/**CTS URN**?dist=N&t=**String**&t=**String**…`  => find all passages in **CTS URN** with tokens, **String**, **String**, within N tokens of each other.
+- implemented `/texts/tokens?dist=N&t=**String**&t=**String**…`  => find all passages  with tokens, **String**, **String**, within N tokens of each other.
+- implemented `/texts/tokens/**CTS URN**?dist=N&t=**String**&t=**String**…`  => find all passages in **CTS URN** with tokens, **String**, **String**, within N tokens of each other.
 
 
 
