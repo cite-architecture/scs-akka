@@ -32,13 +32,13 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "org.scalatest"     %% "scalatest" % scalaTestV % "test",
 
-    "edu.holycross.shot.cite" %% "xcite" % "3.2.2" from "file:///cite/scala/unmanaged_jars/xcite_2.12-3.2.2.jar",
+    "edu.holycross.shot.cite" %% "xcite" % "3.2.2",
     "edu.holycross.shot" %% "cex" % "6.1.0",
    "edu.holycross.shot" %% "citerelations" % "2.0.1",
-    "edu.holycross.shot" %% "ohco2" % "10.4.3" from "file:///cite/scala/unmanaged_jars/ohco2_2.12-10.4.3.jar",
+    "edu.holycross.shot" %% "ohco2" % "10.4.3",
     "edu.holycross.shot" %% "citebinaryimage" % "1.0.0" from "file:///cite/scala/unmanaged_jars/citebinaryimage_2.12-1.0.0.jar",
     "edu.holycross.shot" %% "scm" % "5.1.10" from "file:///cite/scala/unmanaged_jars/scm_2.12-5.1.10.jar",
-    "edu.holycross.shot" %% "citeobj" % "5.2.0" from "file:///cite/scala/unmanaged_jars/citeobj_2.12-5.2.0.jar"
+    "edu.holycross.shot" %% "citeobj" % "5.2.3" 
   )
 }
 
