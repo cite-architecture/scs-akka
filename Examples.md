@@ -46,8 +46,14 @@
 ### Token Searches
 - <http://localhost:9000/texts/token?t=water>
 - <http://localhost:9000/texts/token/urn:cts:greekLit:tlg0016.tlg001.eng:?t=water>
-- <http://localhost:9000/texts/allTokens?t=earth&t=water>
-- <http://localhost:9000/texts/allTokens/urn:cts:greekLit:tlg0016.tlg001.eng:?t=earth&t=water>
+- <http://localhost:9000/texts/tokens?t=earth&t=water>
+- <http://localhost:9000/texts/tokens/urn:cts:greekLit:tlg0016.tlg001.eng:?t=earth&t=water>
+
+Not implemented
+
+- <http://localhost:9000/texts/tokens?dist=3&t=earth&t=water>
+- <http://localhost:9000/texts/tokens/urn:cts:greekLit:tlg0016.tlg001.eng:4?dist=3&t=earth&t=water>
+- <http://localhost:9000/texts/tokens/urn:cts:greekLit:tlg0016.tlg001.eng:4?dist=2&t=earth&t=water> (should result in no citations)
 
 ## Collections of Objects
 

@@ -293,20 +293,20 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
             }
           }
         } ~
-         (get & path( "allTokens" / Segment )){ urnString =>
-          parameters( 't.as[String].*, 'ignorePunctuation.as[Boolean] ? true ) { (tokenStrings, ignorePunctuation) => 
+         (get & path( "tokens" / Segment )){ urnString =>
+          parameters( 't.as[String].*, 'ignorePunctuation.as[Boolean] ? true, 'dist.as[String] ? "" ) { (tokenStrings, ignorePunctuation, dist) => 
             complete {
-              fetchAllTokensFind(tokenStrings.toVector, Some(urnString), ignorePunctuation).map[ToResponseMarshallable] {
+              fetchAllTokensFind(tokenStrings.toVector, Some(urnString), ignorePunctuation, dist).map[ToResponseMarshallable] {
                 case Right(corpusString) => corpusString
                 case Left(errorMessage) => BadRequest -> errorMessage
               }
             }
           }
         } ~
-        (get & path( "allTokens" )){ 
-          parameters( 't.as[String].*, 'ignorePunctuation.as[Boolean] ? true ) { (tokenStrings, ignorePunctuation) => 
+        (get & path( "tokens" )){ 
+          parameters( 't.as[String].*, 'ignorePunctuation.as[Boolean] ? true, 'dist.as[String] ? "" ) { (tokenStrings, ignorePunctuation, dist) => 
             complete {
-              fetchAllTokensFind(tokenStrings.toVector, None, ignorePunctuation).map[ToResponseMarshallable] {
+              fetchAllTokensFind(tokenStrings.toVector, None, ignorePunctuation, dist).map[ToResponseMarshallable] {
                 case Right(corpusString) => corpusString
                 case Left(errorMessage) => BadRequest -> errorMessage
               }

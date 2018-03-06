@@ -393,8 +393,11 @@ def fetchTokenFind(tokenString:String, urnString:Option[String], ignorePunctuati
   }
 }
 
-def fetchAllTokensFind(tokenStrings:Vector[String], urnString:Option[String], ignorePunctuation:Boolean = true): Future[Either[String, CorpusJson]] = {
+def fetchAllTokensFind(tokenStrings:Vector[String], urnString:Option[String], ignorePunctuation:Boolean = true, dist:String = ""): Future[Either[String, CorpusJson]] = {
+
   try {
+    // Let's see if there is a dist
+    val distance:Option[Int] = if (dist == "") None else Some(dist.toInt)
     val findInCorpus:Corpus = urnString match {
       case Some(s) => {
         logger.info("found URN")
@@ -404,7 +407,13 @@ def fetchAllTokensFind(tokenStrings:Vector[String], urnString:Option[String], ig
       } 
       case None => textRepository.get.corpus
     } 
-    val foundCorpus:Corpus = findInCorpus.findTokens(tokenStrings, findInCorpus, ignorePunctuation)
+    val foundCorpus:Corpus = {
+      distance match {
+        case Some(d) => findInCorpus.findTokensWithin(tokenStrings, d, ignorePunctuation)
+        case _ => findInCorpus.findTokens(tokenStrings, findInCorpus, ignorePunctuation)
+      }
+    }
+
     val v:Vector[Map[String,String]] = foundCorpus.nodes.map(l => Map("urn" -> l.urn.toString, "text" -> l.text))
     val n:CorpusJson = CorpusJson(v) 
     Unmarshal(n).to[CorpusJson].map(Right(_))
