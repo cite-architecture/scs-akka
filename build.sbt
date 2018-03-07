@@ -4,7 +4,7 @@ enablePlugins(LauncherJarPlugin)
 
 name := "cite-microservice"
 organization := "edu.furman.classics"
-version := "0.3.0"
+version := "1.0.0"
 scalaVersion := "2.12.3"
 
 fork in run := true
@@ -34,10 +34,10 @@ libraryDependencies ++= {
 
     "edu.holycross.shot.cite" %% "xcite" % "3.2.2",
     "edu.holycross.shot" %% "cex" % "6.1.0",
-   "edu.holycross.shot" %% "citerelations" % "2.0.1",
+    "edu.holycross.shot" %% "citerelations" % "2.0.1",
     "edu.holycross.shot" %% "ohco2" % "10.4.3",
     "edu.holycross.shot" %% "citebinaryimage" % "1.0.1",
-    "edu.holycross.shot" %% "scm" % "5.1.10" from "file:///cite/scala/unmanaged_jars/scm_2.12-5.1.10.jar",
+    "edu.holycross.shot" %% "scm" % "5.3.0",
     "edu.holycross.shot" %% "citeobj" % "5.2.3" 
   )
 }
