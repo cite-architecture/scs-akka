@@ -375,7 +375,7 @@ def fetchTokenFind(tokenString:String, urnString:Option[String], ignorePunctuati
   try {
     val findInCorpus:Corpus = urnString match {
       case Some(s) => {
-        logger.info("found URN")
+        //logger.info("found URN")
         val urn:CtsUrn = CtsUrn(s)
         val newCorpus:Corpus = textRepository.get.corpus >= urn 
         newCorpus
