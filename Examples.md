@@ -17,7 +17,7 @@
 - <http://localhost:9000/texts/reff/urn:cts:greekLit:tlg0016.tlg001.grc:2-3>
 - <http://localhost:9000/texts/reff/urn:cts:greekLit:tlg0012.tlg001:1>
 
-### Get Texts
+### Get Passages
 
 - <http://localhost:9000/texts/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1>
 - <http://localhost:9000/texts/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1-1.25>
@@ -56,19 +56,19 @@
 
 ### Catalog
 
-- <http://localhost:9000/collections/> 
-- <http://localhost:9000/collections/urn:cite2:hmt:e4.v1:> 
+- <http://localhost:9000/collections/>
+- <http://localhost:9000/collections/urn:cite2:hmt:e4.v1:>
 - <http://localhost:9000/collections/hasobject/urn:cite2:hmt:e4.v1:1r> should return `true`
 - <http://localhost:9000/collections/hasobject/urn:cite2:hmt:e4.v1:NOTOBJECT> should return `false`
 
 ### Objects
 
-- <http://localhost:9000/objects/urn:cite2:hmt:e4.v1:> 
-- <http://localhost:9000/objects/urn:cite2:hmt:e4.v1:1r> 
-- <http://localhost:9000/objects/urn:cite2:hmt:e4.v1:2r-3v> 
-- <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:?offset=1&limit=10> 
-- <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:?offset=11&limit=10> 
-- <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:> 
+- <http://localhost:9000/objects/urn:cite2:hmt:e4.v1:>
+- <http://localhost:9000/objects/urn:cite2:hmt:e4.v1:1r>
+- <http://localhost:9000/objects/urn:cite2:hmt:e4.v1:2r-3v>
+- <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:?offset=1&limit=10>
+- <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:?offset=11&limit=10>
+- <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:>
 
 ### Finding Objects
 
@@ -76,7 +76,7 @@ urn-match
 
 - <http://localhost:9000/objects/find/urnmatch?find=urn:cite2:hmt:msA.2017a:12r>
 - <http://localhost:9000/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:msA.2017a:12r>
-- <http://localhost:9000/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:msA.2017a:12r&parameterurn=urn:cite2:hmt:textblock.2017a.folio>
+- <http://localhost:9000/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:msA.2017a:12r&parameterurn=urn:cite2:hmt:textblock.2017a.folio:>
 
 regexmatch
 
@@ -121,7 +121,7 @@ numeric equals
 - <http://localhost:9000/objects/find/numeric?n1=5&op=eq&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>
 - <http://localhost:9000/objects/find/numeric/urn:cite2:fufolio:msChad.2017a:?n1=5&op=eq>
 
-numeric greater-than 
+numeric greater-than
 
 - <http://localhost:9000/objects/find/numeric?n1=5&op=gt>
 - <http://localhost:9000/objects/find/numeric?n1=5&op=gt&propertyurn=urn:cite2:fufolio:msChad.2017a.sequence:>

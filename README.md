@@ -4,7 +4,7 @@ Based on [https://github.com/theiterators/akka-http-microservice](https://github
 
 ## Version: 1.0.0
 
-Status:  **experimental**.  No binary releases yet.
+Status:  **early development**.
 
 ## Running
 
@@ -12,11 +12,17 @@ Status:  **experimental**.  No binary releases yet.
 - Get [SBT](http://www.scala-sbt.org)
 - At the top-level of this repository, type `sbt run`
 
+Tests include large datasets requiring substantial amounts of memory.  You may need to increase default settings.  One way to do that is with the environmental variable `SBT_OPTS`, e.g.,
+
+    export SBT_OPTS="-Xmx2G -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=2G -Xss2M"
+
+
+
 ## Building & Running a JAR
 
 ### Configure and Build
 
-In `src/main/resources/application.conf`, specify a path to a CEX library; the default is `library=cex/library.cex`. That path will be relative to the directory from which you invoke the `.jar`. 
+In `src/main/resources/application.conf`, specify a path to a CEX library; the default is `library=cex/library.cex`. That path will be relative to the directory from which you invoke the `.jar`.
 
 In SBT:
 
@@ -30,11 +36,11 @@ The result will be in:
 
 ### Run
 
-Be sure your datafile is in the proper place with the proper name. By default it is `cex/library.cex` relative to the directory from which you invoke the `scs.jar`. 
+Be sure your datafile is in the proper place with the proper name. By default it is `cex/library.cex` relative to the directory from which you invoke the `scs.jar`.
 
 Invoke it with `java -jar scs.jar`.
 
-The service should be running at `http://localhost:9000`. 
+The service should be running at `http://localhost:9000`.
 
 
 ## Testing
@@ -43,7 +49,7 @@ The service should be running at `http://localhost:9000`.
 
 By default the service uses the CEX file at `cex/library.cex`. There is another, much larger CEX file at `cex/cite-test-huge.cex`.
 
-The CEX file is configured in the file `src/main/resources/application.conf`. 
+The CEX file is configured in the file `src/main/resources/application.conf`.
 
 ## Available microservices
 
@@ -115,7 +121,7 @@ The following services are under development.
 
 ## CITE Image Services
 
-- implemented `/image/CITE2URN` => delivers binary image data 
+- implemented `/image/CITE2URN` => delivers binary image data
 - implemented `/image/WIDTH/CITE2URN` => delivers binary image data scaled to WIDTH
 - implemented `/image/MAXWIDTH/MAXHEIGHT/CITE2URN` => delivers binary image data scaled to fit MAXWIDTH and MAXHEIGHT
 
