@@ -513,9 +513,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         (get & path(Segment / Segment)) { (widthString, urnString) =>
           parameters( 'resolveImage.as[Boolean] ? true ) { (resolveImage) => 
             val u:Cite2Urn = Cite2Urn(urnString)
-            logger.info(s"urn = ${u}")
+            //logger.info(s"urn = ${u}")
             val w:Int = widthString.toInt
-            logger.info(s"width = ${w}")
+            //logger.info(s"width = ${w}")
             resolveImage match {
               case false => {
                 complete {
