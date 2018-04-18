@@ -58,7 +58,7 @@ The following services are under development.
 ## Text services
 
 - implemented `/texts` => lists all distinct work-components appearing in cited text nodes
-- implemented `/texts`**CTS URN** => list of citable nodes matching **CTS URN**
+- implemented `/texts/`**CTS URN** => list of citable nodes matching **CTS URN**
 - implemented `/texts/reff/`**CTS URN** => (possibly empty) list of CTS URNs matching **CTS URN**
 - implemented `/texts/first/`**CTS URN** => 0 or 1 citable node; if 1, the first node matching **CTS URN**
 - implemented `/texts/firsturn/`**CTS URN** => CTS URN identifying the first citable node in a text
@@ -74,28 +74,28 @@ The following services are under development.
 
 ### String searching services
 
-- implemented `/texts/find?s=**String**` => find all passages in repository with text content matching **String**
-- implemented `/texts/find/**CTS URN**?s=**String**`  => find all passages in **CTS URN** with text content matching **String**
+- implemented `/texts/find?s=`**String** => find all passages in repository with text content matching **String**
+- implemented `/texts/find/`**CTS URN**`?s=`**String**  => find all passages in **CTS URN** with text content matching **String**
 
 ### Token searching services
 
-- implemented `/texts/token?t=**String**` => find all passages in repository containing token **String**
-- implemented `/texts/token/**CTS URN**?t=**String**`  => find all passages in **CTS URN** containing **String**
-- implemented `/texts/tokens?t=**String**&t=**String**…` => find all passages in repository with all tokens, **String**, **String**…
-- implemented `/texts/tokens/**CTS URN**?t=**String**&t=**String**…`  => find all passages in **CTS URN** with all tokens, **String**, **String**…
-- implemented `/texts/tokens?dist=N&t=**String**&t=**String**…`  => find all passages  with tokens, **String**, **String**, within N tokens of each other.
-- implemented `/texts/tokens/**CTS URN**?dist=N&t=**String**&t=**String**…`  => find all passages in **CTS URN** with tokens, **String**, **String**, within N tokens of each other.
+- implemented `/texts/token?t=`**String** => find all passages in repository containing token **String**
+- implemented `/texts/token/`**CTS URN**`?t=`**String**  => find all passages in **CTS URN** containing **String**
+- implemented `/texts/tokens?t=`**String**`&t=`**String**… => find all passages in repository with all tokens, **String**, **String**…
+- implemented `/texts/tokens/`**CTS URN**`?t=`**String**`&t=`**String**…  => find all passages in **CTS URN** with all tokens, **String**, **String**…
+- implemented `/texts/tokens?dist=`**N**`&t=`**String**`&t=`**String**…  => find all passages  with tokens, **String**, **String**, within N tokens of each other.
+- implemented `/texts/tokens/`**CTS URN**`?dist=`**N**`&t=`**String**`&t=`**String**…  => find all passages in **CTS URN** with tokens, **String**, **String**, within N tokens of each other.
 
 
 
 ### Ngram histograms
 
-- implemented `/texts/ngram?n=**N**` => compute histogram of all ngrams of size `N`
-- implemented `/texts/ngram?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times
-- implemented `/texts/ngram/**CTS URN**?n=**N**` => compute histogram of all ngrams of size `N` within `CTS URN`
-- implemented `/texts/ngram/**CTS URN**?n=**N**&t=**T**` => compute histogram of all ngrams of size `N` occurring more than `T` times within **CTS URN**
-- implemented `/texts/ngram/urns?ng=**NGRAM*` => Find passages where ngram NGRAM occurs.
-- implemented `/texts/ngram/urns/**CTS URN?ng=NGRAM*` => Find passages within CTS URN where ngram NGRAM occurs.
+- implemented `/texts/ngram?n=`**N** => compute histogram of all ngrams of size `N`
+- implemented `/texts/ngram?n=`**N**`&t=`**T** => compute histogram of all ngrams of size `N` occurring more than `T` times
+- implemented `/texts/ngram/`**CTS URN**`?n=`**N** => compute histogram of all ngrams of size `N` within `CTS URN`
+- implemented `/texts/ngram/`**CTS URN**`?n=`**N**`&t=`**T** => compute histogram of all ngrams of size `N` occurring more than `T` times within **CTS URN**
+- implemented `/texts/ngram/urns?ng=`**NGRAM* => Find passages where ngram NGRAM occurs.
+- implemented `/texts/ngram/urns/`**CTS URN**`?ng=`**NGRAM** => Find passages within CTS URN where ngram NGRAM occurs.
 
 (By default, each of these ignores punctuation. To include punctuation, add `&ignorePunctuation=false` to any request.)
 
