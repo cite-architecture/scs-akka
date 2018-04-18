@@ -127,6 +127,17 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
             fetchCtsUrn(urnString).map[ToResponseMarshallable] {
               case Right(ctsUrnString) => ctsUrnString
               case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      }
+    } ~
+    pathPrefix("libraryinfo"  ) {
+    // Validate a CTS URN 
+        (get) { 
+          complete {
+            fetchLibraryInfo.map[ToResponseMarshallable] {
+              case Right(libraryInfoMap) => libraryInfoMap
+              case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
         }
@@ -207,6 +218,14 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
           complete {
             fetchNextUrn(urnString).map[ToResponseMarshallable] {
               case Right(ctsUrnString) => ctsUrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~ 
+        (get & path("label" / Segment)) { (urnString) =>
+          complete {
+            fetchLabelForUrn(urnString).map[ToResponseMarshallable] {
+              case Right(nodeLabel) => nodeLabel
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
@@ -604,5 +623,6 @@ object CiteMicroservice extends App with Service with Ohco2Service with CiteColl
   }
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
+
 
 }

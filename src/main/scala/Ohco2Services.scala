@@ -56,6 +56,38 @@ case class CatalogJson(citeCatalog:Vector[(
     def config: Config
     val logger: LoggingAdapter
 
+  def fetchLibraryInfo: Future[Either[String,Map[String,String]]] = {
+    try {
+      val libraryName:String = cexLibrary.name
+      val libraryUrn:Cite2Urn = cexLibrary.urn
+      val libraryLicense:String = cexLibrary.license
+      val infoMap:Map[String,String] = {
+        Map(
+          "name" -> libraryName,
+          "urn" -> libraryUrn.toString,
+          "license" -> libraryLicense
+        )
+      }
+     Unmarshal(infoMap).to[Map[String,String]].map(Right(_))
+   } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
+
+  def fetchLabelForUrn(urnString:String): Future[Either[String,String]] = {
+    try {
+        val u:CtsUrn = CtsUrn(urnString)
+        val label:String = textRepository.get.label(u)
+        Unmarshal(label).to[String].map(Right(_))
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
+
     def fetchCatalog(urnString:Option[String]):Future[Either[String,CatalogJson]] = {
       try {
         val cc:Vector[CatalogEntry] = urnString match {
@@ -134,6 +166,7 @@ case class CatalogJson(citeCatalog:Vector[(
       }
     }
   }
+
 
   def fetchUrnsForNgram(urnString: Option[String], ngString: String): Future[Either[String,ReffJson]] = {
    try {

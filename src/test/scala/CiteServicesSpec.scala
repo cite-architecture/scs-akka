@@ -46,6 +46,16 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
     }
   }
 
+
+  it should """respond to "/libraryinfo" correctly""" in {
+    Get(s"/libraryinfo") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val infoMap:Map[String,String] = Map("name" -> "scs-akka test library", "urn" -> "urn:cite2:cex:demo.2017_1:servicetest","license" -> "CC Share Alike.  For details, see more info.")
+      responseAs[Map[String,String]] shouldBe infoMap
+    }
+  }
+
   it should """respond to "/ctsurn" and correctly use the xcite library to confirm a good URN """ in {
     Get(s"/ctsurn/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
       val u:CtsUrn = CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1")
@@ -144,6 +154,13 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
       contentType shouldBe `application/json`
       responseAs[CtsUrnString] shouldBe urnStringReply
     }
+  }
+
+  it should """respond to "/texts/label/URN" correctly """ in {
+    Get(s"/texts/label/urn:cts:greekLit:tlg0016.tlg001.grc:1.1") ~> routes ~> check {
+      status shouldBe OK
+      responseAs[String] shouldBe "Herodotus, Histories (Greek, Godley, ed.) 1.1"
+     }
   }
 
   it should """respond to "/texts/nexturn/URN" correctly """ in {
@@ -812,7 +829,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     Get(s"/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.1,0.2,0.3,0.4?resolveImage=false") ~> routes ~> check {
       status shouldBe OK
       val u:String = responseAs[String]
-      u should equal ("http://www.homermultitext.org/iipsrv?IIIF=/project/homer/pyramidal/VenA/VA012RN_0013.tif/pct:10,20,30,40/2000,/0/default.jpg")
+      u should equal ("http://www.homermultitext.org/iipsrv?IIIF=/project/homer/pyramidal/VenA/VA012RN_0013.tif/pct:10.0,20.0,30.0,40.0/2000,/0/default.jpg")
     }
   }
 
