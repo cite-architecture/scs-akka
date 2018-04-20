@@ -99,7 +99,7 @@ valueequals
 
 - <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:e4.v1.sequence:&value=3>
 
-- <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.image:&value=urn:cite2:hmt:vaimg.v1:VA013RN_0014>
+- <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.image:&value=urn:cite2:hmt:vaimg.2017a:VA013RN_0014>
 - <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.text:&value=urn:cts:greekLit:tlg0012.tlg001:1.151-1.175>
 - <http://localhost:9000/objects/find/valueequals?propertyurn=urn:cite2:hmt:msA.v1.siglum:&value=msA>
 
@@ -149,7 +149,7 @@ Basic Image Retrieval
 
 - <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013> (resolve to image)
 - <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.04506,0.2196,0.1344,0.10093> (resolve to image)
-- <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013?resolveImate=false> (return URL to image)
+- <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013?resolveImage=false> (return URL to image)
 - <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.04506,0.2196,0.1344,0.10093?resolveImage=false> (return URL to image)
 
 Defining a width
