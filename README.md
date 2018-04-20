@@ -2,7 +2,7 @@
 
 Based on [https://github.com/theiterators/akka-http-microservice](https://github.com/theiterators/akka-http-microservice) and used according to that project's MIT License. Thanks to Łukasz Sowa from [Iterators](http://www.theiterators.com).
 
-## Version: 1.1.0
+## Version: 1.1.1
 
 Status:  **active development**.
 
@@ -15,7 +15,6 @@ Status:  **active development**.
 Tests include large datasets requiring substantial amounts of memory.  You may need to increase default settings.  One way to do that is with the environmental variable `SBT_OPTS`, e.g.,
 
     export SBT_OPTS="-Xmx2G -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=2G -Xss2M"
-
 
 
 ## Building & Running a JAR
@@ -39,6 +38,8 @@ The result will be in:
 Be sure your datafile is in the proper place with the proper name. By default it is `cex/library.cex` relative to the directory from which you invoke the `scs.jar`.
 
 Invoke it with `java -jar scs.jar`.
+
+This app requires Java 1.8.
 
 The service should be running at `http://localhost:9000`.
 
@@ -127,13 +128,14 @@ The following services are under development.
 
 For all of these, an optional `?resolveImage=false` parameter will deliver a service-URL, rather than binary image data.
 
+## Using the Data from the Microservices
+
+The [CiteJson](https://github.com/cite-architecture/CITE-JSON) library offers classes that accept the JSON output by SCS-Akka and turns it into Scala objects compatible with the various [CITE Libraries](https://github.com/cite-architecture).
+
 ## Versions
 
-- **0.1.3** Parameterized local vs. remote CEX file.
-- **0.1.2** Added next and prev functions.
-- **0.1.1** Added endpints for ngrams and catalog.
-- **0.1.0** First version that responds to some CITE queries, and has tested them.
-- **0.0.1** Initial framework setup; modify template for Scala 2.12.
+See <releases.md>.
+
 
 ## Author & license
 

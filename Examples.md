@@ -147,8 +147,10 @@ numeric within
 
 Basic Image Retrieval
 
-- <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013>
-- <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.04506,0.2196,0.1344,0.10093>
+- <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013> (resolve to image)
+- <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.04506,0.2196,0.1344,0.10093> (resolve to image)
+- <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013?resolveImate=false> (return URL to image)
+- <http://localhost:9000/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.04506,0.2196,0.1344,0.10093?resolveImage=false> (return URL to image)
 
 Defining a width
 

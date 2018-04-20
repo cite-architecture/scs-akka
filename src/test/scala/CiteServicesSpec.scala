@@ -46,7 +46,6 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
     }
   }
 
-
   it should """respond to "/libraryinfo" correctly""" in {
     Get(s"/libraryinfo") ~> routes ~> check {
       status shouldBe OK
@@ -813,9 +812,10 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       contentType shouldBe `application/json`
       val dms:VectorOfDataModelsDefJson = responseAs[VectorOfDataModelsDefJson]
       dms.dataModels.size should equal (2) 
-      assert(dms.dataModels(0).dataModel("collection") == "urn:cite2:hmt:vaimg.2017a:")
+      assert(dms.dataModels(0).dataModel("collection") == "urn:cite2:hmt:binaryimg.v1:")
     }
   }
+ 
 
   it should """respond to "/image/URN?resolveImage=false" with a valid IIIF-API URL """ in {
     Get(s"/image/urn:cite2:hmt:vaimg.2017a:VA012RN_0013?resolveImage=false") ~> routes ~> check {

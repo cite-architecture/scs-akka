@@ -44,6 +44,8 @@ case class ServiceUrlString(urlString: String)
     val binaryImagePathProp:Cite2Urn = Cite2Urn("urn:cite2:hmt:binaryimg.v1.path:")
     val binaryImageUrlProp:Cite2Urn = Cite2Urn("urn:cite2:hmt:binaryimg.v1.url:")
 
+    val protocolPropertyName:String = "protocol"
+    val iiifApiProtocolString:String = "iiifApi"
 
     def iiifApiUrl(
       urn:Cite2Urn, 
@@ -90,6 +92,10 @@ case class ServiceUrlString(urlString: String)
     def gatherInfo(urn:Cite2Urn):Map[String,String] = {
       try {
         val collectionUrn:Cite2Urn = urn.dropProperty.dropSelector 
+
+        // Check that this object even exists in data
+        val thisObjectExists:CiteObject = collectionRepository.get.citableObject(urn)
+
         // Check that URN has an object-selector
         if (urn.objectComponentOption == None){
           logger.info(s"${urn} does not specify an object.")
@@ -100,49 +106,54 @@ case class ServiceUrlString(urlString: String)
           logger.info(s"No collection objects in library.")
           throw new ScsException(s"No collection objects in library.")
         }
-        // Check for no applicable model
-        if (cexLibrary.modelApplies(binaryImageModel,collectionUrn) == false ){
-          logger.info(s"Model ${binaryImageModel} does not apply to Collection ${collectionUrn}")
-          throw new ScsException(s"Model ${binaryImageModel} does not apply to Collection ${collectionUrn}")
-        }
-        // Check that the object exists in the collection
-        val requestedObjectVector:Vector[CiteObject] = collectionRepository.get ~~ urn
-        if (requestedObjectVector.size < 1){
-          logger.info(s"Object ${urn} does not exist in Collection ${collectionUrn}")
-          throw new ScsException(s"Object ${urn} does not exist in Collection ${collectionUrn}")
-        }
-        if (requestedObjectVector.size > 1){
-          logger.info(s"${urn} seems to identify more than one object in Collection ${collectionUrn}")
-          throw new ScsException(s"${urn} seems to identify more than one object in Collection ${collectionUrn}")
-        }
-        // Check that the binaryImageCollection exists in this data
-        val cv:Vector[CiteCollectionDef] = collectionRepository.get.catalog.collections
-        val imageCollectionFilter = cv.filter(_.urn == binaryImageCollection).size
-        val imageCollectionPresent:Boolean = imageCollectionFilter == 1
-        if (imageCollectionPresent != true){
-          logger.info(s"The Collection ${binaryImageCollection}, which implements the CiteBinaryImage model, is missing.")
-          throw new ScsException(s"The Collection ${binaryImageCollection}, which implements the CiteBinaryImage model, is missing.")
+        // Check that there are some datamodels, and get them
+        val theseModels:Vector[DataModel] = cexLibrary.dataModels match {
+            case Some(vdm) => vdm
+            case _ => throw new ScsException(s"No datamodels in library.")
         }
 
-
-        // If we got here, then we can proceed
-        val requestObject:CiteObject = requestedObjectVector(0)
-
-        // Get correct item from BinaryImage Collection
-        val bcColl:Vector[CiteObject] = collectionRepository.get.citableObjects.filter(_.urn ~~ binaryImageCollection)
-        val bcItems:Vector[CiteObject] = bcColl.filter(_.urnMatch(collectionUrn))
-        // Confirm that there is one and only one match
-        if (bcItems.size != 1){
-          logger.info(s"Ambiguous match for collection ${collectionUrn} in ${binaryImageCollection}.")
-          throw new ScsException(s"Ambiguous match for collection ${collectionUrn} in ${binaryImageCollection}.")
+        // Check for implementation 
+        val implementations:Vector[DataModel] = theseModels.filter(_.model == binaryImageModel)
+        if (implementations.size < 1){
+          logger.info(s"Model ${binaryImageModel} is not represented in this library.")
+          throw new ScsException(s"Model ${binaryImageModel} is not represented in this library.")
         }
+
+        // Next, get the collections that implement it
+        val colls = implementations.map(i => i.collection)
+        // Find which collections connect the DataModel to the requested objectUrn, if any
+        val collectionsImplementing:Vector[Cite2Urn] = colls.filter(c => { 
+           collectionRepository.get.urnMatch(
+            propertyUrnFromPropertyName(c,"collection"),
+            urn
+          ).size > 0 })
+
+
+        // Find out which Objects in (each of those/that) Collection implent(s) the collection of the requested URN
+        val objectsImplementing:Vector[Cite2Urn] = collectionsImplementing.map( c => {
+            val propUrn:Cite2Urn = propertyUrnFromPropertyName(c,"collection")
+            val objMatchVec:Vector[CiteObject] = collectionRepository.get.urnMatch(propUrn,urn.dropSelector)
+            val objMatchUrns:Vector[Cite2Urn] = objMatchVec.map(_.urn)
+            objMatchUrns
+          }).flatten
+
+        if (objectsImplementing.size < 1){
+          logger.info(s"No object in ${binaryImageModel} implements objects in ${urn.dropSelector}.")
+          throw new ScsException(s"No object in ${binaryImageModel} implements objects in ${urn.dropSelector}.")
+        }
+
+        val thisImplementation:CiteObject =  implementedByProtocol(objectsImplementing,iiifApiProtocolString) match {
+            case Some(o) => o 
+            case _ => {
+              logger.info(s"This object (${urn}) is not implemented by the ${iiifApiProtocolString}.")
+              throw new ScsException(s"This object (${urn}) is not implemented by the ${iiifApiProtocolString}.")
+            }
+        }
+
 
         // Still here? Now let's get some data
-        val bcItem:CiteObject = bcItems(0)
-        val baseUrl:String = bcItem.propertyValue(binaryImageUrlProp).toString
-        val serverPath:String = bcItem.propertyValue(binaryImagePathProp).toString
 
-        val reply:Map[String,String] = Map("baseUrl" -> baseUrl, "serverPath" -> serverPath)
+        val reply:Map[String,String] = pathAndUrl(urn,thisImplementation)
         reply
       } catch {
         case e: Exception => {
@@ -151,5 +162,64 @@ case class ServiceUrlString(urlString: String)
       }
     }
 
+  // Probably should be in CiteObj library?
+  // Given a collection URN and a property name, construct a property URN
+  def propertyUrnFromPropertyName(urn:Cite2Urn, propName:String):Cite2Urn = {
+    val returnUrn:Cite2Urn = {
+      urn.propertyOption match {
+        case Some(po) => urn // just return it!
+        case None => {
+          val collUrn:Cite2Urn = urn.dropSelector
+          val collUrnString:String = collUrn.toString.dropRight(1) // remove colon
+          urn.objectComponentOption match {
+            case Some(oc) => {
+              Cite2Urn(s"${collUrnString}.${propName}:${oc}")
+            }
+            case None => {
+              Cite2Urn(s"${collUrnString}.${propName}:")
+            }
+          }
+        }
+      }
+    }
+    returnUrn
+  } 
+
+  /*
+  Given a CITE URN to an object, and a protocol string, report whether that object is implemented by the given protocol
+  */
+  def implementedByProtocol(urnV:Vector[Cite2Urn], protocol:String):Option[CiteObject] = {
+    try {
+      urnV.size match {
+        case s if (s > 0) => {
+          val implementedUrns:Vector[Cite2Urn] = urnV.filter(u => {
+            val oneObject:CiteObject = collectionRepository.get.citableObjects.filter(_.urn == u)(0)
+            val propId:Cite2Urn = propertyUrnFromPropertyName(u, protocolPropertyName)
+            oneObject.valueEquals(propId,protocol)
+          })
+          implementedUrns.size match {
+            case s if (s > 0) => Some(collectionRepository.get.citableObject(implementedUrns(0)))
+            case _ => None
+          }
+        }
+        case _ => None
+      }
+    } catch {
+      case e: Exception => {
+        None
+      }   
+    }
+  }
+
+  def pathAndUrl(urn:Cite2Urn, obj:CiteObject):Map[String,String] = {
+
+    val pathUrn:Cite2Urn = propertyUrnFromPropertyName(obj.urn, "path")
+    val path:String = obj.propertyValue(pathUrn).toString
+    val urlUrn:Cite2Urn = propertyUrnFromPropertyName(obj.urn, "url")
+    val url:String = obj.propertyValue(urlUrn).toString
+    val pathMap:Map[String,String] = Map("serverPath" -> path, "baseUrl" -> url)
+    pathMap
+  }
+ 
 
 }

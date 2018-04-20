@@ -4,7 +4,7 @@ enablePlugins(LauncherJarPlugin)
 
 name := "cite-microservice"
 organization := "edu.furman.classics"
-version := "1.1.0"
+version := "1.1.1"
 scalaVersion := "2.12.4"
 
 fork in run := true
@@ -22,8 +22,8 @@ resolvers += Resolver.bintrayRepo("eumaeus", "maven")
 
 libraryDependencies ++= {
   val scalaTestV  = "3.0.1"
-  val akkaVersion = "2.5.4"
-  val akkaHttpVersion = "10.0.10"
+  val akkaVersion = "2.5.12"
+  val akkaHttpVersion = "10.1.1"
   Seq(
     "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
@@ -36,6 +36,7 @@ libraryDependencies ++= {
     "edu.holycross.shot" %% "cex" % "6.2.1",
     "edu.holycross.shot" %% "citerelations" % "2.0.4",
     "edu.holycross.shot" %% "ohco2" % "10.7.0",
+    "edu.holycross.shot" %% "scm" % "6.0.0",
     "edu.holycross.shot" %% "citebinaryimage" % "1.1.2",
     "edu.holycross.shot" %% "scm" % "6.0.0",
     "edu.holycross.shot" %% "citeobj" % "7.0.0"
