@@ -168,7 +168,7 @@ case class CatalogJson(citeCatalog:Vector[(
   }
 
 
-  def fetchUrnsForNgram(urnString: Option[String], ngString: String): Future[Either[String,ReffJson]] = {
+  def fetchUrnsForNgramJson(urnString: Option[String], ngString: String): Future[Either[String,ReffJson]] = {
    try {
       val nu:Vector[CtsUrn] = urnString match {
         case Some(u) => {
@@ -190,6 +190,43 @@ case class CatalogJson(citeCatalog:Vector[(
       }
     }
 
+  }
+
+  def fetchUrnsForNgram(urnString: Option[String], ngString: String):Vector[CtsUrn] = {
+   try {
+      val nu:Vector[CtsUrn] = urnString match {
+        case Some(u) => {
+          val urn:CtsUrn = CtsUrn(u)
+          val urnv:Vector[CtsUrn] = (textRepository.get.corpus >= urn).urnsForNGram(ngString)
+          urnv
+        }
+        case None => {
+          val urnv:Vector[CtsUrn] = textRepository.get.corpus.urnsForNGram(ngString)
+          urnv
+        }
+      }
+      nu
+   } catch {
+      case e: Exception => {
+        throw new IOException(e)
+      }
+    }
+
+  }
+
+  def urnsToKwikCorpus(urnString: Option[String], ngString: String):Future[Either[String,CorpusJson]] = {
+    try {
+      logger.info(s"Got to urnsToKwikCorpus with ${ngString}")
+      val vurn:Vector[CtsUrn] = fetchUrnsForNgram(urnString, ngString)
+      val c:Corpus = textRepository.get.corpus ~~ vurn 
+      val v:Vector[Map[String,String]] = c.nodes.map(l => Map("urn" -> l.urn.toString, "text" -> l.text))
+      val n:CorpusJson = CorpusJson(v) 
+      Unmarshal(n).to[CorpusJson].map(Right(_))
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
   }
 
 

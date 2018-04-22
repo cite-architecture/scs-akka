@@ -233,7 +233,27 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         (get & path( "ngram" / "urns"  )){
           parameters('ng.as[String]) { ng => 
             complete {
-              fetchUrnsForNgram(None, ng).map[ToResponseMarshallable]{
+              fetchUrnsForNgramJson(None, ng).map[ToResponseMarshallable]{
+                case Right(ngh) => ngh
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~
+        (get & path( "ngram" / "urns" / "tocorpus"  )){
+          parameters('ng.as[String]) { ng => 
+            complete {
+              urnsToKwikCorpus(None, ng).map[ToResponseMarshallable]{
+                case Right(ngh) => ngh
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        } ~  
+        (get & path( "ngram" / "urns" / "tocorpus" / Segment )){ urnString =>
+          parameters('ng.as[String]) { ng => 
+            complete {
+              urnsToKwikCorpus(Some(urnString), ng).map[ToResponseMarshallable]{
                 case Right(ngh) => ngh
                 case Left(errorMessage) => BadRequest -> errorMessage
               }
@@ -243,7 +263,7 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         (get & path( "ngram" / "urns" / Segment )){ urnString =>
           parameters('ng.as[String]) { ng => 
             complete {
-              fetchUrnsForNgram(Some(urnString), ng).map[ToResponseMarshallable]{
+              fetchUrnsForNgramJson(Some(urnString), ng).map[ToResponseMarshallable]{
                 case Right(ngh) => ngh
                 case Left(errorMessage) => BadRequest -> errorMessage
               }

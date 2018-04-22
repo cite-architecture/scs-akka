@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.2.0**: Add option to get citable nodes for Ngrams, instead of merely URNs.
+
 **1.1.1**: Fixed broken image requests.
 
 **1.1.0**: Added requests for Library info and Label for a Citable Node.
