@@ -216,9 +216,15 @@ case class CatalogJson(citeCatalog:Vector[(
 
   def urnsToKwikCorpus(urnString: Option[String], ngString: String):Future[Either[String,CorpusJson]] = {
     try {
-      logger.info(s"Got to urnsToKwikCorpus with ${ngString}")
       val vurn:Vector[CtsUrn] = fetchUrnsForNgram(urnString, ngString)
-      val c:Corpus = textRepository.get.corpus ~~ vurn 
+      val tempV1:Vector[CitableNode] = vurn.map(u => {
+        textRepository.get.corpus.nodes.filter(_.urn == u)(0)
+      }).toVector
+      val tempV:Vector[CitableNode] = tempV1.map(n => {
+        val newNode:CitableNode = CitableNode(urn = n.urn, text = n.kwic(ngString,30))
+        newNode
+      }).toVector
+      val c:Corpus = Corpus(tempV)
       val v:Vector[Map[String,String]] = c.nodes.map(l => Map("urn" -> l.urn.toString, "text" -> l.text))
       val n:CorpusJson = CorpusJson(v) 
       Unmarshal(n).to[CorpusJson].map(Right(_))
@@ -445,7 +451,6 @@ def fetchTokenFind(tokenString:String, urnString:Option[String], ignorePunctuati
   try {
     val findInCorpus:Corpus = urnString match {
       case Some(s) => {
-        //logger.info("found URN")
         val urn:CtsUrn = CtsUrn(s)
         val newCorpus:Corpus = textRepository.get.corpus >= urn 
         newCorpus
@@ -470,7 +475,7 @@ def fetchAllTokensFind(tokenStrings:Vector[String], urnString:Option[String], ig
     val distance:Option[Int] = if (dist == "") None else Some(dist.toInt)
     val findInCorpus:Corpus = urnString match {
       case Some(s) => {
-        logger.info("found URN")
+        //logger.info("found URN")
         val urn:CtsUrn = CtsUrn(s)
         val newCorpus:Corpus = textRepository.get.corpus >= urn 
         newCorpus
