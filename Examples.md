@@ -34,6 +34,8 @@
 - <http://localhost:9000/texts/ngram/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:?n=3&t=5>
 - [http://localhost:9000/texts/ngram/urns?ng=προσέφη+πόδας+ὠκὺς](http://localhost:9000/texts/ngram/urns?ng=προσέφη+πόδας+ὠκὺς)
 - [http://localhost:9000/texts/ngram/urns/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:?ng=προσέφη+πόδας+ὠκὺς](http://localhost:9000/texts/ngram/urns/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:?ng=προσέφη+πόδας+ὠκὺς)
+- [http://localhost:9000/texts/ngram/urns?ng=προσέφη+πόδας+ὠκὺς](http://localhost:9000/texts/ngram/urns/tocorpus?ng=προσέφη+πόδας+ὠκὺς)
+- [http://localhost:9000/texts/ngram/urns/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:?ng=προσέφη+πόδας+ὠκὺς](http://localhost:9000/texts/ngram/urns/tocorpus/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:?ng=προσέφη+πόδας+ὠκὺς)
 
 ### String Searches
 - <http://localhost:9000/texts/find?s=earth+and+water>
