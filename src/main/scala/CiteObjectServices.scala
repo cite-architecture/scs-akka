@@ -39,6 +39,7 @@ case class CiteCollectionDefJson(citeCollectionDef:CiteCollectionInfoJson, citeP
 case class VectorOfCiteCollectionDefsJson(citeCollectionDefs:Vector[CiteCollectionDefJson])
 // Data Model
 case class DataModelDefJson(dataModel:Map[String,String])
+case class ObjectLabelMapJson(labelMap:Map[String,String])
 case class VectorOfDataModelsDefJson(dataModels:Vector[DataModelDefJson])
 
 
@@ -67,6 +68,19 @@ trait CiteCollectionService extends Protocols {
     }
   }
 
+  def fetchObjectsMapJson: Future[Either[String,ObjectLabelMapJson]] = {
+    try {
+        val m:Map[String,String] = {
+          Map(collectionRepository.get.citableObjects.map{ a => a.urn.toString -> a.label }: _*)
+        } 
+        val olm:ObjectLabelMapJson = ObjectLabelMapJson(m)
+        Unmarshal(olm).to[ObjectLabelMapJson].map(Right(_))
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
 
   def fetchCiteCollectionDef(urn: Cite2Urn) : Option[CiteCollectionDefJson] = {
     try {

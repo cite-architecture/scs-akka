@@ -46,6 +46,7 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val citeObjectFormat = jsonFormat2(CiteObjectJson.apply)
   implicit val ServiceUrlStringFormat = jsonFormat1(ServiceUrlString.apply)
   implicit val citePropertyDefFormat = jsonFormat1(CitePropertyDefJson.apply)
+  implicit val objectLabelMapFormat = jsonFormat1(ObjectLabelMapJson.apply)
   implicit val citeCollectionPropertyDefsFormat = jsonFormat1(CiteCollectionPropertyDefsJson.apply)
   implicit val citeCollectionInfoFormat = jsonFormat1(CiteCollectionInfoJson.apply)
   implicit val citeCollectionDefFormat = jsonFormat2(CiteCollectionDefJson.apply)
@@ -381,6 +382,14 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       pathPrefix("collections") {
+        (get & path( "labelmap")) { 
+            complete { 
+              fetchObjectsMapJson.map[ToResponseMarshallable]{
+                case Right(labelMap) => labelMap
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+          }
+        } ~
         (get & path( Segment )) { urnString =>
           complete { 
             fetchCiteCollectionDefJson(urnString).map[ToResponseMarshallable]{

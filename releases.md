@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.3.0**: Added `/object/labelmap`, returning a Map(Cite2Urn -> String), a catalog of all objects in the CollectionRepository.
+
 **1.2.0**: Sped up changes from 1.2.0 by about 10x; sorted out kwic output.
 
 **1.2.0**: Add option to get citable nodes for Ngrams, instead of merely URNs.

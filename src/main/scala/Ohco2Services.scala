@@ -88,6 +88,8 @@ case class CatalogJson(citeCatalog:Vector[(
     }
   }
 
+
+
     def fetchCatalog(urnString:Option[String]):Future[Either[String,CatalogJson]] = {
       try {
         val cc:Vector[CatalogEntry] = urnString match {
