@@ -427,6 +427,22 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       pathPrefix("objects") {
+        (get & path( "prevurn" / Segment)) { urnString => 
+          complete { 
+            fetchPrevCite2Urn(urnString).map[ToResponseMarshallable]{
+              case Right(cite2UrnString) => cite2UrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+          }
+        } ~
+        (get & path( "nexturn" / Segment)) { urnString => 
+          complete { 
+            fetchNextCite2Urn(urnString).map[ToResponseMarshallable]{
+              case Right(cite2UrnString) => cite2UrnString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+          }
+        } ~
         (get & path( "paged" / Segment)) { urnString => 
           parameters('offset.as[Int] ? 1, 'limit.as[Int] ? 10) { (offset, limit) => 
             complete { 

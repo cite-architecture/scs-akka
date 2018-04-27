@@ -546,6 +546,43 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     }
   }
 
+  it should """respond to "/objects/nexturn/OBJECT-URN" with the next object's urn """ in {
+    Get(s"/objects/nexturn/urn:cite2:hmt:e4.v1:1v") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:Cite2UrnString = responseAs[Cite2UrnString]
+      r.urnString should equal ("urn:cite2:hmt:e4.v1:2r")
+    }
+  }
+
+  it should """respond to "/objects/prevurn/OBJECT-URN" with the previous object's urn """ in {
+    Get(s"/objects/prevurn/urn:cite2:hmt:e4.v1:1v") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:Cite2UrnString = responseAs[Cite2UrnString]
+      r.urnString should equal ("urn:cite2:hmt:e4.v1:1r")
+    }
+  }
+
+  it should """respond to "/objects/nexturn/RANGE-URN" with the next object's urn """ in {
+    Get(s"/objects/nexturn/urn:cite2:hmt:e4.v1:1v-2r") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:Cite2UrnString = responseAs[Cite2UrnString]
+      r.urnString should equal ("urn:cite2:hmt:e4.v1:2v")
+    }
+  }
+
+  it should """respond to "/objects/prevurn/RANGE-URN" with the previous object's urn """ in {
+    Get(s"/objects/prevurn/urn:cite2:hmt:e4.v1:1v-2r") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:Cite2UrnString = responseAs[Cite2UrnString]
+      r.urnString should equal ("urn:cite2:hmt:e4.v1:1r")
+    }
+  }
+
+
   it should """respond to "/objects/COLLECTION-URN" with all objects in a collection """ in {
     Get(s"/objects/urn:cite2:hmt:e4.v1:") ~> routes ~> check {
       status shouldBe OK

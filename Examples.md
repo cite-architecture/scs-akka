@@ -68,6 +68,8 @@
 
 - <http://localhost:9000/objects/urn:cite2:hmt:e4.v1:>
 - <http://localhost:9000/objects/urn:cite2:hmt:e4.v1:1r>
+- <http://localhost:9000/objects/prevurn/urn:cite2:hmt:e4.v1:2v>
+- <http://localhost:9000/objects/nexturn/urn:cite2:hmt:e4.v1:2v>
 - <http://localhost:9000/objects/urn:cite2:hmt:e4.v1:2r-3v>
 - <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:?offset=1&limit=10>
 - <http://localhost:9000/objects/paged/urn:cite2:hmt:e4.v1:?offset=11&limit=10>

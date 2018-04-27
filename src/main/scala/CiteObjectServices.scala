@@ -68,6 +68,58 @@ trait CiteCollectionService extends Protocols {
     }
   }
 
+  def fetchPrevCite2Urn(urnString: String): Future[Either[String,Cite2UrnString]] = {
+    try {
+      val urn:Cite2Urn = {
+        val u = Cite2Urn(urnString)
+        if (u.isRange) {
+          u.rangeBeginUrn 
+        } else {
+          u
+        }
+      }
+      val thisObj:CiteObject = collectionRepository.get.citableObject(urn)
+      val urnReplyString:String = {
+        collectionRepository.get.prev(thisObj) match {
+          case Some(obj:CiteObject) => obj.urn.toString
+          case None => ""
+        }
+      }
+      val urnReply:Cite2UrnString = Cite2UrnString(urnReplyString)
+      Unmarshal(urnReply).to[Cite2UrnString].map(Right(_))
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
+
+  def fetchNextCite2Urn(urnString: String): Future[Either[String,Cite2UrnString]] = {
+    try {
+      val urn:Cite2Urn = {
+        val u = Cite2Urn(urnString)
+        if (u.isRange) {
+          u.rangeEndUrn 
+        } else {
+          u
+        }
+      }
+      val thisObj:CiteObject = collectionRepository.get.citableObject(urn)
+      val urnReplyString:String = {
+        collectionRepository.get.next(thisObj) match {
+          case Some(obj:CiteObject) => obj.urn.toString
+          case None => ""
+        }
+      }
+      val urnReply:Cite2UrnString = Cite2UrnString(urnReplyString)
+      Unmarshal(urnReply).to[Cite2UrnString].map(Right(_))
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
+
   def fetchObjectsMapJson: Future[Either[String,ObjectLabelMapJson]] = {
     try {
         val m:Map[String,String] = {
