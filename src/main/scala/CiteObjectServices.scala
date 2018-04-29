@@ -32,6 +32,7 @@ case class Cite2UrnString(urnString: String)
 case class CiteObjectJson(citeObject:Map[String,String],citePropertyValues:
     Vector[Map[String,String]])
 case class VectorOfCiteObjectsJson(citeObjects:Vector[CiteObjectJson])
+case class VectorOfCite2UrnsJson(cite2Urns:Vector[Cite2UrnString])
 case class CitePropertyDefJson(citePropertyDef:Map[String,String])
 case class CiteCollectionInfoJson(citeCollectionInfo:Map[String,String])
 case class CiteCollectionPropertyDefsJson(citeCollectionPropertyDefs:Vector[CitePropertyDefJson])
@@ -55,6 +56,45 @@ trait CiteCollectionService extends Protocols {
   def config: Config
   val logger: LoggingAdapter
 
+
+  def collectionsForModel(urnString:String): Future[Either[String,VectorOfCite2UrnsJson]] = {
+    try {
+      val urn:Cite2Urn = Cite2Urn(urnString)
+      val uVec:Vector[Cite2Urn] = cexLibrary.collectionsForModel(urn)
+      val sVec = VectorOfCite2UrnsJson(uVec.map( u => Cite2UrnString(u.toString)))
+      Unmarshal(sVec).to[VectorOfCite2UrnsJson].map(Right(_))
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
+
+  def modelsForCollection(urnString:String): Future[Either[String,VectorOfCite2UrnsJson]] = {
+    try {
+      val urn:Cite2Urn = Cite2Urn(urnString)
+      val uVec:Vector[Cite2Urn] = cexLibrary.modelsForCollection(urn)
+      val sVec = VectorOfCite2UrnsJson(uVec.map( u => Cite2UrnString(u.toString)))
+      Unmarshal(sVec).to[VectorOfCite2UrnsJson].map(Right(_))
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
+
+  def modelApplies(modelUrnStr:String, collUrnStr:String): Future[Either[String,Boolean]] = {
+    try {
+      val modelUrn:Cite2Urn = Cite2Urn(modelUrnStr)
+      val collUrn:Cite2Urn = Cite2Urn(collUrnStr)
+      val mApplies:Boolean = cexLibrary.modelApplies(modelUrn, collUrn)
+      Unmarshal(mApplies).to[Boolean].map(Right(_))
+    } catch {
+      case e: Exception => {
+        Future.successful(Left(s"${new IOException(e)}"))
+      }
+    }
+  }
 
   def fetchCite2Urn(urnString: String): Future[Either[String, Cite2UrnString]] = {
     try {

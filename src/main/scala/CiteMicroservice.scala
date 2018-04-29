@@ -51,6 +51,9 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val citeCollectionInfoFormat = jsonFormat1(CiteCollectionInfoJson.apply)
   implicit val citeCollectionDefFormat = jsonFormat2(CiteCollectionDefJson.apply)
   implicit val vectorOfCiteObjectsFormat = jsonFormat1(VectorOfCiteObjectsJson.apply)
+  implicit val vectorOfCite2UrnsFormat = jsonFormat1(VectorOfCite2UrnsJson.apply)
+
+  CiteObjectJson
   implicit val vectorOfCiteCollectionDefsFormat = jsonFormat1(VectorOfCiteCollectionDefsJson.apply)
   // DataModel
   implicit val dataModelDefFormat = jsonFormat1(DataModelDefJson.apply)
@@ -133,16 +136,47 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
       }
     } ~
     pathPrefix("libraryinfo"  ) {
-    // Validate a CTS URN 
-        (get) { 
+      (get) { 
+        complete {
+          fetchLibraryInfo.map[ToResponseMarshallable] {
+            case Right(libraryInfoMap) => libraryInfoMap
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      }
+    } ~
+    pathPrefix("modelsforcollection"  ) {
+      (get & path(Segment)) { urnString => 
+        complete {
+          modelsForCollection(urnString).map[ToResponseMarshallable] {
+            case Right(cite2urns) => cite2urns
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      }
+    } ~
+    pathPrefix("collectionsformodel"  ) {
+      (get & path(Segment)) { urnString => 
+        complete {
+          collectionsForModel(urnString).map[ToResponseMarshallable] {
+            case Right(cite2urns) => cite2urns
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      }
+    } ~
+    pathPrefix("modelapplies"  ) {
+      (get ) { 
+        parameters('modelurn.as[String], 'collurn.as[String]) { (modelUrn, collUrn) => 
           complete {
-            fetchLibraryInfo.map[ToResponseMarshallable] {
-              case Right(libraryInfoMap) => libraryInfoMap
+            modelApplies(modelUrn, collUrn).map[ToResponseMarshallable] {
+              case Right(b) => b.toString
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
         }
-      } ~
+      }
+    } ~
       pathPrefix("textcatalog") {
       // Get Text Catalog
         (get & path( Segment)) { urnString => 

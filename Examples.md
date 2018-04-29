@@ -2,6 +2,10 @@
 
 > Assuming the server is running at, *e.g.* `localhost:9000`
 
+## Library-Level Requests
+
+- <http://localhost:9000/libraryinfo>
+
 ## Texts
 
 ### See the Text Catalog
@@ -147,6 +151,9 @@ numeric within
 ### Data Models
 
 - <http://localhost:9000/datamodels>
+- <http://localhost:9000/modelapplies?modelurn=urn:cite2:cite:datamodels.v1:binaryimg&collurn=urn:cite2:hmt:binaryimg.v1:>
+- <http://localhost:9000/collectionsformodel/urn:cite2:cite:datamodels.v1:binaryimg>
+- <http://localhost:9000/modelsforcollection/urn:cite2:hmt:binaryimg.v1:>
 
 ### Images
 
