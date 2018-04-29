@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.5.0**: Added the ability to to a `valueequal` query with a `type=` param, as an alternative to specifying a property-URN.
+
 **1.4.0**: Added `/object/prevurn/Cite2URN` and `/object/nexturn/Cite2Urn`, providing navigation of ordered collections.
 
 **1.3.0**: Added `/object/labelmap`, returning a Map(Cite2Urn -> String), a catalog of all objects in the CollectionRepository.

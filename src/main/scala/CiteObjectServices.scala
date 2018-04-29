@@ -459,46 +459,86 @@ def doNumeric(collectionUrnStr:Option[String], n1:Double, op:String, n2:Option[D
   }
 }
 
-def doValueEquals(propertyUrnStr:String, valueToMatchStr:String): Future[Either[String, VectorOfCiteObjectsJson]] = {
+def doValueEquals(propertyUrnStrOption:Option[String], valueToMatchStr:String, typeStringOption:Option[String]): Future[Either[String, VectorOfCiteObjectsJson]] = {
   try {
-    val propertyUrn:Cite2Urn = Cite2Urn(propertyUrnStr) 
-    val collectionUrn:Cite2Urn = propertyUrn.dropSelector.dropProperty
-    val collectionDef:Option[CiteCollectionDef] = collectionRepository.get.collectionDefinition(collectionUrn)
-    if (collectionDef == None){ throw new ScsException(s"${collectionUrn} is not present in this repository.")} 
-    val propertyDefVec:Vector[CitePropertyDef] = collectionDef.get.propertyDefs.filter(_.urn == propertyUrn)
-    if (propertyDefVec.size < 1) { throw new ScsException(s"${propertyUrn} is not a property of ${collectionUrn}.")}
-    val propertyDef:CitePropertyDef = propertyDefVec(0)
-    val propertyType:CitePropertyType = propertyDef.propertyType
-    val objectMatches:Vector[CiteObject] = propertyType match {
-      case CtsUrnType => { 
-        val valueToMatch:CtsUrn = CtsUrn(valueToMatchStr)
-        collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
+    propertyUrnStrOption match {
+      case Some(propertyUrnStr) => {
+        /* if there is a property specified */
+        val propertyUrn:Cite2Urn = Cite2Urn(propertyUrnStr) 
+        val collectionUrn:Cite2Urn = propertyUrn.dropSelector.dropProperty
+        val collectionDef:Option[CiteCollectionDef] = collectionRepository.get.collectionDefinition(collectionUrn)
+        if (collectionDef == None){ throw new ScsException(s"${collectionUrn} is not present in this repository.")} 
+        val propertyDefVec:Vector[CitePropertyDef] = collectionDef.get.propertyDefs.filter(_.urn == propertyUrn)
+        if (propertyDefVec.size < 1) { throw new ScsException(s"${propertyUrn} is not a property of ${collectionUrn}.")}
+        val propertyDef:CitePropertyDef = propertyDefVec(0)
+        val propertyType:CitePropertyType = propertyDef.propertyType
+        val objectMatches:Vector[CiteObject] = propertyType match {
+          case CtsUrnType => { 
+            val valueToMatch:CtsUrn = CtsUrn(valueToMatchStr)
+            collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
+          }
+          case Cite2UrnType => { 
+            val valueToMatch:Cite2Urn = Cite2Urn(valueToMatchStr)
+            collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
+          }
+          case StringType => {  
+            val valueToMatch:String = valueToMatchStr
+            collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
+          }
+          case BooleanType => { 
+            val valueToMatch:Boolean = (valueToMatchStr == "true")
+            collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
+          }
+          case NumericType => { 
+            val valueToMatch:Double = valueToMatchStr.toDouble
+            collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
+          }        
+          case ControlledVocabType => { 
+            val valueToMatch:String = valueToMatchStr
+            collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
+          }
+          case _ => { throw new ScsException(s"${propertyUrn} is of an unrecognized type.") }
+        }
+        val objectMatchesJson:Vector[CiteObjectJson] = objectMatches.map( o => makeCiteObjectJson(o))
+        val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(objectMatchesJson)
+        Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
       }
-      case Cite2UrnType => { 
-        val valueToMatch:Cite2Urn = Cite2Urn(valueToMatchStr)
-        collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
+      /* If there is no property specified, use typeStringOption */
+      case None => {
+        typeStringOption match {
+          case Some(typeString) => {
+            val objectMatches:Vector[CiteObject] = typeString match {
+              case "ctsurn" => { 
+                val valueToMatch:CtsUrn = CtsUrn(valueToMatchStr)
+                collectionRepository.get.valueEquals( valueToMatch)
+              }
+              case "cite2urn" => { 
+                val valueToMatch:Cite2Urn = Cite2Urn(valueToMatchStr)
+                collectionRepository.get.valueEquals( valueToMatch)
+              }
+              case "string" => {  
+                val valueToMatch:String = valueToMatchStr
+                collectionRepository.get.valueEquals( valueToMatch)
+              }
+              case "boolean" => { 
+                val valueToMatch:Boolean = (valueToMatchStr == "true")
+                collectionRepository.get.valueEquals( valueToMatch)
+              }
+              case "numeric" => { 
+                val valueToMatch:Double = valueToMatchStr.toDouble
+                collectionRepository.get.valueEquals( valueToMatch)
+              }        
+              case _ => { throw new ScsException(s""" "${typeString}" is of an unrecognized type.""") }
+            }
+            val objectMatchesJson:Vector[CiteObjectJson] = objectMatches.map( o => makeCiteObjectJson(o))
+            val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(objectMatchesJson)
+            Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
+          }
+          case None => throw new Exception(s"Request must include *either* a proprtyurn-parameter or a type-parameter.")
+        } 
       }
-      case StringType => {  
-        val valueToMatch:String = valueToMatchStr
-        collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
-      }
-      case BooleanType => { 
-        val valueToMatch:Boolean = (valueToMatchStr == "true")
-        collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
-      }
-      case NumericType => { 
-        val valueToMatch:Double = valueToMatchStr.toDouble
-        collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
-      }        
-      case ControlledVocabType => { 
-        val valueToMatch:String = valueToMatchStr
-        collectionRepository.get.valueEquals(propertyUrn, valueToMatch)
-      }
-      case _ => { throw new ScsException(s"${propertyUrn} is of an unrecognized type.") }
+
     }
-    val objectMatchesJson:Vector[CiteObjectJson] = objectMatches.map( o => makeCiteObjectJson(o))
-    val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(objectMatchesJson)
-    Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
   } catch {
     case e: Exception => {
       Future.successful(Left(s"${new IOException(e)}"))

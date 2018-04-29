@@ -685,6 +685,22 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       r.citeObjects.size should equal (9) 
     }
   }
+  it should """respond to "/objects/find/valueequals" when given a type with a boolean value """ in {
+    Get(s"/objects/find/valueequals?type=boolean&value=true") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (12) 
+    }
+  }
+  it should """respond to "/objects/find/valueequals" when given a type with a string value """ in {
+    Get(s"/objects/find/valueequals?type=string&value=recto") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (20) 
+    }
+  }
   it should """respond to "/objects/find/valueequals" with a numeric value """ in {
     Get(s"/objects/find/valueequals?propertyurn=urn:cite2:hmt:e4.v1.sequence:&value=3") ~> routes ~> check {
       status shouldBe OK

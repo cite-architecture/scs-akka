@@ -515,9 +515,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
           }
         } ~
         (get & path("find" / "valueequals"  )) { 
-          parameters( 'value.as[String], 'propertyurn.as[String] ) { (valueToMatchStr, propertyUrnStr) => 
+          parameters( 'value.as[String], 'propertyurn.as[String] ?, 'type.as[String] ? ) { (valueToMatchStr, propertyUrnStr, typeStringOption) => 
             complete {
-              doValueEquals(propertyUrnStr, valueToMatchStr).map[ToResponseMarshallable]{
+              doValueEquals(propertyUrnStr, valueToMatchStr, typeStringOption).map[ToResponseMarshallable]{
                 case Right(citeObjects) => citeObjects
                 case Left(errorMessage) => BadRequest -> errorMessage
               }
