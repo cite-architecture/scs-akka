@@ -81,7 +81,7 @@
 
 Get objects from multiple collections:	
 
-- </collections/objects?urn=urn:cite2:cite:datamodels.v1:&urn=urn:cite2:hmt:binaryimg.v1:&urn=urn:cite2:hmt:e4.v1:>
+- <http://localhost:9000/collections/objects?urn=urn:cite2:cite:datamodels.v1:&urn=urn:cite2:hmt:binaryimg.v1:&urn=urn:cite2:hmt:e4.v1:>
 
 ### Finding Objects
 
