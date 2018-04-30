@@ -416,6 +416,17 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       pathPrefix("collections") {
+        (get & path( "objects")) { 
+          parameters( 'urn.as[String].* ) { strings => 
+            complete { 
+              val urns:Vector[Cite2Urn] = strings.toVector.map(s => Cite2Urn(s))
+              fetchCiteObjectsFromNCollections(urns).map[ToResponseMarshallable]{
+                case Right(objectVec) => objectVec
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+            }
+          }
+        } ~
         (get & path( "labelmap")) { 
             complete { 
               fetchObjectsMapJson.map[ToResponseMarshallable]{

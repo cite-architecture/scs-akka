@@ -546,6 +546,17 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     }
   }
 
+  it should """respond to "collections/objects?urn=URN1&urn=URN2&urn=URN3" with objects from three collections""" in {
+    val u1:Cite2Urn = Cite2Urn("urn:cite2:cite:datamodels.v1:")
+    val u2:Cite2Urn = Cite2Urn("urn:cite2:hmt:binaryimg.v1:")
+    val u3:Cite2Urn = Cite2Urn("urn:cite2:hmt:e4.v1:")
+    Get(s"/collections/objects?urn=${u1}&urn=${u2}&urn=${u3}") ~> routes ~> check {
+      status shouldBe OK
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (23) 
+    }
+  }
+
   it should """respond to "/objects/nexturn/OBJECT-URN" with the next object's urn """ in {
     Get(s"/objects/nexturn/urn:cite2:hmt:e4.v1:1v") ~> routes ~> check {
       status shouldBe OK

@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.7.0**: `collections/objects?urn=URN1&urn=URN2&urn=URN3…`.
+
 **1.6.0**: `modelsforcollection`, `collectionsformodel`, and `modelapplies`.
 
 **1.5.0**: Added the ability to to a `valueequal` query with a `type=` param, as an alternative to specifying a property-URN.
