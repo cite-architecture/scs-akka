@@ -439,7 +439,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.ctsCatalog.size should equal (12)
+      r.ctsCatalog.size should equal (14)
     }  
   }
 
@@ -448,7 +448,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.ctsCatalog.size should equal (12)
+      r.ctsCatalog.size should equal (14)
     }  
   }
 
@@ -457,7 +457,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.ctsCatalog.size should equal (12)
+      r.ctsCatalog.size should equal (14)
     }  
   }
 
@@ -466,7 +466,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.ctsCatalog.size should equal (12)
+      r.ctsCatalog.size should equal (14)
     }  
   }
 
@@ -475,7 +475,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       val r:CatalogJson  = responseAs[CatalogJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.ctsCatalog.size should equal (3)
+      r.ctsCatalog.size should equal (4)
     }  
   }
 
@@ -516,7 +516,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteCollectionDefsJson = responseAs[VectorOfCiteCollectionDefsJson]
-      r.citeCollectionDefs.size should equal (10) 
+      r.citeCollectionDefs.size should equal (11) 
     }
   }
 
@@ -553,7 +553,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     Get(s"/collections/objects?urn=${u1}&urn=${u2}&urn=${u3}") ~> routes ~> check {
       status shouldBe OK
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
-      r.citeObjects.size should equal (23) 
+      r.citeObjects.size should equal (24) 
     }
   }
 
@@ -875,7 +875,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       status shouldBe OK
       contentType shouldBe `application/json`
       val dms:VectorOfDataModelsDefJson = responseAs[VectorOfDataModelsDefJson]
-      dms.dataModels.size should equal (2) 
+      dms.dataModels.size should equal (3) 
       assert(dms.dataModels(0).dataModel("collection") == "urn:cite2:hmt:binaryimg.v1:")
     }
   }
@@ -919,7 +919,41 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     }
   }
 
+  it should """respond to "/dse/recordsforimage/CITE2-URN"""" in {
+    Get(s"/dse/recordsforimage/urn:cite2:hmt:vaimg.2017a:VA012RN_0013") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfDseRecordsJson = responseAs[VectorOfDseRecordsJson]
+      r.dseRecords.size should equal (20) 
+    }
+  }
 
+  it should """respond to "/dse/recordsforsurface/CITE2-URN"""" in {
+    Get(s"/dse/recordsforsurface/urn:cite2:hmt:msA.v1:12r") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfDseRecordsJson = responseAs[VectorOfDseRecordsJson]
+      r.dseRecords.size should equal (20) 
+    }
+  }
+
+  it should """respond to "/dse/recordsfortext/CTS-URN" (leaf-node)""" in {
+    Get(s"/dse/recordsfortext/urn:cts:greekLit:tlg0012.tlg001.msA:1.3") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfDseRecordsJson = responseAs[VectorOfDseRecordsJson]
+      r.dseRecords.size should equal (1) 
+    }
+  }
+
+  it should """respond to "/dse/recordsfortext/CTS-URN" (range)""" in {
+    Get(s"/dse/recordsfortext/urn:cts:greekLit:tlg0012.tlg001.msA:1.1-1.3") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfDseRecordsJson = responseAs[VectorOfDseRecordsJson]
+      r.dseRecords.size should equal (3) 
+    }
+  }
 
 
 }

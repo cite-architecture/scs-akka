@@ -26,6 +26,7 @@ import edu.holycross.shot.ohco2._
 import edu.holycross.shot.cite._
 import edu.holycross.shot.citeobj._
 import edu.holycross.shot.scm._
+import edu.holycross.shot.dse._
 
 case class Cite2UrnString(urnString: String)
 

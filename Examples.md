@@ -182,3 +182,12 @@ Embedding
 
 - ![12-recto](http://localhost:9000/image/500/500/urn:cite2:hmt:vaimg.2017a:VA012RN_0013)
 - ![12-recto-detail](http://localhost:9000/image/500/500/urn:cite2:hmt:vaimg.2017a:VA012RN_0013@0.04506,0.2196,0.1344,0.10093)
+
+### Documented Scholarly Editions (DSE) Data Model
+
+The DSE Data model consists of a CITE Collection of objects, each documenting a three-way relationship between (a) a text-bearing artifact, (b) a documentary image (ideally with a region-of-interest defined), and (c) a citable passage of text.
+
+- <http://localhost:9000/dse/recordsforsurface/urn:cite2:hmt:msA.v1:12r> Get all DSE Records associated with a Text Bearing Artifact.
+- <http://localhost:9000/dse/recordsforimage/urn:cite2:hmt:vaimg.2017a:VA012RN_0013>Get all DSE Records associated with a Citable Image. 
+- <http://localhost:9000/dse/recordsfortext/urn:cts:greekLit:tlg0012.tlg001.msA:1.1> Get all DSE Records associated with a passage of text.
+- <http://localhost:9000/dse/recordsfortext/urn:cts:greekLit:tlg0012.tlg001.msA:1.1-1.3> Get all DSE Records associated with a passage of text expressed by a range-URN.

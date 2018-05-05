@@ -30,6 +30,7 @@ import edu.holycross.shot.ohco2._
 import edu.holycross.shot.cite._
 import edu.holycross.shot.citeobj._
 import edu.holycross.shot.scm._
+import edu.holycross.shot.dse._
 import edu.holycross.shot.citerelation._
 
 
@@ -53,15 +54,18 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val vectorOfCiteObjectsFormat = jsonFormat1(VectorOfCiteObjectsJson.apply)
   implicit val vectorOfCite2UrnsFormat = jsonFormat1(VectorOfCite2UrnsJson.apply)
 
-  CiteObjectJson
+  // CiteObjectJson
   implicit val vectorOfCiteCollectionDefsFormat = jsonFormat1(VectorOfCiteCollectionDefsJson.apply)
   // DataModel
   implicit val dataModelDefFormat = jsonFormat1(DataModelDefJson.apply)
   implicit val vectorOfDataModelDefFormat = jsonFormat1(VectorOfDataModelsDefJson.apply)
+  // DSE 
+  implicit val dseRecordFormat = jsonFormat5(DseRecordJson.apply)
+  implicit val vectorOfDseRecordsFormat = jsonFormat1(VectorOfDseRecordsJson.apply)
 
 }
 
-trait Service extends Protocols with Ohco2Service with CiteCollectionService with CiteImageService {
+trait Service extends Protocols with Ohco2Service with CiteCollectionService with CiteImageService with DseService {
   implicit val system: ActorSystem
   implicit def executor: ExecutionContextExecutor
   implicit val materializer: Materializer
@@ -87,14 +91,14 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
 
   lazy val cexLibraryLocal:CiteLibrary = {
       val f:String = config.getString("cex.library")
-      logger.info(s"\n\nUsing CEX file: ${f}\n")
+      logger.debug(s"\n\nUsing CEX file: ${f}\n")
       val cl:CiteLibrary = CiteLibrarySource.fromFile( f , "#", ",")
       cl
   }
 
   lazy val cexLibraryRemote:CiteLibrary = {
       val url:String = config.getString("cex.libraryUrl")
-      logger.info(s"\n\nUsing CEX file from URL: ${url}\n")
+      logger.debug(s"\n\nUsing CEX file from URL: ${url}\n")
       val cexFile = scala.io.Source.fromURL(url)
       val cexString = cexFile.mkString
       val repo:CiteLibrary = CiteLibrary(cexString, "#", ",")
@@ -177,500 +181,536 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       }
     } ~
-      pathPrefix("textcatalog") {
-      // Get Text Catalog
-        (get & path( Segment)) { urnString => 
-          complete {
-            fetchCatalog(Some(urnString)).map[ToResponseMarshallable] {
-              case Right(catalogString) => catalogString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        } ~
-        (get & pathEndOrSingleSlash ) { 
-          complete {
-            fetchCatalog(None).map[ToResponseMarshallable] {
-              case Right(catalogString) => catalogString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
+    pathPrefix("textcatalog") {
+    // Get Text Catalog
+      (get & path( Segment)) { urnString => 
+        complete {
+          fetchCatalog(Some(urnString)).map[ToResponseMarshallable] {
+            case Right(catalogString) => catalogString
+            case Left(errorMessage) => BadRequest -> errorMessage
           }
         }
       } ~
-      pathPrefix("texts"  ) {
-      // All the '/texts' routes
-        (get & path("first" / Segment)) { (urnString) =>
-          complete {
-            fetchFirstNode(urnString).map[ToResponseMarshallable] {
-              case Right(citableNodeString) => citableNodeString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
+      (get & pathEndOrSingleSlash ) { 
+        complete {
+          fetchCatalog(None).map[ToResponseMarshallable] {
+            case Right(catalogString) => catalogString
+            case Left(errorMessage) => BadRequest -> errorMessage
           }
-        } ~
-        (get & path("firsturn" / Segment)) { (urnString) =>
-          complete {
-            fetchFirstUrn(urnString).map[ToResponseMarshallable] {
-              case Right(ctsUrnString) => ctsUrnString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
+        }
+      }
+    } ~
+    pathPrefix("texts"  ) {
+    // All the '/texts' routes
+      (get & path("first" / Segment)) { (urnString) =>
+        complete {
+          fetchFirstNode(urnString).map[ToResponseMarshallable] {
+            case Right(citableNodeString) => citableNodeString
+            case Left(errorMessage) => BadRequest -> errorMessage
           }
-        } ~
-        pathPrefix("reff") {
-        // Reff
-          (get & path(Segment)) { urnString =>
-            complete {
-              fetchReff(urnString).map[ToResponseMarshallable] {
-                case Right(reffString) => reffString
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            } 
+        }
+      } ~
+      (get & path("firsturn" / Segment)) { (urnString) =>
+        complete {
+          fetchFirstUrn(urnString).map[ToResponseMarshallable] {
+            case Right(ctsUrnString) => ctsUrnString
+            case Left(errorMessage) => BadRequest -> errorMessage
           }
-        } ~
-        (get & path("prev" / Segment)) { (urnString) =>
-          complete {
-            fetchPrevText(urnString).map[ToResponseMarshallable] {
-              case Right(corpusString) => corpusString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        } ~
-        (get & path("prevurn" / Segment)) { (urnString) =>
-          complete {
-            fetchPrevUrn(urnString).map[ToResponseMarshallable] {
-              case Right(ctsUrnString) => ctsUrnString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        } ~
-        (get & path("next" / Segment)) { (urnString) =>
-          complete {
-            fetchNextText(urnString).map[ToResponseMarshallable] {
-              case Right(corpusString) => corpusString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        } ~
-        (get & path("nexturn" / Segment)) { (urnString) =>
-          complete {
-            fetchNextUrn(urnString).map[ToResponseMarshallable] {
-              case Right(ctsUrnString) => ctsUrnString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        } ~ 
-        (get & path("label" / Segment)) { (urnString) =>
-          complete {
-            fetchLabelForUrn(urnString).map[ToResponseMarshallable] {
-              case Right(nodeLabel) => nodeLabel
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        } ~ 
-        (get & path( "ngram" / "urns"  )){
-          parameters('ng.as[String]) { ng => 
-            complete {
-              fetchUrnsForNgramJson(None, ng).map[ToResponseMarshallable]{
-                case Right(ngh) => ngh
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path( "ngram" / "urns" / "tocorpus"  )){
-          parameters('ng.as[String]) { ng => 
-            complete {
-              urnsToKwikCorpus(None, ng).map[ToResponseMarshallable]{
-                case Right(ngh) => ngh
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~  
-        (get & path( "ngram" / "urns" / "tocorpus" / Segment )){ urnString =>
-          parameters('ng.as[String]) { ng => 
-            complete {
-              urnsToKwikCorpus(Some(urnString), ng).map[ToResponseMarshallable]{
-                case Right(ngh) => ngh
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path( "ngram" / "urns" / Segment )){ urnString =>
-          parameters('ng.as[String]) { ng => 
-            complete {
-              fetchUrnsForNgramJson(Some(urnString), ng).map[ToResponseMarshallable]{
-                case Right(ngh) => ngh
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path( "ngram" / Segment )){ urnString =>
-          parameters('n.as[Int] ? 3, 't.as[Int] ? 1, 's.as[String] ?, 'ignorePunctuation.as[Boolean] ? true) { (n, t, s, ignorePunctuation) =>
-            complete {
-              fetchNgram(n, t, s, Some(urnString), ignorePunctuation).map[ToResponseMarshallable] {
-                case Right(ngh) => ngh
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path( "ngram" )) { 
-          parameters('n.as[Int] ? 3, 't.as[Int] ? 1, 's.as[String] ?, 'ignorePunctuation.as[Boolean] ? true) { (n, t, s, ignorePunctuation) =>
-            complete {
-              fetchNgram(n, t, s, None, ignorePunctuation).map[ToResponseMarshallable] {
-                case Right(ngh) => ngh
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path( "find" )) { 
-          parameters( 's.as[String].* ) { strings => 
-            complete {
-              val stringVector = strings.toVector
-              fetchFind(stringVector, None).map[ToResponseMarshallable] {
-                case Right(corpusString) => corpusString
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path( "find" / Segment )){ urnString =>
-          parameters( 's.as[String].* ) { strings => 
-            complete {
-              val stringVector = strings.toVector
-              fetchFind(stringVector, Some(urnString)).map[ToResponseMarshallable] {
-                case Right(corpusString) => corpusString
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path( "token" / Segment )){ urnString =>
-          parameters( 't.as[String], 'ignorePunctuation.as[Boolean] ? true ) { (tokenString, ignorePunctuation) => 
-            complete {
-              fetchTokenFind(tokenString, Some(urnString), ignorePunctuation).map[ToResponseMarshallable] {
-                case Right(corpusString) => corpusString
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path( "token" )){ 
-          parameters( 't.as[String], 'ignorePunctuation.as[Boolean] ? true ) { (tokenString, ignorePunctuation) => 
-            complete {
-              fetchTokenFind(tokenString, None, ignorePunctuation).map[ToResponseMarshallable] {
-                case Right(corpusString) => corpusString
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-         (get & path( "tokens" / Segment )){ urnString =>
-          parameters( 't.as[String].*, 'ignorePunctuation.as[Boolean] ? true, 'dist.as[String] ? "" ) { (tokenStrings, ignorePunctuation, dist) => 
-            complete {
-              fetchAllTokensFind(tokenStrings.toVector, Some(urnString), ignorePunctuation, dist).map[ToResponseMarshallable] {
-                case Right(corpusString) => corpusString
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path( "tokens" )){ 
-          parameters( 't.as[String].*, 'ignorePunctuation.as[Boolean] ? true, 'dist.as[String] ? "" ) { (tokenStrings, ignorePunctuation, dist) => 
-            complete {
-              fetchAllTokensFind(tokenStrings.toVector, None, ignorePunctuation, dist).map[ToResponseMarshallable] {
-                case Right(corpusString) => corpusString
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
+        }
+      } ~
+      pathPrefix("reff") {
+      // Reff
         (get & path(Segment)) { urnString =>
           complete {
-            fetchOhco2Text(urnString).map[ToResponseMarshallable] {
+            fetchReff(urnString).map[ToResponseMarshallable] {
+              case Right(reffString) => reffString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          } 
+        }
+      } ~
+      (get & path("prev" / Segment)) { (urnString) =>
+        complete {
+          fetchPrevText(urnString).map[ToResponseMarshallable] {
+            case Right(corpusString) => corpusString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~
+      (get & path("prevurn" / Segment)) { (urnString) =>
+        complete {
+          fetchPrevUrn(urnString).map[ToResponseMarshallable] {
+            case Right(ctsUrnString) => ctsUrnString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~
+      (get & path("next" / Segment)) { (urnString) =>
+        complete {
+          fetchNextText(urnString).map[ToResponseMarshallable] {
+            case Right(corpusString) => corpusString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~
+      (get & path("nexturn" / Segment)) { (urnString) =>
+        complete {
+          fetchNextUrn(urnString).map[ToResponseMarshallable] {
+            case Right(ctsUrnString) => ctsUrnString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~ 
+      (get & path("label" / Segment)) { (urnString) =>
+        complete {
+          fetchLabelForUrn(urnString).map[ToResponseMarshallable] {
+            case Right(nodeLabel) => nodeLabel
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~ 
+      (get & path( "ngram" / "urns"  )){
+        parameters('ng.as[String]) { ng => 
+          complete {
+            fetchUrnsForNgramJson(None, ng).map[ToResponseMarshallable]{
+              case Right(ngh) => ngh
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      (get & path( "ngram" / "urns" / "tocorpus"  )){
+        parameters('ng.as[String]) { ng => 
+          complete {
+            urnsToKwikCorpus(None, ng).map[ToResponseMarshallable]{
+              case Right(ngh) => ngh
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~  
+      (get & path( "ngram" / "urns" / "tocorpus" / Segment )){ urnString =>
+        parameters('ng.as[String]) { ng => 
+          complete {
+            urnsToKwikCorpus(Some(urnString), ng).map[ToResponseMarshallable]{
+              case Right(ngh) => ngh
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      (get & path( "ngram" / "urns" / Segment )){ urnString =>
+        parameters('ng.as[String]) { ng => 
+          complete {
+            fetchUrnsForNgramJson(Some(urnString), ng).map[ToResponseMarshallable]{
+              case Right(ngh) => ngh
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      (get & path( "ngram" / Segment )){ urnString =>
+        parameters('n.as[Int] ? 3, 't.as[Int] ? 1, 's.as[String] ?, 'ignorePunctuation.as[Boolean] ? true) { (n, t, s, ignorePunctuation) =>
+          complete {
+            fetchNgram(n, t, s, Some(urnString), ignorePunctuation).map[ToResponseMarshallable] {
+              case Right(ngh) => ngh
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      (get & path( "ngram" )) { 
+        parameters('n.as[Int] ? 3, 't.as[Int] ? 1, 's.as[String] ?, 'ignorePunctuation.as[Boolean] ? true) { (n, t, s, ignorePunctuation) =>
+          complete {
+            fetchNgram(n, t, s, None, ignorePunctuation).map[ToResponseMarshallable] {
+              case Right(ngh) => ngh
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      (get & path( "find" )) { 
+        parameters( 's.as[String].* ) { strings => 
+          complete {
+            val stringVector = strings.toVector
+            fetchFind(stringVector, None).map[ToResponseMarshallable] {
               case Right(corpusString) => corpusString
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
-        } ~ 
-        (get &  pathEndOrSingleSlash ) { 
-          complete {
-            fetchCatalog(None).map[ToResponseMarshallable] {
-              case Right(catalogString) => catalogString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        }  
+        }
       } ~
-      pathPrefix("cite2urn"){
-        // Validate a Cite2 URN
-        (get & path(Segment)) { (urnString) =>
+      (get & path( "find" / Segment )){ urnString =>
+        parameters( 's.as[String].* ) { strings => 
           complete {
-            fetchCite2Urn(urnString).map[ToResponseMarshallable] {
-              case Right(cite2UrnString) => cite2UrnString
+            val stringVector = strings.toVector
+            fetchFind(stringVector, Some(urnString)).map[ToResponseMarshallable] {
+              case Right(corpusString) => corpusString
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
         }
       } ~
-      pathPrefix("collections") {
-        (get & path( "objects")) { 
-          parameters( 'urn.as[String].* ) { strings => 
-            complete { 
-              val urns:Vector[Cite2Urn] = strings.toVector.map(s => Cite2Urn(s))
-              fetchCiteObjectsFromNCollections(urns).map[ToResponseMarshallable]{
-                case Right(objectVec) => objectVec
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }              
-            }
-          }
-        } ~
-        (get & path( "labelmap")) { 
-            complete { 
-              fetchObjectsMapJson.map[ToResponseMarshallable]{
-                case Right(labelMap) => labelMap
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }              
-          }
-        } ~
-        (get & path( Segment )) { urnString =>
-          complete { 
-            fetchCiteCollectionDefJson(urnString).map[ToResponseMarshallable]{
-              case Right(citeCollectionDefJson) => citeCollectionDefJson
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }
-          }
-        } ~
-        (get & path( "hasobject" / Segment)) { urnString =>
-          complete{
-             hasObject(urnString).map[ToResponseMarshallable] {
-              case Right(b) => b.toString
-              case Left(errorMessage) => BadRequest -> errorMessage
-             }
-          }
-
-        } ~
-        (get & pathEndOrSingleSlash )  {
+      (get & path( "token" / Segment )){ urnString =>
+        parameters( 't.as[String], 'ignorePunctuation.as[Boolean] ? true ) { (tokenString, ignorePunctuation) => 
           complete {
-            fetchVectorOfCiteCollectionDefsJson.map[ToResponseMarshallable]{
+            fetchTokenFind(tokenString, Some(urnString), ignorePunctuation).map[ToResponseMarshallable] {
+              case Right(corpusString) => corpusString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      (get & path( "token" )){ 
+        parameters( 't.as[String], 'ignorePunctuation.as[Boolean] ? true ) { (tokenString, ignorePunctuation) => 
+          complete {
+            fetchTokenFind(tokenString, None, ignorePunctuation).map[ToResponseMarshallable] {
+              case Right(corpusString) => corpusString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+       (get & path( "tokens" / Segment )){ urnString =>
+        parameters( 't.as[String].*, 'ignorePunctuation.as[Boolean] ? true, 'dist.as[String] ? "" ) { (tokenStrings, ignorePunctuation, dist) => 
+          complete {
+            fetchAllTokensFind(tokenStrings.toVector, Some(urnString), ignorePunctuation, dist).map[ToResponseMarshallable] {
+              case Right(corpusString) => corpusString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      (get & path( "tokens" )){ 
+        parameters( 't.as[String].*, 'ignorePunctuation.as[Boolean] ? true, 'dist.as[String] ? "" ) { (tokenStrings, ignorePunctuation, dist) => 
+          complete {
+            fetchAllTokensFind(tokenStrings.toVector, None, ignorePunctuation, dist).map[ToResponseMarshallable] {
+              case Right(corpusString) => corpusString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        }
+      } ~
+      (get & path(Segment)) { urnString =>
+        complete {
+          fetchOhco2Text(urnString).map[ToResponseMarshallable] {
+            case Right(corpusString) => corpusString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~ 
+      (get &  pathEndOrSingleSlash ) { 
+        complete {
+          fetchCatalog(None).map[ToResponseMarshallable] {
+            case Right(catalogString) => catalogString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      }  
+    } ~
+    pathPrefix("cite2urn"){
+      // Validate a Cite2 URN
+      (get & path(Segment)) { (urnString) =>
+        complete {
+          fetchCite2Urn(urnString).map[ToResponseMarshallable] {
+            case Right(cite2UrnString) => cite2UrnString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      }
+    } ~
+    pathPrefix("collections") {
+      (get & path( "objects")) { 
+        parameters( 'urn.as[String].* ) { strings => 
+          complete { 
+            val urns:Vector[Cite2Urn] = strings.toVector.map(s => Cite2Urn(s))
+            fetchCiteObjectsFromNCollections(urns).map[ToResponseMarshallable]{
+              case Right(objectVec) => objectVec
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+          }
+        }
+      } ~
+      (get & path( "labelmap")) { 
+          complete { 
+            fetchObjectsMapJson.map[ToResponseMarshallable]{
+              case Right(labelMap) => labelMap
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+        }
+      } ~
+      (get & path( Segment )) { urnString =>
+        complete { 
+          fetchCiteCollectionDefJson(urnString).map[ToResponseMarshallable]{
+            case Right(citeCollectionDefJson) => citeCollectionDefJson
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~
+      (get & path( "hasobject" / Segment)) { urnString =>
+        complete{
+           hasObject(urnString).map[ToResponseMarshallable] {
+            case Right(b) => b.toString
+            case Left(errorMessage) => BadRequest -> errorMessage
+           }
+        }
+
+      } ~
+      (get & pathEndOrSingleSlash )  {
+        complete {
+          fetchVectorOfCiteCollectionDefsJson.map[ToResponseMarshallable]{
+            case Right(citeObject) => citeObject
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      }
+    } ~
+    pathPrefix("datamodels") {
+      (get & pathEndOrSingleSlash) {
+        complete {
+          fetchDataModelsJson.map[ToResponseMarshallable]{
+            case Right(dataModel) => dataModel
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      }
+    } ~
+    pathPrefix("objects") {
+      (get & path( "prevurn" / Segment)) { urnString => 
+        complete { 
+          fetchPrevCite2Urn(urnString).map[ToResponseMarshallable]{
+            case Right(cite2UrnString) => cite2UrnString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }              
+        }
+      } ~
+      (get & path( "nexturn" / Segment)) { urnString => 
+        complete { 
+          fetchNextCite2Urn(urnString).map[ToResponseMarshallable]{
+            case Right(cite2UrnString) => cite2UrnString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }              
+        }
+      } ~
+      (get & path( "paged" / Segment)) { urnString => 
+        parameters('offset.as[Int] ? 1, 'limit.as[Int] ? 10) { (offset, limit) => 
+          complete { 
+            fetchPagedCiteObjectJson(urnString, offset, limit).map[ToResponseMarshallable]{
               case Right(citeObject) => citeObject
               case Left(errorMessage) => BadRequest -> errorMessage
-            }
+            }              
           }
         }
       } ~
-      pathPrefix("datamodels") {
-        (get & pathEndOrSingleSlash) {
+      (get & path("find" / "urnmatch" / Segment )) { urnString =>
+        parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterUrn) => 
+          //complete {s"'/find/urnmatch/${urnString}' with parameter ${urn} Not implemented yet."}
           complete {
-            fetchDataModelsJson.map[ToResponseMarshallable]{
-              case Right(dataModel) => dataModel
+            doUrnMatch(Some(urnString), urn, parameterUrn).map[ToResponseMarshallable]{
+              case Right(citeObjects) => citeObjects
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+          }
+        }
+      } ~
+      (get & path("find" / "urnmatch" )) { 
+        parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterUrn) => 
+          complete {
+            doUrnMatch(None, urn, parameterUrn).map[ToResponseMarshallable]{
+              case Right(citeObjects) => citeObjects
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+          }
+        }
+      } ~
+      (get & path("find" / "regexmatch" / Segment )) { urnString =>
+        parameters( 'find.as[String], 'parameterurn.as[String] ?) { (rx, parameterUrn) => 
+          complete {
+            doRegexMatch(Some(urnString), rx, parameterUrn).map[ToResponseMarshallable]{
+              case Right(citeObjects) => citeObjects
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+          }
+        }
+      } ~
+      (get & path("find" / "regexmatch" )) { 
+        parameters( 'find.as[String], 'parameterurn.as[String] ?) { (rx, parameterUrn) => 
+          complete {
+            doRegexMatch(None, rx, parameterUrn).map[ToResponseMarshallable]{
+              case Right(citeObjects) => citeObjects
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+          }
+        }
+      } ~
+      (get & path("find" / "stringcontains" / Segment )) { urnString =>
+        parameters( 'find.as[String], 'casesensitive.as[Boolean] ? true ) { (s, caseSensitive) => 
+          complete {
+            doStringContains(Some(urnString), s, caseSensitive).map[ToResponseMarshallable]{
+              case Right(citeObjects) => citeObjects
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+          }
+        }
+      } ~
+      (get & path("find" / "stringcontains" )) { 
+        parameters( 'find.as[String], 'casesensitive.as[Boolean] ? true ) { (s, caseSensitive) => 
+          complete {
+            doStringContains(None, s, caseSensitive).map[ToResponseMarshallable]{
+              case Right(citeObjects) => citeObjects
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+          }
+        }
+      } ~
+      (get & path("find" / "valueequals"  )) { 
+        parameters( 'value.as[String], 'propertyurn.as[String] ?, 'type.as[String] ? ) { (valueToMatchStr, propertyUrnStr, typeStringOption) => 
+          complete {
+            doValueEquals(propertyUrnStr, valueToMatchStr, typeStringOption).map[ToResponseMarshallable]{
+              case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
         }
       } ~
-      pathPrefix("objects") {
-        (get & path( "prevurn" / Segment)) { urnString => 
-          complete { 
-            fetchPrevCite2Urn(urnString).map[ToResponseMarshallable]{
-              case Right(cite2UrnString) => cite2UrnString
+      (get & path("find" / "numeric" / Segment )) { urnString =>
+        parameters(  'n1.as[Double], 'op.as[String], 'n2.as[Double] ?, 'propertyurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
+          complete {
+            doNumeric(Some(urnString), n1, op, n2, parameterUrn).map[ToResponseMarshallable]{
+              case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
-            }              
-          }
-        } ~
-        (get & path( "nexturn" / Segment)) { urnString => 
-          complete { 
-            fetchNextCite2Urn(urnString).map[ToResponseMarshallable]{
-              case Right(cite2UrnString) => cite2UrnString
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }              
-          }
-        } ~
-        (get & path( "paged" / Segment)) { urnString => 
-          parameters('offset.as[Int] ? 1, 'limit.as[Int] ? 10) { (offset, limit) => 
-            complete { 
-              fetchPagedCiteObjectJson(urnString, offset, limit).map[ToResponseMarshallable]{
-                case Right(citeObject) => citeObject
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }              
             }
           }
-        } ~
-        (get & path("find" / "urnmatch" / Segment )) { urnString =>
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterUrn) => 
-            //complete {s"'/find/urnmatch/${urnString}' with parameter ${urn} Not implemented yet."}
-            complete {
-              doUrnMatch(Some(urnString), urn, parameterUrn).map[ToResponseMarshallable]{
-                case Right(citeObjects) => citeObjects
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }              
-            }
-          }
-        } ~
-        (get & path("find" / "urnmatch" )) { 
-          parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterUrn) => 
-            complete {
-              doUrnMatch(None, urn, parameterUrn).map[ToResponseMarshallable]{
-                case Right(citeObjects) => citeObjects
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }              
-            }
-          }
-        } ~
-        (get & path("find" / "regexmatch" / Segment )) { urnString =>
-          parameters( 'find.as[String], 'parameterurn.as[String] ?) { (rx, parameterUrn) => 
-            complete {
-              doRegexMatch(Some(urnString), rx, parameterUrn).map[ToResponseMarshallable]{
-                case Right(citeObjects) => citeObjects
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }              
-            }
-          }
-        } ~
-        (get & path("find" / "regexmatch" )) { 
-          parameters( 'find.as[String], 'parameterurn.as[String] ?) { (rx, parameterUrn) => 
-            complete {
-              doRegexMatch(None, rx, parameterUrn).map[ToResponseMarshallable]{
-                case Right(citeObjects) => citeObjects
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }              
-            }
-          }
-        } ~
-        (get & path("find" / "stringcontains" / Segment )) { urnString =>
-          parameters( 'find.as[String], 'casesensitive.as[Boolean] ? true ) { (s, caseSensitive) => 
-            complete {
-              doStringContains(Some(urnString), s, caseSensitive).map[ToResponseMarshallable]{
-                case Right(citeObjects) => citeObjects
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }              
-            }
-          }
-        } ~
-        (get & path("find" / "stringcontains" )) { 
-          parameters( 'find.as[String], 'casesensitive.as[Boolean] ? true ) { (s, caseSensitive) => 
-            complete {
-              doStringContains(None, s, caseSensitive).map[ToResponseMarshallable]{
-                case Right(citeObjects) => citeObjects
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }              
-            }
-          }
-        } ~
-        (get & path("find" / "valueequals"  )) { 
-          parameters( 'value.as[String], 'propertyurn.as[String] ?, 'type.as[String] ? ) { (valueToMatchStr, propertyUrnStr, typeStringOption) => 
-            complete {
-              doValueEquals(propertyUrnStr, valueToMatchStr, typeStringOption).map[ToResponseMarshallable]{
-                case Right(citeObjects) => citeObjects
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path("find" / "numeric" / Segment )) { urnString =>
-          parameters(  'n1.as[Double], 'op.as[String], 'n2.as[Double] ?, 'propertyurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
-            complete {
-              doNumeric(Some(urnString), n1, op, n2, parameterUrn).map[ToResponseMarshallable]{
-                case Right(citeObjects) => citeObjects
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path("find" / "numeric" )) { 
-          parameters( 'n1.as[Double], 'op.as[String], 'n2.as[Double] ?,'propertyurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
-            complete {
-              doNumeric(None, n1, op, n2, parameterUrn).map[ToResponseMarshallable]{
-                case Right(citeObjects) => citeObjects
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }
-            }
-          }
-        } ~
-        (get & path(Segment)) { (urnString) =>
-            complete { 
-              fetchCiteObjectJson(urnString).map[ToResponseMarshallable]{
-                case Right(citeObject) => citeObject
-                case Left(errorMessage) => BadRequest -> errorMessage
-              }              
-            }
-         } 
+        }
       } ~
-      pathPrefix("image") {
-        (get & path(Segment)) {  urnString =>
-          parameters( 'resolveImage.as[Boolean] ? true ) { (resolveImage) => 
-            val u:Cite2Urn = Cite2Urn(urnString)
-            resolveImage match {
-              case false => {
-                complete {
-                  iiifApiUrl(u).map[ToResponseMarshallable]{
-                    case Right(su) => {
-                      su
-                    }
-                    case Left(errorMessage) => BadRequest -> errorMessage
-                  }
-                }
-              }
-              case _ => {
-                redirect(iiifApiResolver(urn = u),StatusCodes.TemporaryRedirect) 
-              }
+      (get & path("find" / "numeric" )) { 
+        parameters( 'n1.as[Double], 'op.as[String], 'n2.as[Double] ?,'propertyurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
+          complete {
+            doNumeric(None, n1, op, n2, parameterUrn).map[ToResponseMarshallable]{
+              case Right(citeObjects) => citeObjects
+              case Left(errorMessage) => BadRequest -> errorMessage
             }
           }
-        } ~
-        (get & path(Segment / Segment)) { (widthString, urnString) =>
-          parameters( 'resolveImage.as[Boolean] ? true ) { (resolveImage) => 
-            val u:Cite2Urn = Cite2Urn(urnString)
-            //logger.info(s"urn = ${u}")
-            val w:Int = widthString.toInt
-            //logger.info(s"width = ${w}")
-            resolveImage match {
-              case false => {
-                complete {
-                  iiifApiUrl(urn = u, width = Some(w)).map[ToResponseMarshallable]{
-                    case Right(su) => {
-                      su
-                    }
-                    case Left(errorMessage) => BadRequest -> errorMessage
+        }
+      } ~
+      (get & path(Segment)) { (urnString) =>
+          complete { 
+            fetchCiteObjectJson(urnString).map[ToResponseMarshallable]{
+              case Right(citeObject) => citeObject
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }              
+          }
+       } 
+    } ~
+    pathPrefix("image") {
+      (get & path(Segment)) {  urnString =>
+        parameters( 'resolveImage.as[Boolean] ? true ) { (resolveImage) => 
+          val u:Cite2Urn = Cite2Urn(urnString)
+          resolveImage match {
+            case false => {
+              complete {
+                iiifApiUrl(u).map[ToResponseMarshallable]{
+                  case Right(su) => {
+                    su
                   }
+                  case Left(errorMessage) => BadRequest -> errorMessage
                 }
               }
-              case _ => {
-                redirect(iiifApiResolver(urn = u, width = Some(w)),StatusCodes.TemporaryRedirect) 
-              }
+            }
+            case _ => {
+              redirect(iiifApiResolver(urn = u),StatusCodes.TemporaryRedirect) 
             }
           }
-        } ~
-        (get & path(Segment / Segment / Segment)) { (maxHeightString, maxWidthString, urnString) =>
-          parameters( 'resolveImage.as[Boolean] ? true ) { (resolveImage) => 
-            val u:Cite2Urn = Cite2Urn(urnString)
-            val mw:Int = maxWidthString.toInt
-            val mh:Int = maxHeightString.toInt
-            resolveImage match {
-              case false => {
-                complete {
-                  iiifApiUrl(urn = u, maxWidth = Some(mw), maxHeight = Some(mh)).map[ToResponseMarshallable]{
-                    case Right(su) => {
-                      su
-                    }
-                    case Left(errorMessage) => BadRequest -> errorMessage
+        }
+      } ~
+      (get & path(Segment / Segment)) { (widthString, urnString) =>
+        parameters( 'resolveImage.as[Boolean] ? true ) { (resolveImage) => 
+          val u:Cite2Urn = Cite2Urn(urnString)
+          //logger.info(s"urn = ${u}")
+          val w:Int = widthString.toInt
+          //logger.info(s"width = ${w}")
+          resolveImage match {
+            case false => {
+              complete {
+                iiifApiUrl(urn = u, width = Some(w)).map[ToResponseMarshallable]{
+                  case Right(su) => {
+                    su
                   }
+                  case Left(errorMessage) => BadRequest -> errorMessage
                 }
               }
-              case _ => {
-                redirect(iiifApiResolver(urn = u, maxWidth = Some(mw), maxHeight = Some(mh)),StatusCodes.TemporaryRedirect) 
-              }
+            }
+            case _ => {
+              redirect(iiifApiResolver(urn = u, width = Some(w)),StatusCodes.TemporaryRedirect) 
             }
           }
-        } 
-      }
+        }
+      } ~
+      (get & path(Segment / Segment / Segment)) { (maxHeightString, maxWidthString, urnString) =>
+        parameters( 'resolveImage.as[Boolean] ? true ) { (resolveImage) => 
+          val u:Cite2Urn = Cite2Urn(urnString)
+          val mw:Int = maxWidthString.toInt
+          val mh:Int = maxHeightString.toInt
+          resolveImage match {
+            case false => {
+              complete {
+                iiifApiUrl(urn = u, maxWidth = Some(mw), maxHeight = Some(mh)).map[ToResponseMarshallable]{
+                  case Right(su) => {
+                    su
+                  }
+                  case Left(errorMessage) => BadRequest -> errorMessage
+                }
+              }
+            }
+            case _ => {
+              redirect(iiifApiResolver(urn = u, maxWidth = Some(mw), maxHeight = Some(mh)),StatusCodes.TemporaryRedirect) 
+            }
+          }
+        }
+      } 
+    } ~
+    pathPrefix("dse") {
+      // Validate a CTS URN 
+      (get & path( "test" / Segment)) { (urnString) =>
+        complete {
+          testDseService(urnString).map[ToResponseMarshallable] {
+            case Right(ctsUrnString) => ctsUrnString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~
+      (get & path( "recordsforimage" / Segment)) { (urnString) =>
+        complete {
+          dseRecordsForImage(urnString).map[ToResponseMarshallable] {
+            case Right(ctsUrnString) => ctsUrnString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~
+      (get & path( "recordsforsurface" / Segment)) { (urnString) =>
+        complete {
+          dseRecordsForSurface(urnString).map[ToResponseMarshallable] {
+            case Right(ctsUrnString) => ctsUrnString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      } ~  
+      (get & path( "recordsfortext" / Segment)) { (urnString) =>
+        complete {
+          dseRecordsForText(urnString).map[ToResponseMarshallable] {
+            case Right(ctsUrnString) => ctsUrnString
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }
+        }
+      }      
+    }
+
     }
   }
 }
 
 
-object CiteMicroservice extends App with Service with Ohco2Service with CiteCollectionService with CiteImageService {
+object CiteMicroservice extends App with Service with Ohco2Service with CiteCollectionService with CiteImageService with DseService {
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
   override implicit val materializer = ActorMaterializer()
@@ -695,20 +735,20 @@ object CiteMicroservice extends App with Service with Ohco2Service with CiteColl
 
   textRepository match {
     case Some(tr) => { 
-        logger.info(s"\n\nCorpus-size: ${tr.corpus.size}\n\n")
+        logger.debug(s"\n\nCorpus-size: ${tr.corpus.size}\n\n")
        // cexLibrary.textRepository.get
       } 
     case None => {
-        logger.info(s"\n\nNO TEXT REPOSITORY IN THIS CEX FILE!\n\n")
+        logger.debug(s"\n\nNO TEXT REPOSITORY IN THIS CEX FILE!\n\n")
     }
   }
 
   collectionRepository match {
     case Some(cr) => { 
-        logger.info(s"\n\nCollection-size: ${cr.citableObjects.size}\n\n")
+        logger.debug(s"\n\nCollection-size: ${cr.citableObjects.size}\n\n")
       } 
     case None => {
-        logger.info(s"\n\nNO COLLECTION REPOSITORY IN THIS CEX FILE!\n\n")
+        logger.debug(s"\n\nNO COLLECTION REPOSITORY IN THIS CEX FILE!\n\n")
     }
   }
 
