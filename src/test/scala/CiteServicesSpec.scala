@@ -50,7 +50,7 @@ class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest wit
     Get(s"/libraryinfo") ~> routes ~> check {
       status shouldBe OK
       contentType shouldBe `application/json`
-      val infoMap:Map[String,String] = Map("name" -> "scs-akka test library", "urn" -> "urn:cite2:cex:demo.2017_1:servicetest","license" -> "CC Share Alike.  For details, see more info.")
+      val infoMap:Map[String,String] = Map("name" -> "scs-akka test library", "urn" -> "urn:cite2:cex:demo.2017_1:servicetest","license" -> "CC Share Alike. For details, see more info.")
       responseAs[Map[String,String]] shouldBe infoMap
     }
   }
@@ -696,6 +696,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       r.citeObjects.size should equal (9) 
     }
   }
+
   it should """respond to "/objects/find/valueequals" when given a type with a boolean value """ in {
     Get(s"/objects/find/valueequals?type=boolean&value=true") ~> routes ~> check {
       status shouldBe OK
@@ -704,6 +705,25 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       r.citeObjects.size should equal (12) 
     }
   }
+
+  it should """respond to "/objects/find/valueequals" when given a type with a boolean value and page the results """ in {
+    Get(s"/objects/find/valueequals?type=boolean&value=true&offset=0&limit=2") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (2) 
+    }
+  }
+
+  it should """respond to "/objects/find/valueequals" when given a type with a boolean value and page the results, even beyond the end of the set """ in {
+    Get(s"/objects/find/valueequals?type=boolean&value=true&offset=10&limit=4") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (2) 
+    }
+  }
+
   it should """respond to "/objects/find/valueequals" when given a type with a string value """ in {
     Get(s"/objects/find/valueequals?type=string&value=recto") ~> routes ~> check {
       status shouldBe OK

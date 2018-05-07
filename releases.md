@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.10.0**: Added `limit` and `offset` optional parameters for paged results on collection searches.
+
 **1.9.0**: `collections/reff/COLLECTION-URN` returns `Vector[Cite2Urn]`
 
 **1.8.0**: Added handling of the DSE object model (see <Examples.md>).

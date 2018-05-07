@@ -512,10 +512,10 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "urnmatch" / Segment )) { urnString =>
-        parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterUrn) => 
+        parameters( 'find.as[String], 'parameterurn.as[String] ?, 'offset.as[Int] ? , 'limit.as[Int] ? ) { (urn, parameterUrn, offset, limit) => 
           //complete {s"'/find/urnmatch/${urnString}' with parameter ${urn} Not implemented yet."}
           complete {
-            doUrnMatch(Some(urnString), urn, parameterUrn).map[ToResponseMarshallable]{
+            doUrnMatch(Some(urnString), urn, parameterUrn, offset, limit).map[ToResponseMarshallable]{
               case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }              
@@ -523,9 +523,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "urnmatch" )) { 
-        parameters( 'find.as[String], 'parameterurn.as[String] ? ) { (urn, parameterUrn) => 
+        parameters( 'find.as[String], 'parameterurn.as[String] ?, 'offset.as[Int] ? , 'limit.as[Int] ? ) { (urn, parameterUrn, offset, limit) => 
           complete {
-            doUrnMatch(None, urn, parameterUrn).map[ToResponseMarshallable]{
+            doUrnMatch(None, urn, parameterUrn, offset, limit).map[ToResponseMarshallable]{
               case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }              
@@ -533,9 +533,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "regexmatch" / Segment )) { urnString =>
-        parameters( 'find.as[String], 'parameterurn.as[String] ?) { (rx, parameterUrn) => 
+        parameters( 'find.as[String], 'parameterurn.as[String] ?, 'offset.as[Int] ? , 'limit.as[Int] ? ) { (rx, parameterUrn, offset, limit) => 
           complete {
-            doRegexMatch(Some(urnString), rx, parameterUrn).map[ToResponseMarshallable]{
+            doRegexMatch(Some(urnString), rx, parameterUrn, offset, limit ).map[ToResponseMarshallable]{
               case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }              
@@ -543,9 +543,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "regexmatch" )) { 
-        parameters( 'find.as[String], 'parameterurn.as[String] ?) { (rx, parameterUrn) => 
+        parameters( 'find.as[String], 'parameterurn.as[String] ?, 'offset.as[Int] ? , 'limit.as[Int] ? ) { (rx, parameterUrn, offset, limit) => 
           complete {
-            doRegexMatch(None, rx, parameterUrn).map[ToResponseMarshallable]{
+            doRegexMatch(None, rx, parameterUrn, offset, limit).map[ToResponseMarshallable]{
               case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }              
@@ -553,9 +553,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "stringcontains" / Segment )) { urnString =>
-        parameters( 'find.as[String], 'casesensitive.as[Boolean] ? true ) { (s, caseSensitive) => 
+        parameters( 'find.as[String], 'casesensitive.as[Boolean] ? true , 'offset.as[Int] ? , 'limit.as[Int] ? ) { (s, caseSensitive, offset, limit) => 
           complete {
-            doStringContains(Some(urnString), s, caseSensitive).map[ToResponseMarshallable]{
+            doStringContains(Some(urnString), s, caseSensitive, offset, limit).map[ToResponseMarshallable]{
               case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }              
@@ -563,9 +563,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "stringcontains" )) { 
-        parameters( 'find.as[String], 'casesensitive.as[Boolean] ? true ) { (s, caseSensitive) => 
+        parameters( 'find.as[String], 'casesensitive.as[Boolean] ? true , 'offset.as[Int] ? , 'limit.as[Int] ? ) { (s, caseSensitive, offset, limit) => 
           complete {
-            doStringContains(None, s, caseSensitive).map[ToResponseMarshallable]{
+            doStringContains(None, s, caseSensitive, offset, limit).map[ToResponseMarshallable]{
               case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }              
@@ -573,9 +573,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "valueequals"  )) { 
-        parameters( 'value.as[String], 'propertyurn.as[String] ?, 'type.as[String] ? ) { (valueToMatchStr, propertyUrnStr, typeStringOption) => 
+        parameters( 'value.as[String], 'propertyurn.as[String] ?, 'type.as[String] ? , 'offset.as[Int] ? , 'limit.as[Int] ? ) { (valueToMatchStr, propertyUrnStr, typeStringOption, offset, limit) => 
           complete {
-            doValueEquals(propertyUrnStr, valueToMatchStr, typeStringOption).map[ToResponseMarshallable]{
+            doValueEquals(propertyUrnStr, valueToMatchStr, typeStringOption, offset, limit).map[ToResponseMarshallable]{
               case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }
@@ -583,9 +583,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "numeric" / Segment )) { urnString =>
-        parameters(  'n1.as[Double], 'op.as[String], 'n2.as[Double] ?, 'propertyurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
+        parameters(  'n1.as[Double], 'op.as[String], 'n2.as[Double] ?, 'propertyurn.as[String] ?, 'offset.as[Int] ? , 'limit.as[Int] ?  ) { (n1, op, n2, parameterUrn, offset, limit) => 
           complete {
-            doNumeric(Some(urnString), n1, op, n2, parameterUrn).map[ToResponseMarshallable]{
+            doNumeric(Some(urnString), n1, op, n2, parameterUrn, offset, limit).map[ToResponseMarshallable]{
               case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }
@@ -593,9 +593,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "numeric" )) { 
-        parameters( 'n1.as[Double], 'op.as[String], 'n2.as[Double] ?,'propertyurn.as[String] ? ) { (n1, op, n2, parameterUrn) => 
+        parameters( 'n1.as[Double], 'op.as[String], 'n2.as[Double] ?,'propertyurn.as[String] ? , 'offset.as[Int] ? , 'limit.as[Int] ? ) { (n1, op, n2, parameterUrn, offset, limit) => 
           complete {
-            doNumeric(None, n1, op, n2, parameterUrn).map[ToResponseMarshallable]{
+            doNumeric(None, n1, op, n2, parameterUrn, offset, limit).map[ToResponseMarshallable]{
               case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }

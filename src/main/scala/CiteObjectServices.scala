@@ -376,7 +376,7 @@ trait CiteCollectionService extends Protocols {
       }
     }
 
-def doUrnMatch(collectionUrnStr:Option[String], urnToMatchStr:String, parameterUrnStr:Option[String] ): Future[Either[String, VectorOfCiteObjectsJson]] = {
+def doUrnMatch(collectionUrnStr:Option[String], urnToMatchStr:String, parameterUrnStr:Option[String], offset:Option[Int] = None, limit:Option[Int] = None ): Future[Either[String, VectorOfCiteObjectsJson]] = {
   try {
     val urnToMatch:Urn = {
       if (urnToMatchStr.startsWith("urn:cts:")) { CtsUrn(urnToMatchStr) } 
@@ -394,7 +394,21 @@ def doUrnMatch(collectionUrnStr:Option[String], urnToMatchStr:String, parameterU
       case Some(pus) => co.filter(_.urnMatch(Cite2Urn(pus), urnToMatch))
       case None => co.filter(_.urnMatch(urnToMatch))
     }
-    val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+    val objectVector:VectorOfCiteObjectsJson = {
+      val unpaged = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+      offset match {
+        case Some(ofs) => {
+          limit match {
+            case Some(li) => {
+              VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+            }
+            case None => unpaged
+          }
+        }
+        case None => unpaged
+      }
+    }
+
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
   } catch {
     case e: Exception => {
@@ -403,7 +417,7 @@ def doUrnMatch(collectionUrnStr:Option[String], urnToMatchStr:String, parameterU
   }
 }
 
-def doRegexMatch(collectionUrnStr:Option[String], regexToMatchStr:String, parameterUrnStr:Option[String] ): Future[Either[String, VectorOfCiteObjectsJson]] = {
+def doRegexMatch(collectionUrnStr:Option[String], regexToMatchStr:String, parameterUrnStr:Option[String], offset:Option[Int] = None, limit:Option[Int] = None ): Future[Either[String, VectorOfCiteObjectsJson]] = {
   try {
     val co:Vector[CiteObject] = collectionUrnStr match {
       case Some(u) => {
@@ -417,7 +431,20 @@ def doRegexMatch(collectionUrnStr:Option[String], regexToMatchStr:String, parame
       case Some(pus) => co.filter(_.regexMatch(Cite2Urn(pus), regexToMatchStr))
       case None => co.filter(_.regexMatch(regexToMatchStr))
     }
-    val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+    val objectVector:VectorOfCiteObjectsJson = {
+      val unpaged = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+      offset match {
+        case Some(ofs) => {
+          limit match {
+            case Some(li) => {
+              VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+            }
+            case None => unpaged
+          }
+        }
+        case None => unpaged
+      }
+    }
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
   } catch {
     case e: Exception => {
@@ -426,7 +453,7 @@ def doRegexMatch(collectionUrnStr:Option[String], regexToMatchStr:String, parame
   }
 }
 
-def doStringContains(collectionUrnStr:Option[String], stringToMatchStr:String, caseSensitive:Boolean = true): Future[Either[String, VectorOfCiteObjectsJson]] = {
+def doStringContains(collectionUrnStr:Option[String], stringToMatchStr:String, caseSensitive:Boolean = true, offset:Option[Int] = None, limit:Option[Int] = None): Future[Either[String, VectorOfCiteObjectsJson]] = {
   try {
     val co:Vector[CiteObject] = collectionUrnStr match {
       case Some(u) => {
@@ -437,7 +464,20 @@ def doStringContains(collectionUrnStr:Option[String], stringToMatchStr:String, c
       case None => collectionRepository.get.citableObjects
     }
     val findResults:Vector[CiteObject] = co.filter(_.stringContains(stringToMatchStr, caseSensitive))
-    val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+    val objectVector:VectorOfCiteObjectsJson = {
+      val unpaged = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+      offset match {
+        case Some(ofs) => {
+          limit match {
+            case Some(li) => {
+              VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+            }
+            case None => unpaged
+          }
+        }
+        case None => unpaged
+      }
+    }
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
   } catch {
     case e: Exception => {
@@ -446,7 +486,7 @@ def doStringContains(collectionUrnStr:Option[String], stringToMatchStr:String, c
   }
 }
 
-def doNumeric(collectionUrnStr:Option[String], n1:Double, op:String, n2:Option[Double], propertyUrnStr:Option[String]):Future[Either[String,VectorOfCiteObjectsJson]] = {
+def doNumeric(collectionUrnStr:Option[String], n1:Double, op:String, n2:Option[Double], propertyUrnStr:Option[String], offset:Option[Int] = None, limit:Option[Int] = None):Future[Either[String,VectorOfCiteObjectsJson]] = {
   try {  
     val co:Vector[CiteObject] = collectionUrnStr match {
       case Some(u) => {
@@ -520,7 +560,20 @@ def doNumeric(collectionUrnStr:Option[String], n1:Double, op:String, n2:Option[D
         }    
       }
     }
-    val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+    val objectVector:VectorOfCiteObjectsJson = {
+      val unpaged = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+      offset match {
+        case Some(ofs) => {
+          limit match {
+            case Some(li) => {
+              VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+            }
+            case None => unpaged
+          }
+        }
+        case None => unpaged
+      }
+    }
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
   } catch {
     case e: Exception => {
@@ -529,7 +582,7 @@ def doNumeric(collectionUrnStr:Option[String], n1:Double, op:String, n2:Option[D
   }
 }
 
-def doValueEquals(propertyUrnStrOption:Option[String], valueToMatchStr:String, typeStringOption:Option[String]): Future[Either[String, VectorOfCiteObjectsJson]] = {
+def doValueEquals(propertyUrnStrOption:Option[String], valueToMatchStr:String, typeStringOption:Option[String], offset:Option[Int] = None, limit:Option[Int] = None): Future[Either[String, VectorOfCiteObjectsJson]] = {
   try {
     propertyUrnStrOption match {
       case Some(propertyUrnStr) => {
@@ -570,7 +623,20 @@ def doValueEquals(propertyUrnStrOption:Option[String], valueToMatchStr:String, t
           case _ => { throw new ScsException(s"${propertyUrn} is of an unrecognized type.") }
         }
         val objectMatchesJson:Vector[CiteObjectJson] = objectMatches.map( o => makeCiteObjectJson(o))
-        val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(objectMatchesJson)
+        val objectVector:VectorOfCiteObjectsJson = {
+          val unpaged = VectorOfCiteObjectsJson(objectMatchesJson)
+          offset match {
+            case Some(ofs) => {
+              limit match {
+                case Some(li) => {
+                  VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+                }
+                case None => unpaged
+              }
+            }
+            case None => unpaged
+          }
+        }
         Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
       }
       /* If there is no property specified, use typeStringOption */
@@ -601,7 +667,20 @@ def doValueEquals(propertyUrnStrOption:Option[String], valueToMatchStr:String, t
               case _ => { throw new ScsException(s""" "${typeString}" is of an unrecognized type.""") }
             }
             val objectMatchesJson:Vector[CiteObjectJson] = objectMatches.map( o => makeCiteObjectJson(o))
-            val objectVector:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(objectMatchesJson)
+            val objectVector:VectorOfCiteObjectsJson = {
+              val unpaged = VectorOfCiteObjectsJson(objectMatchesJson)
+              offset match {
+                case Some(ofs) => {
+                  limit match {
+                    case Some(li) => {
+                      VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+                    }
+                    case None => unpaged
+                  }
+                }
+                case None => unpaged
+              }
+            }
             Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
           }
           case None => throw new Exception(s"Request must include *either* a proprtyurn-parameter or a type-parameter.")
