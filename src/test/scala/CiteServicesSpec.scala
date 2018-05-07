@@ -656,6 +656,26 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     }
   }
 
+  it should """respond to "/objects/find/urnmatch?find=URN&offset=0&limit=2" by finding the first two objects in all collections with URN as a property value""" in {
+    Get(s"/objects/find/urnmatch?find=urn:cite2:hmt:msA.2017a:12v&offset=0&limit=2") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (2) 
+    }
+  }
+
+  it should """also report stats for the above""" in {
+    Get(s"/objects/find/urnmatch?find=urn:cite2:hmt:msA.2017a:12v&offset=0&limit=2") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (2) 
+      val testMap:Map[String,String] = Map("total" -> "3","showing" -> "2")
+      r.stats should equal (testMap)
+    }
+  }
+
 
   it should """respond to "/objects/find/urnmatch/COLLECTION-URN?find=URN" by finding objects in COLLECTION-URN with URN as a property value.""" in {
     Get(s"/objects/find/urnmatch/urn:cite2:hmt:textblock.2017a:?find=urn:cite2:hmt:msA.2017a:12v") ~> routes ~> check {

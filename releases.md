@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.10.1**: Also reporting "total" and "showing" numbers for searches and paged-browsing.
+
 **1.10.0**: Added `limit` and `offset` optional parameters for paged results on collection searches.
 
 **1.9.0**: `collections/reff/COLLECTION-URN` returns `Vector[Cite2Urn]`

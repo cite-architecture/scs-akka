@@ -32,7 +32,7 @@ case class Cite2UrnString(urnString: String)
 
 case class CiteObjectJson(citeObject:Map[String,String],citePropertyValues:
     Vector[Map[String,String]])
-case class VectorOfCiteObjectsJson(citeObjects:Vector[CiteObjectJson])
+case class VectorOfCiteObjectsJson(citeObjects:Vector[CiteObjectJson],stats:Map[String,String] = Map())
 case class VectorOfCite2UrnsJson(cite2Urns:Vector[Cite2UrnString])
 case class CitePropertyDefJson(citePropertyDef:Map[String,String])
 case class CiteCollectionInfoJson(citeCollectionInfo:Map[String,String])
@@ -322,7 +322,11 @@ trait CiteCollectionService extends Protocols {
         val trueOffset = offset 
         val urn:Cite2Urn = Cite2Urn(urnString)
         val unpagedReply:VectorOfCiteObjectsJson = fetchCiteObjects(urn)
-        val pagedReply:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(unpagedReply.citeObjects.slice(trueOffset,(trueOffset + limit)) )
+        val pagedVector = unpagedReply.citeObjects.slice(trueOffset,(trueOffset + limit))
+        val pagedReply:VectorOfCiteObjectsJson = VectorOfCiteObjectsJson(
+          pagedVector,
+          Map("total" -> s"${unpagedReply.citeObjects.size}", "showing" -> s"${pagedVector.size}")
+         )
         Unmarshal(pagedReply).to[VectorOfCiteObjectsJson].map(Right(_))
       } catch {
         case e: Exception => {
@@ -346,10 +350,13 @@ trait CiteCollectionService extends Protocols {
     def fetchCiteObjects(urn: Cite2Urn):VectorOfCiteObjectsJson = {
       try {
         val vectorReply:Vector[CiteObject] = collectionRepository.get ~~ urn
-        VectorOfCiteObjectsJson(vectorReply.map( v => {
-          val c:CiteObjectJson = makeCiteObjectJson(v) 
-          c
-        }))
+        VectorOfCiteObjectsJson(
+            vectorReply.map( v => {
+            val c:CiteObjectJson = makeCiteObjectJson(v) 
+            c
+          }),
+          Map("total" -> s"${vectorReply.size}", "showing" -> s"${vectorReply.size}")           
+        )
       } catch {
         case e: Exception => {
           throw new ScsException(s"""Failed to make vector of objects for ${urn}.""")
@@ -366,10 +373,13 @@ trait CiteCollectionService extends Protocols {
           }
           ).flatten
         }
-        val objectVector = VectorOfCiteObjectsJson(vectorReply.map( v => {
-          val c:CiteObjectJson = makeCiteObjectJson(v) 
-          c
-        }))
+        val objectVector = VectorOfCiteObjectsJson(
+          vectorReply.map( v => {
+            val c:CiteObjectJson = makeCiteObjectJson(v) 
+            c
+          }),
+          Map("total" -> s"${vectorReply.size}", "showing" -> s"${vectorReply.size}")
+        )
         Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
       } catch {
         case e: Exception => Future.successful(Left(s"${new IOException(e)}"))
@@ -395,17 +405,22 @@ def doUrnMatch(collectionUrnStr:Option[String], urnToMatchStr:String, parameterU
       case None => co.filter(_.urnMatch(urnToMatch))
     }
     val objectVector:VectorOfCiteObjectsJson = {
-      val unpaged = VectorOfCiteObjectsJson(findResults.map(o => makeCiteObjectJson(o)))
+      val unpaged = VectorOfCiteObjectsJson(
+        findResults.map(o => makeCiteObjectJson(o)) )
       offset match {
         case Some(ofs) => {
           limit match {
             case Some(li) => {
-              VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+              val pagedResult = unpaged.citeObjects.slice(ofs,(ofs + li))
+              VectorOfCiteObjectsJson(
+                pagedResult,
+                Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${pagedResult.size}")
+              )
             }
-            case None => unpaged
+            case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
           }
         }
-        case None => unpaged
+        case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
       }
     }
 
@@ -437,12 +452,16 @@ def doRegexMatch(collectionUrnStr:Option[String], regexToMatchStr:String, parame
         case Some(ofs) => {
           limit match {
             case Some(li) => {
-              VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+              val pagedResult = unpaged.citeObjects.slice(ofs,(ofs + li))
+              VectorOfCiteObjectsJson(
+                pagedResult,
+                Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${pagedResult.size}")
+              )
             }
-            case None => unpaged
+            case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
           }
         }
-        case None => unpaged
+        case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
       }
     }
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
@@ -470,12 +489,16 @@ def doStringContains(collectionUrnStr:Option[String], stringToMatchStr:String, c
         case Some(ofs) => {
           limit match {
             case Some(li) => {
-              VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+              val pagedResult = unpaged.citeObjects.slice(ofs,(ofs + li))
+              VectorOfCiteObjectsJson(
+                pagedResult,
+                Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${pagedResult.size}")
+              )
             }
-            case None => unpaged
+            case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
           }
         }
-        case None => unpaged
+        case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
       }
     }
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
@@ -566,12 +589,16 @@ def doNumeric(collectionUrnStr:Option[String], n1:Double, op:String, n2:Option[D
         case Some(ofs) => {
           limit match {
             case Some(li) => {
-              VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+              val pagedResult = unpaged.citeObjects.slice(ofs,(ofs + li))
+              VectorOfCiteObjectsJson(
+                pagedResult,
+                Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${pagedResult.size}")
+              )
             }
-            case None => unpaged
+            case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
           }
         }
-        case None => unpaged
+        case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
       }
     }
     Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
@@ -629,12 +656,16 @@ def doValueEquals(propertyUrnStrOption:Option[String], valueToMatchStr:String, t
             case Some(ofs) => {
               limit match {
                 case Some(li) => {
-                  VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+              val pagedResult = unpaged.citeObjects.slice(ofs,(ofs + li))
+              VectorOfCiteObjectsJson(
+                pagedResult,
+                Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${pagedResult.size}")
+              )
                 }
-                case None => unpaged
+                case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
               }
             }
-            case None => unpaged
+            case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
           }
         }
         Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
@@ -673,12 +704,16 @@ def doValueEquals(propertyUrnStrOption:Option[String], valueToMatchStr:String, t
                 case Some(ofs) => {
                   limit match {
                     case Some(li) => {
-                      VectorOfCiteObjectsJson(unpaged.citeObjects.slice(ofs,(ofs + li)) )
+                      val pagedResult = unpaged.citeObjects.slice(ofs,(ofs + li))
+                      VectorOfCiteObjectsJson(
+                        pagedResult,
+                        Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${pagedResult.size}")
+                      )
                     }
-                    case None => unpaged
+                    case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
                   }
                 }
-                case None => unpaged
+                case None => VectorOfCiteObjectsJson(unpaged.citeObjects, Map("total" -> s"${unpaged.citeObjects.size}", "showing" -> s"${unpaged.citeObjects.size}"))
               }
             }
             Unmarshal(objectVector).to[VectorOfCiteObjectsJson].map(Right(_))
