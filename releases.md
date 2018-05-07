@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.9.0**: `collections/reff/COLLECTION-URN` returns `Vector[Cite2Urn]`
+
 **1.8.0**: Added handling of the DSE object model (see <Examples.md>).
 
 **1.7.0**: `collections/objects?urn=URN1&urn=URN2&urn=URN3…`.

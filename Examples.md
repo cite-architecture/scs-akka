@@ -64,6 +64,7 @@
 
 - <http://localhost:9000/collections/>
 - <http://localhost:9000/collections/urn:cite2:hmt:e4.v1:>
+- <http://localhost:9000/collections/reff/urn:cite2:hmt:e4.v1:> (just URNs)
 - <http://localhost:9000/collections/hasobject/urn:cite2:hmt:e4.v1:1r> should return `true`
 - <http://localhost:9000/collections/hasobject/urn:cite2:hmt:e4.v1:NOTOBJECT> should return `false`
 - <http://localhost:9000/collections/labelmap> (returns a map of Cite2Urn -> String, the label of each citable object)

@@ -4,7 +4,7 @@ enablePlugins(LauncherJarPlugin)
 
 name := "cite-microservice"
 organization := "edu.furman.classics"
-version := "1.8.0"
+version := "1.9.0"
 scalaVersion := "2.12.4"
 
 fork in run := true
@@ -31,7 +31,6 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "org.scalatest"     %% "scalatest" % scalaTestV % "test",
-
     "edu.holycross.shot.cite" %% "xcite" % "3.3.0",
     "edu.holycross.shot" %% "cex" % "6.2.1",
     "edu.holycross.shot" %% "citerelations" % "2.0.4",

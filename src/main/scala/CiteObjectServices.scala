@@ -331,6 +331,18 @@ trait CiteCollectionService extends Protocols {
       }
     }
 
+    def fetchCollectionsReff(urn:Cite2Urn):Future[Either[String,VectorOfCite2UrnsJson]] = {
+      try {
+        val vectorReply:Vector[Cite2Urn] = (collectionRepository.get ~~ urn).map(_.urn)
+        val jsonReply = VectorOfCite2UrnsJson(vectorReply.map(u => Cite2UrnString(u.toString)))
+        Unmarshal(jsonReply).to[VectorOfCite2UrnsJson].map(Right(_))
+      } catch {
+        case e: Exception => {
+          throw new ScsException(s"""Failed to make vector of objects for ${urn}.""")
+        }
+      }
+    }
+
     def fetchCiteObjects(urn: Cite2Urn):VectorOfCiteObjectsJson = {
       try {
         val vectorReply:Vector[CiteObject] = collectionRepository.get ~~ urn

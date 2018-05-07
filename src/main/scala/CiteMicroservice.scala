@@ -420,6 +420,15 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
       }
     } ~
     pathPrefix("collections") {
+      (get & path( "reff" / Segment)) { urnStr =>
+        complete { 
+          val urn:Cite2Urn = Cite2Urn(urnStr)
+          fetchCollectionsReff(urn).map[ToResponseMarshallable]{
+            case Right(objectVec) => objectVec
+            case Left(errorMessage) => BadRequest -> errorMessage
+          }              
+        }
+      } ~
       (get & path( "objects")) { 
         parameters( 'urn.as[String].* ) { strings => 
           complete { 
