@@ -38,7 +38,6 @@ trait Protocols extends DefaultJsonProtocol {
   // Ohco2
   implicit val ctsUrnStringFormat = jsonFormat1(CtsUrnString.apply)
   implicit val cite2UrnStringFormat = jsonFormat1(Cite2UrnString.apply)
-  implicit val corpusFormat = jsonFormat1(CorpusJson.apply)
   implicit val citableNodeFormat = jsonFormat1(CitableNodeJson.apply)
   implicit val ngramHistoFormat = jsonFormat1(NgramHistoJson.apply)
   implicit val catalogFormat = jsonFormat1(CatalogJson.apply)
@@ -51,9 +50,7 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val citeCollectionPropertyDefsFormat = jsonFormat1(CiteCollectionPropertyDefsJson.apply)
   implicit val citeCollectionInfoFormat = jsonFormat1(CiteCollectionInfoJson.apply)
   implicit val citeCollectionDefFormat = jsonFormat2(CiteCollectionDefJson.apply)
-  implicit val vectorOfCiteObjectsFormat = jsonFormat2(VectorOfCiteObjectsJson.apply)
   implicit val vectorOfCite2UrnsFormat = jsonFormat1(VectorOfCite2UrnsJson.apply)
-
   // CiteObjectJson
   implicit val vectorOfCiteCollectionDefsFormat = jsonFormat1(VectorOfCiteCollectionDefsJson.apply)
   // DataModel
@@ -62,7 +59,8 @@ trait Protocols extends DefaultJsonProtocol {
   // DSE 
   implicit val dseRecordFormat = jsonFormat5(DseRecordJson.apply)
   implicit val vectorOfDseRecordsFormat = jsonFormat1(VectorOfDseRecordsJson.apply)
-
+  implicit val vectorOfCiteObjectsFormat = jsonFormat3(VectorOfCiteObjectsJson.apply)
+  implicit val corpusFormat = jsonFormat2(CorpusJson.apply)
 }
 
 trait Service extends Protocols with Ohco2Service with CiteCollectionService with CiteImageService with DseService {
@@ -392,10 +390,12 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path(Segment)) { urnString =>
-        complete {
-          fetchOhco2Text(urnString).map[ToResponseMarshallable] {
-            case Right(corpusString) => corpusString
-            case Left(errorMessage) => BadRequest -> errorMessage
+        parameters( 'dse.as[Boolean] ? false ) { withDse =>
+          complete {
+            fetchOhco2Text(urnString, withDse).map[ToResponseMarshallable] {
+              case Right(corpusString) => corpusString
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
           }
         }
       } ~ 
@@ -502,9 +502,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path( "paged" / Segment)) { urnString => 
-        parameters('offset.as[Int] ? 1, 'limit.as[Int] ? 10) { (offset, limit) => 
+        parameters('offset.as[Int] ? 1, 'limit.as[Int] ? 10, 'dse.as[Boolean] ? false) { (offset, limit, withDse) => 
           complete { 
-            fetchPagedCiteObjectJson(urnString, offset, limit).map[ToResponseMarshallable]{
+            fetchPagedCiteObjectJson(urnString, offset, limit, withDse).map[ToResponseMarshallable]{
               case Right(citeObject) => citeObject
               case Left(errorMessage) => BadRequest -> errorMessage
             }              
@@ -512,7 +512,7 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "urnmatch" / Segment )) { urnString =>
-        parameters( 'find.as[String], 'parameterurn.as[String] ?, 'offset.as[Int] ? , 'limit.as[Int] ? ) { (urn, parameterUrn, offset, limit) => 
+        parameters( 'find.as[String], 'parameterurn.as[String] ?, 'offset.as[Int] ? , 'limit.as[Int] ? , 'dse.as[Boolean] ? false) { (urn, parameterUrn, offset, limit, withDse) => 
           //complete {s"'/find/urnmatch/${urnString}' with parameter ${urn} Not implemented yet."}
           complete {
             doUrnMatch(Some(urnString), urn, parameterUrn, offset, limit).map[ToResponseMarshallable]{
@@ -523,9 +523,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path("find" / "urnmatch" )) { 
-        parameters( 'find.as[String], 'parameterurn.as[String] ?, 'offset.as[Int] ? , 'limit.as[Int] ? ) { (urn, parameterUrn, offset, limit) => 
+        parameters( 'find.as[String], 'parameterurn.as[String] ?, 'offset.as[Int] ? , 'limit.as[Int] ? , 'dse.as[Boolean] ? false) { (urn, parameterUrn, offset, limit, withDse) => 
           complete {
-            doUrnMatch(None, urn, parameterUrn, offset, limit).map[ToResponseMarshallable]{
+            doUrnMatch(None, urn, parameterUrn, offset, limit, withDse).map[ToResponseMarshallable]{
               case Right(citeObjects) => citeObjects
               case Left(errorMessage) => BadRequest -> errorMessage
             }              
@@ -603,11 +603,13 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
         }
       } ~
       (get & path(Segment)) { (urnString) =>
-          complete { 
-            fetchCiteObjectJson(urnString).map[ToResponseMarshallable]{
-              case Right(citeObject) => citeObject
-              case Left(errorMessage) => BadRequest -> errorMessage
-            }              
+          parameters( 'dse.as[Boolean] ? false ){ withDse =>
+            complete { 
+              fetchCiteObjectJson(urnString, withDse).map[ToResponseMarshallable]{
+                case Right(citeObject) => citeObject
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }              
+            }
           }
        } 
     } ~

@@ -190,6 +190,9 @@ Embedding
 The DSE Data model consists of a CITE Collection of objects, each documenting a three-way relationship between (a) a text-bearing artifact, (b) a documentary image (ideally with a region-of-interest defined), and (c) a citable passage of text.
 
 - <http://localhost:9000/dse/recordsforsurface/urn:cite2:hmt:msA.v1:12r> Get all DSE Records associated with a Text Bearing Artifact.
-- <http://localhost:9000/dse/recordsforimage/urn:cite2:hmt:vaimg.2017a:VA012RN_0013>Get all DSE Records associated with a Citable Image. 
+- <http://localhost:9000/dse/recordsforimage/urn:cite2:hmt:vaimg.2017a:VA012RN_0013> Get all DSE Records associated with a Citable Image. 
 - <http://localhost:9000/dse/recordsfortext/urn:cts:greekLit:tlg0012.tlg001.msA:1.1> Get all DSE Records associated with a passage of text.
 - <http://localhost:9000/dse/recordsfortext/urn:cts:greekLit:tlg0012.tlg001.msA:1.1-1.3> Get all DSE Records associated with a passage of text expressed by a range-URN.
+- <http://localhost:9000/objects/urn:cite2:hmt:msA.v1:12r?dse=true> Get and object and any DSE records associated with that object.
+- <http://localhost:9000/objects/find/urnmatch?find=urn:cite2:hmt:vaimg.2017a:VA012RN_0013&dse=true&offset=0&limit=3> Find objects and get all DSE records associated with those objects (or properties of those objects). **Note**, unles `offset` and `limit` are set, this might be a *huge* list of DSE records, and might cause the request to timeout.
+

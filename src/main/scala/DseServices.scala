@@ -233,6 +233,102 @@ case class VectorOfDseRecordsJson(dseRecords:Vector[DseRecordJson])
       }
     }
 
+def dseRecordsComprehensive(uv:Vector[Urn]):VectorOfDseRecordsJson = {
+  try {
+    val ctsUs:Vector[CtsUrn] = {
+      uv.filter(u =>{
+          u match {
+            case CtsUrn(_) => true
+            case _ => false
+          } 
+      }).map(u => u.asInstanceOf[CtsUrn]) 
+    }
+    // expand CtsUrns
+    val expandedCtsUs:Vector[CtsUrn] = {
+      textRepository match { 
+        case Some(tr) => {
+          (for (u <- ctsUs) yield {
+            tr.corpus.validReff(u)
+          }).flatten
+        }
+        case None => ctsUs
+      }
+    }
+
+    val cite2Us:Vector[Cite2Urn] = {
+      uv.filter(u =>{
+          u match {
+            case Cite2Urn(_) => true
+            case _ => false
+          } 
+      }).map(u => u.asInstanceOf[Cite2Urn]) 
+    }
+    val allUrns:Vector[Urn] = expandedCtsUs ++ cite2Us
+    val dseRecs:Vector[DseRecord] = dseRecordsForUrnVector(allUrns).toSet.toVector
+    val dseRecsJson:Vector[DseRecordJson] = {
+      dseRecs.map(r => makeDseRecordJson(r))
+    }
+
+    val returnVal:VectorOfDseRecordsJson = VectorOfDseRecordsJson(dseRecsJson)
+    returnVal 
+  } catch {
+    case e: Exception => {
+        VectorOfDseRecordsJson(Vector())
+    }
+  }
+}
+
+// We aren't going to deliver DSE data unless it is all present in the library
+def dseRecordsForUrnVector(uv:Vector[Urn]):Vector[DseRecord] = {
+  if (hasDseModel(dseModel)) {
+    val dseCollections:Vector[Cite2Urn] = cexLibrary.collectionsForModel(dseModel)
+    dseCollections.size match {
+      case n if (n > 0) => {
+        // We'll do this for every DSE Collection…
+        val recVec:Vector[DseRecord] = dseCollections.map(dc => {
+          // Set up DSE Configuration
+          val repo:CiteCollectionRepository = collectionRepository.get
+          val lbl:String = collectionRepository.get.collectionDefinition(dc).get.collectionLabel
+          val psgPropUrn:Cite2Urn = propertyUrnFromPropertyName(dc,passagePropString)
+          val imgPropUrn:Cite2Urn = propertyUrnFromPropertyName(dc,imagePropString) 
+          val surPropUrn:Cite2Urn =propertyUrnFromPropertyName(dc,surfacePropString) 
+          val dseExt:DseConfiguration = DseConfiguration(
+            repo,
+            lbl,
+            psgPropUrn,
+            imgPropUrn,
+            surPropUrn
+          ) 
+          // now cycle through each Urn
+          val oneVector = {
+            uv.map(u => {
+              u match {
+                case CtsUrn(_) => {
+                  val textRecVec:Vector[DseRecord] = dseExt.recordsForTextVector(Vector(u.asInstanceOf[CtsUrn]))
+                  textRecVec
+                }
+                case Cite2Urn(_) => {
+                  val surfRecVec:Vector[DseRecord] = dseExt.recordsForSurface(u.asInstanceOf[Cite2Urn])
+                  val imgRecVec:Vector[DseRecord] = dseExt.recordsForImage(u.asInstanceOf[Cite2Urn])
+                  val combinedVec:Vector[DseRecord] = surfRecVec ++ imgRecVec
+                  combinedVec
+                } 
+              } 
+            }).toVector.flatten
+          }
+          oneVector
+
+        }).toVector.flatten.toSet.toVector
+        recVec
+      }
+      case _ => {
+        Vector[DseRecord]()
+      }
+    }
+  }  else {
+    Vector[DseRecord]()
+  }
+}
 
 def makeDseRecordJson(dr:DseRecord):DseRecordJson = {
     val label:String = dr.label 

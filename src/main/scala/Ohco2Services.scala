@@ -29,7 +29,7 @@ import edu.holycross.shot.scm._
 
 case class CtsUrnString(urnString: String)
 case class CexLibraries(repos:Vector[CiteLibrary])
-case class CorpusJson(citableNodes:Vector[Map[String, String]])
+case class CorpusJson(citableNodes:Vector[Map[String, String]], dse:VectorOfDseRecordsJson = VectorOfDseRecordsJson(Vector()) )
 case class ReffJson(reff:Vector[String])
 case class CitableNodeJson(citableNode:Map[String, String])
 case class NgramHistoJson(ngramHisto:Vector[Map[String,String]] )
@@ -46,7 +46,7 @@ case class CatalogJson(citeCatalog:Vector[(
   */
 
 
-  trait Ohco2Service extends Protocols {
+  trait Ohco2Service extends Protocols with DseService {
     implicit val system: ActorSystem
     implicit def executor: ExecutionContextExecutor
     implicit val materializer: Materializer
@@ -252,7 +252,7 @@ case class CatalogJson(citeCatalog:Vector[(
     }
   } */
 
-  def fetchOhco2Text(urnString: String): Future[Either[String,CorpusJson]] = {
+  def fetchOhco2Text(urnString: String, withDse:Boolean = false ): Future[Either[String,CorpusJson]] = {
    try {
     val urn:CtsUrn = CtsUrn(urnString)
 
@@ -261,8 +261,15 @@ case class CatalogJson(citeCatalog:Vector[(
     urn.versionOption match {
       case Some(v) => {
         val c:Corpus = cexLibrary.textRepository.get.corpus >= urn 
+
+        // Get DSE records, if any, for the requested text
+        val dseRecs:VectorOfDseRecordsJson = {
+          if (withDse) dseRecordsComprehensive(Vector(urn))
+          else VectorOfDseRecordsJson(Vector())
+        }
+
         val v:Vector[Map[String,String]] = c.nodes.map(l => Map("urn" -> l.urn.toString, "text" -> l.text))
-        val n:CorpusJson = CorpusJson(v) 
+        val n:CorpusJson = CorpusJson(v, dseRecs) 
         Unmarshal(n).to[CorpusJson].map(Right(_))
       }
       case None => {
@@ -280,7 +287,14 @@ case class CatalogJson(citeCatalog:Vector[(
               } 
             }).flatten
           }
-          val n:CorpusJson = CorpusJson(assembledVector) 
+
+          // Get DSE records, if any, for the requested text
+          val dseRecs:VectorOfDseRecordsJson = {
+            if (withDse) dseRecordsComprehensive(realUrns)
+            else VectorOfDseRecordsJson(Vector())
+          }
+
+          val n:CorpusJson = CorpusJson(assembledVector, dseRecs) 
           Unmarshal(n).to[CorpusJson].map(Right(_))
         }
       }      

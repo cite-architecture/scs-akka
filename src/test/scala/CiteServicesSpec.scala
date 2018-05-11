@@ -749,7 +749,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
-      r.citeObjects.size should equal (20) 
+      r.citeObjects.size should equal (21) 
     }
   }
   it should """respond to "/objects/find/valueequals" with a numeric value """ in {
@@ -774,7 +774,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
-      r.citeObjects.size should equal (1) 
+      r.citeObjects.size should equal (2) 
     }
   }
 
@@ -783,7 +783,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
-      r.citeObjects.size should equal (1) 
+      r.citeObjects.size should equal (2) 
     }
   }
 
@@ -861,7 +861,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
-      r.citeObjects.size should equal (32) 
+      r.citeObjects.size should equal (33) 
     }
   }
 
@@ -879,7 +879,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
-      r.citeObjects.size should equal (35) 
+      r.citeObjects.size should equal (36) 
     }
   }
 
@@ -994,6 +994,27 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       r.dseRecords.size should equal (3) 
     }
   }
+
+  it should """include DSE records when the ?dse= param is 'true' for object-requests""" in {
+    Get(s"/objects/urn:cite2:hmt:vaimg.2017a:VA012RN_0013?dse=true") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteObjectsJson = responseAs[VectorOfCiteObjectsJson]
+      r.citeObjects.size should equal (1) 
+      r.dse.dseRecords.size should equal (20)
+    }
+  }
+
+  it should """include DSE records when the ?dse= param is 'true' for Cts requests""" in {
+    Get(s"/texts/urn:cts:greekLit:tlg0012.tlg001.msA:1.1?dse=true") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:CorpusJson = responseAs[CorpusJson]
+      r.citableNodes.size should equal (1) 
+      r.dse.dseRecords.size should equal (1)
+    }
+  }
+
 
 
 }
