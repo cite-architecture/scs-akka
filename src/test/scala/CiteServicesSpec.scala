@@ -10,6 +10,22 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.scaladsl.Flow
 import org.scalatest._
 
+import akka.http.scaladsl.model.HttpHeader
+import akka.http.scaladsl.model.HttpMethods._
+import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.headers.`Access-Control-Allow-Credentials`
+import akka.http.scaladsl.model.headers.`Access-Control-Allow-Methods`
+import akka.http.scaladsl.model.headers.`Access-Control-Allow-Origin`
+import akka.http.scaladsl.model.headers.`Access-Control-Allow-Headers`
+import akka.http.scaladsl.model.headers.`Access-Control-Max-Age`
+import akka.http.scaladsl.model.headers.Origin
+import akka.http.scaladsl.server.Directive0
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.MethodRejection
+import akka.http.scaladsl.server.RejectionHandler
+
+
+
 import java.net.{URI, URLDecoder, URLEncoder}
 
 import spray.json._
@@ -21,9 +37,20 @@ import edu.holycross.shot.citeobj._
 import edu.holycross.shot.scm._
 
 
-class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Service {
+class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Service with CorsSupport{
 
+  override val corsAllowOrigins: List[String] = List("*","http://amphoreus.hpcc.uh.edu")
 
+  override val corsAllowedHeaders: List[String] = List("Origin", "X-Requested-With", "Content-Type", "Accept", "Accept-Encoding", "Accept-Language", "Host", "Referer", "User-Agent")
+
+  override val corsAllowCredentials: Boolean = true
+
+  override val optionsCorsHeaders: List[HttpHeader] = List[HttpHeader](
+    `Access-Control-Allow-Headers`(corsAllowedHeaders.mkString(", ")),
+    `Access-Control-Max-Age`(60 * 60 * 24 * 20), // cache pre-flight response for 20 days
+    `Access-Control-Allow-Credentials`(corsAllowCredentials)
+  )
+  
   override def testConfigSource = "akka.loglevel = INFO"
   override def config = testConfig
   override val logger = Logging(system.eventStream, "edu.furman.akkascs")

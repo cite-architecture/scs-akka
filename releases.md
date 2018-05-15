@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.12.0**: CORS restriction lifted.
+
 **1.11.0**: Delivering along with CiteObjects, Cite Collection search results, and CTS corpora, upon request with the `dse=true` param, DSE objects mapped to objects and citable text passages.
 
 **1.10.1**: Also reporting "total" and "showing" numbers for searches and paged-browsing.
