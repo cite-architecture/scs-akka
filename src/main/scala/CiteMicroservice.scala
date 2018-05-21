@@ -74,10 +74,12 @@ trait Protocols extends DefaultJsonProtocol {
   implicit val dseRecordFormat = jsonFormat5(DseRecordJson.apply)
   implicit val vectorOfDseRecordsFormat = jsonFormat1(VectorOfDseRecordsJson.apply)
   implicit val vectorOfCiteObjectsFormat = jsonFormat3(VectorOfCiteObjectsJson.apply)
-  implicit val corpusFormat = jsonFormat2(CorpusJson.apply)
+  implicit val citeTripleFormat = jsonFormat3(CiteTripleJson.apply)
+  implicit val vectorOfCiteTriplesFormat = jsonFormat1(VectorOfCiteTriplesJson.apply)
+  implicit val corpusFormat = jsonFormat3(CorpusJson.apply)
 }
 
-trait Service extends Protocols with Ohco2Service with CiteCollectionService with CiteImageService with DseService with CorsSupport {
+trait Service extends Protocols with Ohco2Service with CiteCollectionService with CiteImageService with DseService with RelationsService with CorsSupport {
   implicit val system: ActorSystem
   implicit def executor: ExecutionContextExecutor
   implicit val materializer: Materializer
@@ -411,9 +413,9 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
           }
         } ~
         (get & path(Segment)) { urnString =>
-          parameters( 'dse.as[Boolean] ? false ) { withDse =>
+          parameters( 'dse.as[Boolean] ? false, 'commentary.as[Boolean] ? false ) { (withDse, withCommentary) =>
             complete {
-              fetchOhco2Text(urnString, withDse).map[ToResponseMarshallable] {
+              fetchOhco2Text(urnString, withDse, withCommentary).map[ToResponseMarshallable] {
                 case Right(corpusString) => corpusString
                 case Left(errorMessage) => BadRequest -> errorMessage
               }
@@ -701,6 +703,26 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
           }
         } 
       } ~
+      pathPrefix("relations") {
+        (get & path( "verbs" )) {
+          complete {
+            relationsReturnVerbs.map[ToResponseMarshallable] {
+              case Right(verbSet) => verbSet
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~
+        (get & path(Segment)) { (urnString) =>
+          parameters('filter.as[String] ? ) { filter => 
+            complete {
+              relationsReturnRelations(urnString, filter).map[ToResponseMarshallable] {
+                case Right(citeTriples) => citeTriples
+                case Left(errorMessage) => BadRequest -> errorMessage
+              }
+            }
+          }
+        }
+      } ~
       pathPrefix("dse") {
         // Validate a CTS URN 
         (get & path( "test" / Segment)) { (urnString) =>
@@ -742,7 +764,7 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
   }
 }
 
-object CiteMicroservice extends App with Service with Ohco2Service with CiteCollectionService with CiteImageService with DseService with CorsSupport {
+object CiteMicroservice extends App with Service with Ohco2Service with CiteCollectionService with CiteImageService with DseService with RelationsService with CorsSupport {
   override implicit val system = ActorSystem()
   override implicit val executor = system.dispatcher
   override implicit val materializer = ActorMaterializer()

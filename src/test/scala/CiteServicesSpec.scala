@@ -1042,6 +1042,54 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     }
   }
 
+  it should """respond to '/relations/verbs' by listing avaible CiteRelations""" in {
+    Get(s"/relations/verbs") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCite2UrnsJson = responseAs[VectorOfCite2UrnsJson]
+      r.cite2Urns.size should equal (5) 
+    }
+  }
+
+
+   it should """respond to '/relations/CITE2URN' by listing all relations""" in {
+    Get(s"/relations/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteTriplesJson = responseAs[VectorOfCiteTriplesJson]
+      r.citeTriples.size should equal (10)
+      
+    }
+  }
+
+   it should """respond to '/relations/URN?filter=urn:cite2:cite:dseverbs.2017a:appearsOn' by listing all relations, filtered by relation-URN""" in {
+    Get(s"/relations/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1?filter=urn:cite2:cite:dseverbs.2017a:appearsOn") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteTriplesJson = responseAs[VectorOfCiteTriplesJson]
+      r.citeTriples.size should equal (1)
+    }
+  }
+
+   it should """respond to '/texts/URN?commentary=true' by including any commentaries as a VectorOfCiteTriplesJson""" in {
+    Get(s"/texts/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1-1.10?commentary=true") ~> routes ~> check {
+      val r:CorpusJson  = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.commentary.citeTriples.size should equal (10)
+    }
+  }
+
+
+   it should """respond to '/texts/URN?commentary=true' by including any commentaries as a VectorOfCiteTriplesJson when the URN is at the work-level""" in {
+    Get(s"/texts/urn:cts:greekLit:tlg0012.tlg001:1.1-1.10?commentary=true") ~> routes ~> check {
+      val r:CorpusJson  = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.commentary.citeTriples.size should equal (10)
+    }
+  }
+
 
 
 }

@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.13.0**: Added CiteRelations and Commentary Data Model.
+
 **1.12.0**: CORS restriction lifted.
 
 **1.11.0**: Delivering along with CiteObjects, Cite Collection search results, and CTS corpora, upon request with the `dse=true` param, DSE objects mapped to objects and citable text passages.

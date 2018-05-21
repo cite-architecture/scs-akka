@@ -29,7 +29,7 @@ import edu.holycross.shot.scm._
 
 case class CtsUrnString(urnString: String)
 case class CexLibraries(repos:Vector[CiteLibrary])
-case class CorpusJson(citableNodes:Vector[Map[String, String]], dse:VectorOfDseRecordsJson = VectorOfDseRecordsJson(Vector()) )
+case class CorpusJson(citableNodes:Vector[Map[String, String]], dse:VectorOfDseRecordsJson = VectorOfDseRecordsJson(Vector()), commentary:VectorOfCiteTriplesJson = VectorOfCiteTriplesJson(Vector()) )
 case class ReffJson(reff:Vector[String])
 case class CitableNodeJson(citableNode:Map[String, String])
 case class NgramHistoJson(ngramHisto:Vector[Map[String,String]] )
@@ -46,7 +46,7 @@ case class CatalogJson(citeCatalog:Vector[(
   */
 
 
-  trait Ohco2Service extends Protocols with DseService {
+  trait Ohco2Service extends Protocols with DseService with RelationsService {
     implicit val system: ActorSystem
     implicit def executor: ExecutionContextExecutor
     implicit val materializer: Materializer
@@ -252,10 +252,9 @@ case class CatalogJson(citeCatalog:Vector[(
     }
   } */
 
-  def fetchOhco2Text(urnString: String, withDse:Boolean = false ): Future[Either[String,CorpusJson]] = {
+  def fetchOhco2Text(urnString: String, withDse:Boolean = false, withCommentary:Boolean = false ): Future[Either[String,CorpusJson]] = {
    try {
     val urn:CtsUrn = CtsUrn(urnString)
-
     //if (urn.passageComponentOption == None){ throw new ScsException("No passage component. This service will not return a whole text.") }
 
     urn.versionOption match {
@@ -268,8 +267,16 @@ case class CatalogJson(citeCatalog:Vector[(
           else VectorOfDseRecordsJson(Vector())
         }
 
+        val commentary:VectorOfCiteTriplesJson = {
+          if (withCommentary) {
+            val realUrns:Vector[CtsUrn] = textRepository.get.corpus.validReff(urn)
+            getCommentaryForText(realUrns)
+          }
+          else VectorOfCiteTriplesJson(Vector())
+        }
+
         val v:Vector[Map[String,String]] = c.nodes.map(l => Map("urn" -> l.urn.toString, "text" -> l.text))
-        val n:CorpusJson = CorpusJson(v, dseRecs) 
+        val n:CorpusJson = CorpusJson(v, dseRecs, commentary) 
         Unmarshal(n).to[CorpusJson].map(Right(_))
       }
       case None => {
@@ -294,7 +301,15 @@ case class CatalogJson(citeCatalog:Vector[(
             else VectorOfDseRecordsJson(Vector())
           }
 
-          val n:CorpusJson = CorpusJson(assembledVector, dseRecs) 
+          val commentary:VectorOfCiteTriplesJson = {
+            if (withCommentary) {
+              val reff:Vector[CtsUrn] = textRepository.get.corpus.validReff(urn)
+              getCommentaryForText(reff)
+            }
+              else VectorOfCiteTriplesJson(Vector())
+          }
+
+          val n:CorpusJson = CorpusJson(assembledVector, dseRecs, commentary) 
           Unmarshal(n).to[CorpusJson].map(Right(_))
         }
       }      
