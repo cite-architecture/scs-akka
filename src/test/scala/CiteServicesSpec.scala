@@ -1051,6 +1051,15 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     }
   }
 
+  it should """respond to '/relations/verbmap' by listing avaible CiteRelations with labels""" in {
+    Get(s"/relations/verbmap") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:ObjectLabelMapJson = responseAs[ObjectLabelMapJson]
+      r.labelMap.size should equal (5) 
+    }
+  }
+
 
    it should """respond to '/relations/CITE2URN' by listing all relations""" in {
     Get(s"/relations/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1") ~> routes ~> check {

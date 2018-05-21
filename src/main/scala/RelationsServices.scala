@@ -119,6 +119,43 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
       } else { None }
     }
 
+    def relationsReturnVerbMap: Future[Either[String,ObjectLabelMapJson]] = {
+      try {
+          println("got here")
+          val verbs:Option[Vector[Cite2Urn]] = getVerbs
+          val m:Map[String,String] = {
+            verbs match {
+              case Some(vl) => {
+                collectionRepository match {
+                  case Some(cr) => {
+                    Map(vl.map{ v => 
+                      v.toString -> {
+                        if (cr.citableObjects.contains(v)){
+                          cr.citableObject(v).label 
+                        } else {
+                          v.objectComponent
+                        }
+                      }
+                    }: _* )
+                  }
+                  case None => {
+                    Map(vl.map{ v => v.toString -> v.objectComponent }: _* ) 
+                  }
+                }
+              }
+              case None => Map.empty
+            }
+            // Map(collectionRepository.get.citableObjects.map{ a => a.urn.toString -> a.label }: _*)
+          } 
+          val olm:ObjectLabelMapJson = ObjectLabelMapJson(m)
+          Unmarshal(olm).to[ObjectLabelMapJson].map(Right(_))
+      } catch {
+        case e: Exception => {
+          Future.successful(Left(s"${new IOException(e)}"))
+        }
+      }
+    }
+
     def makeCiteTripleJson(ct:CiteTriple):CiteTripleJson = {
       CiteTripleJson(ct.urn1.toString, ct.relation.toString, ct.urn2.toString)
     }

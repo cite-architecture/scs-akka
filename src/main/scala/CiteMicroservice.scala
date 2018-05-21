@@ -712,6 +712,14 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
             }
           }
         } ~
+        (get & path( "verbmap" )) {
+          complete {
+            relationsReturnVerbMap.map[ToResponseMarshallable] {
+              case Right(verbMap) => verbMap
+              case Left(errorMessage) => BadRequest -> errorMessage
+            }
+          }
+        } ~
         (get & path(Segment)) { (urnString) =>
           parameters('filter.as[String] ? ) { filter => 
             complete {
