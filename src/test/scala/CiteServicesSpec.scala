@@ -35,6 +35,7 @@ import edu.holycross.shot.ohco2._
 import edu.holycross.shot.cite._
 import edu.holycross.shot.citeobj._
 import edu.holycross.shot.scm._
+import edu.holycross.shot.citerelation._
 
 
 class CiteServiceSpec extends FlatSpec with Matchers with ScalatestRouteTest with Service with CorsSupport{
@@ -1071,6 +1072,28 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     }
   }
 
+  it should """respond to '/relations/CITE2URN' by listing all relations, using URN similarity""" in {
+    Get(s"/relations/urn:cts:greekLit:tlg0012.tlg001:1.1") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteTriplesJson = responseAs[VectorOfCiteTriplesJson]
+      r.citeTriples.size should equal (10)
+      
+    }
+  }
+
+  
+
+  it should """respond to '/relations/CITE2URN' by listing all relations, ignoring sub-references on URNs""" in {
+    Get(s"/relations/urn:cite2:hmt:vaimg.2017a:VA012RN_0013") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteTriplesJson = responseAs[VectorOfCiteTriplesJson]
+      r.citeTriples.size should equal (4)
+      
+    }
+  }
+
    it should """respond to '/relations/URN?filter=urn:cite2:cite:dseverbs.2017a:appearsOn' by listing all relations, filtered by relation-URN""" in {
     Get(s"/relations/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1?filter=urn:cite2:cite:dseverbs.2017a:appearsOn") ~> routes ~> check {
       status shouldBe OK
@@ -1098,6 +1121,29 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       r.commentary.citeTriples.size should equal (10)
     }
   }
+
+  it should """accept a vector of URNs for relation matching""" in {
+    val urnVec:Vector[CtsUrn] = Vector(
+        CtsUrn("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1"),
+        CtsUrn("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.2"),
+        CtsUrn("urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.3")
+    )
+
+    val osrs:Option[CiteRelationSet] = getRelations(urnVec,None)
+    assert(osrs.get.relations.size == 12)
+  }
+
+  it should """accept a vector of URNs for relation matching, and use URN similarity for the match""" in {
+    val urnVec:Vector[CtsUrn] = Vector(
+        CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.1"),
+        CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.2"),
+        CtsUrn("urn:cts:greekLit:tlg0012.tlg001:1.3")
+    )
+
+    val osrs:Option[CiteRelationSet] = getRelations(urnVec,None)
+    assert(osrs.get.relations.size == 12)
+  }
+
 
 
 

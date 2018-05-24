@@ -71,14 +71,20 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
         val returnSet:Set[CiteTriple] = {
           filterVerb match {
             case Some(v) => {
-              cexLibrary.relationSet.get.relations.filter( rt => {
-                ((urnVec.contains(rt.urn1)) || (urnVec.contains(rt.urn2)))
-              }).filter(_.relation == v)
+              val relationsVec:Vector[CiteTriple] = {
+                urnVec.map( u => {
+                  cexLibrary.relationSet.get.relations.filter( rt => { (rt ~~ u) })
+                }).flatten
+              }
+              relationsVec.filter(_.relation == v).toSet
             }
             case None => {
-             cexLibrary.relationSet.get.relations.filter( rt =>{
-                ((urnVec.contains(rt.urn1)) || (urnVec.contains(rt.urn2)))
-              })
+              val relationsVec:Vector[CiteTriple] = {
+                urnVec.map( u => {
+                  cexLibrary.relationSet.get.relations.filter( rt => { (rt ~~ u) })
+                }).flatten
+              }
+              relationsVec.toSet
             }
           } 
         }
@@ -95,12 +101,12 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
           filterVerb match {
             case Some(v) => {
               cexLibrary.relationSet.get.relations.filter( rt =>{
-                ((rt.urn1 == urn) || (rt.urn2 == urn))
+                (rt ~~ urn)
               }).filter(_.relation == v)
             } 
             case None => {
               cexLibrary.relationSet.get.relations.filter( rt =>{
-                ((rt.urn1 == urn) || (rt.urn2 == urn))
+                (rt ~~ urn)
               })
             }
           } 

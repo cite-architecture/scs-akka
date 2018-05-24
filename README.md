@@ -2,7 +2,7 @@
 
 Based on [https://github.com/theiterators/akka-http-microservice](https://github.com/theiterators/akka-http-microservice) and used according to that project's MIT License. Thanks to Łukasz Sowa from [Iterators](http://www.theiterators.com).
 
-## Version: 1.13.0
+## Version: 1.13.1
 
 Status:  **active development**.
 
