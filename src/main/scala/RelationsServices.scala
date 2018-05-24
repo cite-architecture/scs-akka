@@ -207,7 +207,7 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
         val relationSet:Option[CiteRelationSet] = getRelations(urn, filterUrnOption)
         val vecCiteTripleJson:Vector[CiteTripleJson] = {
           relationSet match {
-            case Some(rs) => rs.relations.map(t => CiteTripleJson(t.urn1.toString, t.relation.toString, t.urn2.toString)).toVector
+            case Some(rs) => rs.relations.map(t => makeCiteTripleJson(CiteTriple(t.urn1, t.relation, t.urn2))).toVector
             case None => Vector()
           }
         }
@@ -228,7 +228,7 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
         }
         val vecCiteTripleJson:Vector[CiteTripleJson] = {
           relationSet match {
-            case Some(rs) => rs.relations.map(t => CiteTripleJson(t.urn1.toString, t.relation.toString, t.urn2.toString)).toVector
+            case Some(rs) => rs.relations.map(t => makeCiteTripleJson(CiteTriple(t.urn1, t.relation, t.urn2))).toVector
             case None => Vector()
           }
         }
@@ -240,7 +240,6 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
           VectorOfCiteTriplesJson(Vector())
         }
       }
-
     }
 
 }

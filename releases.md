@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.13.3**: Improvements to CiteRelations reporting.
+
 **1.13.1**: Ensured that CiteRelations is being URN-aware.
 
 **1.13.0**: Added CiteRelations and Commentary Data Model.
