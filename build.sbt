@@ -4,7 +4,7 @@ enablePlugins(LauncherJarPlugin)
 
 name := "cite-microservice"
 organization := "edu.furman.classics"
-version := "1.13.3"
+version := "1.13.4"
 scalaVersion := "2.12.4"
 
 fork in run := true
@@ -33,12 +33,12 @@ libraryDependencies ++= {
     "org.scalatest"     %% "scalatest" % scalaTestV % "test",
     "edu.holycross.shot.cite" %% "xcite" % "3.3.0",
     "edu.holycross.shot" %% "cex" % "6.2.1",
-    "edu.holycross.shot" %% "citerelations" % "2.1.0" from "file:////Users/cblackwell/Dropbox/CITE/scala/unmanaged_jars/citerelations_2.12-2.1.0.jar",
-    "edu.holycross.shot" %% "ohco2" % "10.7.1" from "file:///Users/cblackwell/Dropbox/CITE/scala/unmanaged_jars/ohco2_2.12-10.7.1.jar",
+    "edu.holycross.shot" %% "citerelations" % "2.1.0",
+    "edu.holycross.shot" %% "ohco2" % "10.8.1",
     "edu.holycross.shot" %% "scm" % "6.0.0",
     "edu.holycross.shot" %% "citebinaryimage" % "1.1.2",
     "edu.holycross.shot" %% "scm" % "6.0.0",
-    "edu.holycross.shot" %% "citeobj" % "7.0.0",
+    "edu.holycross.shot" %% "citeobj" % "7.0.2",
     "edu.holycross.shot" %% "dse" % "3.0.0",
   )
 }

@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.13.4**: Fixed problem involving OHCO2 and DSE/Commentaries on range urns.
+
 **1.13.3**: Improvements to CiteRelations reporting.
 
 **1.13.1**: Ensured that CiteRelations is being URN-aware.

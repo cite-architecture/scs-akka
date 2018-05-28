@@ -261,17 +261,22 @@ case class CatalogJson(citeCatalog:Vector[(
       case Some(v) => {
         val c:Corpus = cexLibrary.textRepository.get.corpus >= urn 
 
+        val reff:Vector[CtsUrn] = {
+          if (withDse || withCommentary) {
+            textRepository.get.corpus.validReff(urn)
+          } else {
+            Vector()
+          }
+        }
+
         // Get DSE records, if any, for the requested text
         val dseRecs:VectorOfDseRecordsJson = {
-          if (withDse) dseRecordsComprehensive(Vector(urn))
+          if (withDse) dseRecordsComprehensive(reff)
           else VectorOfDseRecordsJson(Vector())
         }
 
         val commentary:VectorOfCiteTriplesJson = {
-          if (withCommentary) {
-            val realUrns:Vector[CtsUrn] = textRepository.get.corpus.validReff(urn)
-            getCommentaryForText(realUrns)
-          }
+          if (withCommentary) getCommentaryForText(reff) 
           else VectorOfCiteTriplesJson(Vector())
         }
 
@@ -283,17 +288,17 @@ case class CatalogJson(citeCatalog:Vector[(
         val passageComp:String = urn.passageComponentOption match {
           case Some(s) => s
           case None => ""
-          }
-          val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
-          val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
-          val corpora:Vector[Corpus] = realUrns.map(ru => textRepository.get.corpus >= CtsUrn(s"${ru.dropPassage}${passageComp}"))
-          val assembledVector:Vector[Map[String,String]] = {
-            (for (c <- corpora) yield {
-              for (n <- c.nodes) yield {
-                Map("urn" -> n.urn.toString, "text" -> n.text) 
-              } 
-            }).flatten
-          }
+        }
+        val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
+        val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
+        val corpora:Vector[Corpus] = realUrns.map(ru => textRepository.get.corpus >= CtsUrn(s"${ru.dropPassage}${passageComp}"))
+        val assembledVector:Vector[Map[String,String]] = {
+          (for (c <- corpora) yield {
+            for (n <- c.nodes) yield {
+              Map("urn" -> n.urn.toString, "text" -> n.text) 
+            } 
+          }).flatten
+        }
 
           // Get DSE records, if any, for the requested text
           val dseRecs:VectorOfDseRecordsJson = {
@@ -303,8 +308,7 @@ case class CatalogJson(citeCatalog:Vector[(
 
           val commentary:VectorOfCiteTriplesJson = {
             if (withCommentary) {
-              val reff:Vector[CtsUrn] = textRepository.get.corpus.validReff(urn)
-              getCommentaryForText(reff)
+              getCommentaryForText(realUrns)
             }
               else VectorOfCiteTriplesJson(Vector())
           }

@@ -127,7 +127,6 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
 
     def relationsReturnVerbMap: Future[Either[String,ObjectLabelMapJson]] = {
       try {
-          println("got here")
           val verbs:Option[Vector[Cite2Urn]] = getVerbs
           val m:Map[String,String] = {
             verbs match {
