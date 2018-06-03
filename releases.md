@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.15.1**: Pre-processing of CITE Relations for CtsUrn-Range-aware matching.
+
 **1.15.0**: Improved discovery of Relations when a cts-range is the param urn.
 
 **1.14.0**: Now accepting range-CTS URNs for relations.
