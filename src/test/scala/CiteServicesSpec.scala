@@ -1067,7 +1067,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteTriplesJson = responseAs[VectorOfCiteTriplesJson]
-      r.citeTriples.size should equal (10)
+      r.citeTriples.size should equal (12)
       
     }
   }
@@ -1077,7 +1077,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       status shouldBe OK
       contentType shouldBe `application/json`
       val r:VectorOfCiteTriplesJson = responseAs[VectorOfCiteTriplesJson]
-      r.citeTriples.size should equal (10)
+      r.citeTriples.size should equal (12)
       
     }
   }
@@ -1091,6 +1091,38 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       val r:VectorOfCiteTriplesJson = responseAs[VectorOfCiteTriplesJson]
       r.citeTriples.size should equal (4)
       
+    }
+  }
+
+  it should """respond to '/relations/CTSURN' when the URN is a range by listing all relations""" in {
+    Get(s"/relations/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.1-1.2") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteTriplesJson = responseAs[VectorOfCiteTriplesJson]
+      r.citeTriples.size should equal (14)
+      
+    }
+  }
+
+/*
+  it should """respond to '/relations/CTSURN' when the URN is containing-urn by listing all relations""" in {
+    Get(s"/relations/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteTriplesJson = responseAs[VectorOfCiteTriplesJson]
+      r.citeTriples.size should equal (17)
+      
+    }
+  }
+  */
+
+  it should """respond to '/relations/CTSURN' with good urn awareness on both ends""" in {
+    Get(s"/relations/urn:cts:greekLit:tlg0012.tlg001.perseus_grc2:1.4-1.5") ~> routes ~> check {
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      val r:VectorOfCiteTriplesJson = responseAs[VectorOfCiteTriplesJson]
+      r.citeTriples.size should equal (4)
+ //     println(s"${r}") 
     }
   }
 
@@ -1108,7 +1140,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       val r:CorpusJson  = responseAs[CorpusJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.commentary.citeTriples.size should equal (10)
+      r.commentary.citeTriples.size should equal (13)
     }
   }
 
@@ -1118,7 +1150,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
       val r:CorpusJson  = responseAs[CorpusJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.commentary.citeTriples.size should equal (10)
+      r.commentary.citeTriples.size should equal (13)
     }
   }
 
@@ -1130,7 +1162,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     )
 
     val osrs:Option[CiteRelationSet] = getRelations(urnVec,None)
-    assert(osrs.get.relations.size == 12)
+    assert(osrs.get.relations.size == 14)
   }
 
   it should """accept a vector of URNs for relation matching, and use URN similarity for the match""" in {
@@ -1141,7 +1173,7 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     )
 
     val osrs:Option[CiteRelationSet] = getRelations(urnVec,None)
-    assert(osrs.get.relations.size == 12)
+    assert(osrs.get.relations.size == 13)
   }
 
 

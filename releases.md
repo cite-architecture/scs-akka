@@ -1,5 +1,9 @@
 # `scs-akka`: releases
 
+**1.15.0**: Improved discovery of Relations when a cts-range is the param urn.
+
+**1.14.0**: Now accepting range-CTS URNs for relations.
+
 **1.13.4**: Fixed problem involving OHCO2 and DSE/Commentaries on range urns.
 
 **1.13.3**: Improvements to CiteRelations reporting.
