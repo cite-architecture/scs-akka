@@ -810,22 +810,32 @@ object CiteMicroservice extends App with Service with Ohco2Service with CiteColl
 
   textRepository match {
     case Some(tr) => { 
-        logger.debug(s"\n\nCorpus-size: ${tr.corpus.size}\n\n")
+        logger.info(s"\n\nCorpus-size: ${tr.corpus.size}\n\n")
        // cexLibrary.textRepository.get
       } 
     case None => {
-        logger.debug(s"\n\nNO TEXT REPOSITORY IN THIS CEX FILE!\n\n")
+        logger.info(s"\n\nNO TEXT REPOSITORY IN THIS CEX FILE!\n\n")
     }
   }
 
   collectionRepository match {
     case Some(cr) => { 
-        logger.debug(s"\n\nCollection-size: ${cr.citableObjects.size}\n\n")
+        logger.info(s"\n\nCollection-size: ${cr.citableObjects.size}\n\n")
       } 
     case None => {
-        logger.debug(s"\n\nNO COLLECTION REPOSITORY IN THIS CEX FILE!\n\n")
+        logger.info(s"\n\nNO COLLECTION REPOSITORY IN THIS CEX FILE!\n\n")
     }
   }
+
+  val numRelations:Int = {
+    deluxeRelationSet match {
+      case None => 0
+      case Some(drs) => drs.relations.size
+    }
+  }
+
+  logger.info("Working on relations…")
+  logger.info(s"Deluxe RelationSet = ${numRelations} relations.") 
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
 
