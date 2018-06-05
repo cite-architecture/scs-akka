@@ -826,6 +826,8 @@ object CiteMicroservice extends App with Service with Ohco2Service with CiteColl
         logger.info(s"\n\nNO COLLECTION REPOSITORY IN THIS CEX FILE!\n\n")
     }
   }
+  
+  logger.info("Working on relations…")
 
   val numRelations:Int = {
     deluxeRelationSet match {
@@ -834,7 +836,6 @@ object CiteMicroservice extends App with Service with Ohco2Service with CiteColl
     }
   }
 
-  logger.info("Working on relations…")
   logger.info(s"Deluxe RelationSet = ${numRelations} relations.") 
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))

@@ -118,6 +118,8 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
             }
             val newTriplesVec:Vector[CiteTriple] = u2ExpandedUrns ++ u1ExpandedUrns
             val newTriplesSet:Set[CiteTriple] = newTriplesVec.toSet
+            logger.info(s"original triples: ${rs.relations.size}")
+            logger.info(s"new triples: ${newTriplesSet.size}")
             val allTriplesSet:Set[CiteTriple] = rs.relations ++ newTriplesSet
             val newCiteRelationSet:CiteRelationSet = CiteRelationSet(allTriplesSet)
             Some(newCiteRelationSet)

@@ -2,7 +2,7 @@
 
 Based on [https://github.com/theiterators/akka-http-microservice](https://github.com/theiterators/akka-http-microservice) and used according to that project's MIT License. Thanks to Łukasz Sowa from [Iterators](http://www.theiterators.com).
 
-## Version: 1.15.1
+## Version: 1.15.2
 
 Status:  **active development**.
 
@@ -26,7 +26,7 @@ In `src/main/resources/application.conf`, specify a path to a CEX library; the d
 In SBT:
 
 - `sbt`
-- `++2.12.3`
+- `++2.12.4`
 - `assembly`
 
 The result will be in:
