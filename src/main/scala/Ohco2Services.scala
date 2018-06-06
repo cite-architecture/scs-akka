@@ -268,7 +268,6 @@ case class CatalogJson(citeCatalog:Vector[(
             Vector()
           }
         }
-
         // Get DSE records, if any, for the requested text
         val dseRecs:VectorOfDseRecordsJson = {
           if (withDse) dseRecordsComprehensive(reff)
@@ -285,6 +284,7 @@ case class CatalogJson(citeCatalog:Vector[(
         Unmarshal(n).to[CorpusJson].map(Right(_))
       }
       case None => {
+        //logger.info(s"got to case None")
         val passageComp:String = urn.passageComponentOption match {
           case Some(s) => s
           case None => ""
@@ -300,15 +300,19 @@ case class CatalogJson(citeCatalog:Vector[(
           }).flatten
         }
 
+          val corpUrns:Vector[CtsUrn] = corpora.map( c => {
+            c.nodes.map( _.urn )
+          }).flatten
+          //logger.info(s"corpUrns: ${corpUrns}")
           // Get DSE records, if any, for the requested text
           val dseRecs:VectorOfDseRecordsJson = {
-            if (withDse) dseRecordsComprehensive(realUrns)
+            if (withDse) dseRecordsComprehensive(corpUrns)
             else VectorOfDseRecordsJson(Vector())
           }
 
           val commentary:VectorOfCiteTriplesJson = {
             if (withCommentary) {
-              getCommentaryForText(realUrns)
+              getCommentaryForText(corpUrns)
             }
               else VectorOfCiteTriplesJson(Vector())
           }

@@ -1142,13 +1142,22 @@ it should """respond correctly to "/texts/tokens/CTS-URN?t=STRING&t=STRING" corr
     }
   }
 
+  it should """respond to '/texts/URN?commentary=true' when the URN is a work-level URN, with a correct number of commentary objects""" in {
+    Get(s"/texts/urn:cts:greekLit:tlg0012.tlg001:1.1?commentary=true") ~> routes ~> check {
+      val r:CorpusJson  = responseAs[CorpusJson]
+      status shouldBe OK
+      contentType shouldBe `application/json`
+      r.commentary.citeTriples.size should equal (18)
+    }
+  }
+
 
    it should """respond to '/texts/URN?commentary=true' by including any commentaries as a VectorOfCiteTriplesJson when the URN is at the work-level""" in {
     Get(s"/texts/urn:cts:greekLit:tlg0012.tlg001:1.1-1.10?commentary=true") ~> routes ~> check {
       val r:CorpusJson  = responseAs[CorpusJson]
       status shouldBe OK
       contentType shouldBe `application/json`
-      r.commentary.citeTriples.size should equal (93)
+      r.commentary.citeTriples.size should equal (91)
     }
   }
 

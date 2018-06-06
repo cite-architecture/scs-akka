@@ -4,7 +4,7 @@ enablePlugins(LauncherJarPlugin)
 
 name := "cite-microservice"
 organization := "edu.furman.classics"
-version := "1.15.2"
+version := "1.15.3"
 scalaVersion := "2.12.4"
 
 fork in run := true

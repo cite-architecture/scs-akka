@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.15.2**: DSE and Commentary should work correctly when the request is a work-level URN.
+
 **1.15.2**: Better logging info on startup.
 
 **1.15.1**: Pre-processing of CITE Relations for CtsUrn-Range-aware matching.
