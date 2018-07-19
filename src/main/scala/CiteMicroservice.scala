@@ -829,6 +829,7 @@ object CiteMicroservice extends App with Service with Ohco2Service with CiteColl
   
   logger.info("Working on relations…")
 
+
   val numRelations:Int = {
     deluxeRelationSet match {
       case None => 0

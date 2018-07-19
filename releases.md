@@ -1,5 +1,9 @@
 # `scs-akka`: releases
 
+**1.15.3**: Fixed bug when getting DSEs mapped to non-leaf-node CTS URNs.
+
+**1.15.3**: Updated xCite library to 3.6.0; better pre-processing of relations.
+
 **1.15.2**: DSE and Commentary should work correctly when the request is a work-level URN.
 
 **1.15.2**: Better logging info on startup.

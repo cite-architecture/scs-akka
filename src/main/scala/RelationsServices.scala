@@ -56,7 +56,14 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
                     case CtsUrn(_) => {
                       val u2:CtsUrn = ct.urn2.asInstanceOf[CtsUrn]
                       if (u2.isRange) {
-                        true
+                        // let's exclude any mixed-ranges
+                        val citationDepth:Vector[Int] = u2.citationDepth
+                        if (citationDepth.size != 2){ false }
+                        else {
+                          if (citationDepth(0) != citationDepth(1)) { false }
+                          else true
+                        }
+                        //true
                       } else {
                         false
                       }
@@ -89,7 +96,14 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
                     case CtsUrn(_) => {
                       val u1:CtsUrn = ct.urn1.asInstanceOf[CtsUrn]
                       if (u1.isRange) {
-                        true
+                        // let's exclude any mixed-ranges
+                        val citationDepth:Vector[Int] = u1.citationDepth
+                        if (citationDepth.size != 2){ false }
+                        else {
+                          if (citationDepth(0) != citationDepth(1)) { false }
+                          else true
+                        }
+                        //true
                       } else {
                         false
                       }

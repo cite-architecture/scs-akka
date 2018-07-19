@@ -56,6 +56,7 @@ case class CatalogJson(citeCatalog:Vector[(
     def config: Config
     val logger: LoggingAdapter
 
+
   def fetchLibraryInfo: Future[Either[String,Map[String,String]]] = {
     try {
       val libraryName:String = cexLibrary.name
@@ -149,7 +150,6 @@ case class CatalogJson(citeCatalog:Vector[(
           val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
           val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
           val corpora:Vector[Corpus] = realUrns.map(ru => {
-            //logger.info(ru.toString)
             textRepository.get.corpus >= CtsUrn(s"${ru.dropPassage}${passageComp}")
           })
           val assembledVector:Vector[String] = {
@@ -263,7 +263,11 @@ case class CatalogJson(citeCatalog:Vector[(
 
         val reff:Vector[CtsUrn] = {
           if (withDse || withCommentary) {
-            textRepository.get.corpus.validReff(urn)
+            // get any contained URNs
+            val containedUrns:Vector[CtsUrn] = textRepository.get.corpus.validReff(urn)
+            // BUT DON'T FORGET THE URN THAT GOT YOU HERE!!!
+            val returnVector:Vector[CtsUrn] = containedUrns ++ Vector(urn)
+            returnVector
           } else {
             Vector()
           }
