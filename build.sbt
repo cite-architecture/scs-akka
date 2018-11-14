@@ -11,6 +11,7 @@ fork in run := true
 
 javaOptions in run ++= Seq(
     "-Xms256M",
+	"-Xmn16M",
     "-Xmx4G"
 )
 
@@ -38,7 +39,7 @@ libraryDependencies ++= {
     "edu.holycross.shot" %% "scm" % "6.1.0",
     "edu.holycross.shot" %% "citebinaryimage" % "1.1.2",
     "edu.holycross.shot" %% "scm" % "6.1.0",
-    "edu.holycross.shot" %% "citeobj" % "7.0.2",
+    "edu.holycross.shot" %% "citeobj" % "7.1.3",
     "edu.holycross.shot" %% "dse" % "3.1.0",
   )
 }

@@ -1,5 +1,7 @@
 # `scs-akka`: releases
 
+**1.15.4**: Updated CiteObj library to 7.1.3; better testing on load for duplicate URNs.
+
 **1.15.3**: Fixed bug when getting DSEs mapped to non-leaf-node CTS URNs.
 
 **1.15.3**: Updated xCite library to 3.6.0; better pre-processing of relations.

@@ -13,7 +13,6 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.unmarshalling.Unmarshal
 
-
 import akka.http.scaladsl.model.HttpHeader
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.headers.`Access-Control-Allow-Credentials`
@@ -47,6 +46,7 @@ import edu.holycross.shot.scm._
 import edu.holycross.shot.dse._
 import edu.holycross.shot.citerelation._
 
+import akka.http.scaladsl.model.MediaTypes.`application/json`
 
 trait Protocols extends DefaultJsonProtocol {
   // Ohco2
@@ -838,6 +838,7 @@ object CiteMicroservice extends App with Service with Ohco2Service with CiteColl
   }
 
   logger.info(s"Deluxe RelationSet = ${numRelations} relations.") 
+
 
   Http().bindAndHandle(routes, config.getString("http.interface"), config.getInt("http.port"))
 

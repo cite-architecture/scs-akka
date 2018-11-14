@@ -6,6 +6,10 @@ Based on [https://github.com/theiterators/akka-http-microservice](https://github
 
 Status:  **active development**.
 
+## TL;DR
+
+See examples of what this does at the [HMT Examples page.](http://beta.hpcc.uh.edu/hmt/hmt-microservice/)
+
 ## Running
 
 - Clone this repository
@@ -38,6 +42,10 @@ The result will be in:
 Be sure your datafile is in the proper place with the proper name. By default it is `cex/library.cex` relative to the directory from which you invoke the `scs.jar`.
 
 Invoke it with `java -jar scs.jar`.
+
+If you find you need more memory for a big dataset, try:
+
+`java -Xmn16M -Xmx4G -jar scs.jar`
 
 This app requires Java 1.8.
 
