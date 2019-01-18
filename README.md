@@ -47,6 +47,10 @@ If you find you need more memory for a big dataset, try:
 
 `java -Xmn16M -Xmx4G -jar scs.jar`
 
+By default, the JAR will run on port 9000. You can override that on startup with, *e.g.*:
+
+`java -Xmn16M -Xmx4G -Dhttp.port=9090 -jar scs.jar`
+
 This app requires Java 1.8.
 
 The service should be running at `http://localhost:9000`.
