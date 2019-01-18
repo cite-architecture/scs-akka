@@ -1,5 +1,17 @@
 # `scs-akka`: releases
 
+**1.15.4**: Updated CiteObj library to 7.1.3; better testing on load for duplicate URNs.
+
+**1.15.3**: Fixed bug when getting DSEs mapped to non-leaf-node CTS URNs.
+
+**1.15.3**: Updated xCite library to 3.6.0; better pre-processing of relations.
+
+**1.15.2**: DSE and Commentary should work correctly when the request is a work-level URN.
+
+**1.15.2**: Better logging info on startup.
+
+**1.15.1**: Pre-processing of CITE Relations for CtsUrn-Range-aware matching.
+
 **1.15.0**: Improved discovery of Relations when a cts-range is the param urn.
 
 **1.14.0**: Now accepting range-CTS URNs for relations.

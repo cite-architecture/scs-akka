@@ -45,6 +45,7 @@ case class VectorOfDseRecordsJson(dseRecords:Vector[DseRecordJson])
     def config: Config
     val logger: LoggingAdapter
 
+
     val dseModel:Cite2Urn = Cite2Urn("urn:cite2:cite:datamodels.v1:dse")
     val passagePropString:String = "passage"
     val imagePropString:String = "imageroi"
@@ -247,14 +248,17 @@ def dseRecordsComprehensive(uv:Vector[Urn]):VectorOfDseRecordsJson = {
     val expandedCtsUs:Vector[CtsUrn] = {
       textRepository match { 
         case Some(tr) => {
-          (for (u <- ctsUs) yield {
+          val firstCut:Vector[CtsUrn] = (for (u <- ctsUs) yield {
             tr.corpus.validReff(u)
           }).flatten
+          val originalVec:Vector[CtsUrn] = {
+            ctsUs.map (_.asInstanceOf[CtsUrn])
+          }
+          (firstCut ++ originalVec).distinct
         }
         case None => ctsUs
       }
     }
-
     val cite2Us:Vector[Cite2Urn] = {
       uv.filter(u =>{
           u match {
@@ -264,7 +268,7 @@ def dseRecordsComprehensive(uv:Vector[Urn]):VectorOfDseRecordsJson = {
       }).map(u => u.asInstanceOf[Cite2Urn]) 
     }
     val allUrns:Vector[Urn] = expandedCtsUs ++ cite2Us
-    val dseRecs:Vector[DseRecord] = dseRecordsForUrnVector(allUrns).toSet.toVector
+    val dseRecs:Vector[DseRecord] = dseRecordsForUrnVector(allUrns).distinct
     val dseRecsJson:Vector[DseRecordJson] = {
       dseRecs.map(r => makeDseRecordJson(r))
     }
@@ -318,7 +322,7 @@ def dseRecordsForUrnVector(uv:Vector[Urn]):Vector[DseRecord] = {
           }
           oneVector
 
-        }).toVector.flatten.toSet.toVector
+        }).toVector.flatten.distinct
         recVec
       }
       case _ => {

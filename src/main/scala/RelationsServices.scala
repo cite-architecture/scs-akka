@@ -47,6 +47,100 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
 
     val commentaryVerb:Cite2Urn = Cite2Urn("urn:cite2:cite:verbs.v1:commentsOn")
     val commentaryModel:Cite2Urn = Cite2Urn("urn:cite2:cite:datamodels.v1:commentarymodel")
+    lazy val deluxeRelationSet:Option[CiteRelationSet] = {
+      cexLibrary.relationSet match {
+         case Some(rs) => {
+            val u2RangeRelations:Vector[CiteTriple] = {
+              rs.relations.filter( ct => {
+                  ct.urn2 match {
+                    case CtsUrn(_) => {
+                      val u2:CtsUrn = ct.urn2.asInstanceOf[CtsUrn]
+                      if (u2.isRange) {
+                        // let's exclude any mixed-ranges
+                        val citationDepth:Vector[Int] = u2.citationDepth
+                        if (citationDepth.size != 2){ false }
+                        else {
+                          if (citationDepth(0) != citationDepth(1)) { false }
+                          else true
+                        }
+                        //true
+                      } else {
+                        false
+                      }
+                    }
+                    case _ => false
+                  } 
+              }).toVector
+            }
+            val u2ExpandedUrns:Vector[CiteTriple] = {
+              cexLibrary.textRepository match {
+                case None => Vector()
+                case Some(tr) => {
+                  u2RangeRelations.map(rr => {
+                    val u2:CtsUrn = rr.urn2.asInstanceOf[CtsUrn]
+                    val expandedU2:Vector[CtsUrn] = tr.corpus.validReff(u2)
+                    val eU2 = expandedU2.map( eu2 => {
+                        val tempRelation:Cite2Urn = rr.relation
+                        val u1:Urn = rr.urn1
+                        val tempCiteTriple:CiteTriple = CiteTriple(u1, tempRelation, eu2) 
+                        tempCiteTriple
+                    }).toVector
+                    eU2
+                  }).flatten 
+                }
+              } 
+            }
+            val u1RangeRelations:Vector[CiteTriple] = {
+              rs.relations.filter( ct => {
+                  ct.urn1 match {
+                    case CtsUrn(_) => {
+                      val u1:CtsUrn = ct.urn1.asInstanceOf[CtsUrn]
+                      if (u1.isRange) {
+                        // let's exclude any mixed-ranges
+                        val citationDepth:Vector[Int] = u1.citationDepth
+                        if (citationDepth.size != 2){ false }
+                        else {
+                          if (citationDepth(0) != citationDepth(1)) { false }
+                          else true
+                        }
+                        //true
+                      } else {
+                        false
+                      }
+                    }
+                    case _ => false
+                  } 
+              }).toVector
+            }
+            val u1ExpandedUrns:Vector[CiteTriple] = {
+              cexLibrary.textRepository match {
+                case None => Vector()
+                case Some(tr) => {
+                  u1RangeRelations.map(rr => {
+                    val u1:CtsUrn = rr.urn1.asInstanceOf[CtsUrn]
+                    val expandedU1:Vector[CtsUrn] = tr.corpus.validReff(u1)
+                    val eU1 = expandedU1.map( eu1 => {
+                        val tempRelation:Cite2Urn = rr.relation
+                        val u2:Urn = rr.urn2
+                        val tempCiteTriple:CiteTriple = CiteTriple(eu1, tempRelation, u1) 
+                        tempCiteTriple
+                    }).toVector
+                    eU1
+                  }).flatten 
+                }
+              } 
+            }
+            val newTriplesVec:Vector[CiteTriple] = u2ExpandedUrns ++ u1ExpandedUrns
+            val newTriplesSet:Set[CiteTriple] = newTriplesVec.toSet
+            logger.info(s"original triples: ${rs.relations.size}")
+            logger.info(s"new triples: ${newTriplesSet.size}")
+            val allTriplesSet:Set[CiteTriple] = rs.relations ++ newTriplesSet
+            val newCiteRelationSet:CiteRelationSet = CiteRelationSet(allTriplesSet)
+            Some(newCiteRelationSet)
+         }
+         case None => None
+      }
+    }
 
     def hasRelations:Boolean = {
        cexLibrary.relationSet match {
@@ -73,7 +167,7 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
             case Some(v) => {
               val relationsVec:Vector[CiteTriple] = {
                 urnVec.map( u => {
-                  cexLibrary.relationSet.get.relations.filter( rt => { (rt ~~ u) })
+                  deluxeRelationSet.get.relations.filter( rt => { (rt ~~ u) })
                 }).flatten
               }
               relationsVec.filter(_.relation == v).toSet
@@ -81,7 +175,7 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
             case None => {
               val relationsVec:Vector[CiteTriple] = {
                 urnVec.map( u => {
-                  cexLibrary.relationSet.get.relations.filter( rt => { (rt ~~ u) })
+                  deluxeRelationSet.get.relations.filter( rt => { (rt ~~ u) })
                 }).flatten
               }
               relationsVec.toSet
@@ -94,18 +188,47 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
         }
       } else { None }
     }
- 
+
     def getRelations(urn:Urn, filterVerb:Option[Cite2Urn]):Option[CiteRelationSet] = {
+      urn match {
+        case CtsUrn(_) => {
+          val cu:CtsUrn = urn.asInstanceOf[CtsUrn]
+          if (cu.isRange){
+            cexLibrary.textRepository match {
+              case Some(tr) => {
+                val expandedUrn:Vector[CtsUrn] = tr.corpus.validReff(cu)
+                expandedUrn.size match {
+                  case n if (n == 0) => {
+                    getSimpleRelations(urn, filterVerb)
+                  }
+                  case _ => {
+                    // let's not forget the original query!
+                    val lookupVector:Vector[CtsUrn] = expandedUrn ++ Vector(cu)
+                    getRelations(lookupVector, filterVerb)
+                   } 
+                }
+              }
+              case None => getSimpleRelations(urn, filterVerb)
+            } 
+          } else {
+            getSimpleRelations(urn, filterVerb)
+          }
+        }
+        case _ => getSimpleRelations(urn, filterVerb)
+      }
+    }
+ 
+    def getSimpleRelations(urn:Urn, filterVerb:Option[Cite2Urn]):Option[CiteRelationSet] = {
       if (hasRelations) {
         val returnSet:Set[CiteTriple] = {
           filterVerb match {
             case Some(v) => {
-              cexLibrary.relationSet.get.relations.filter( rt =>{
+              deluxeRelationSet.get.relations.filter( rt =>{
                 (rt ~~ urn)
               }).filter(_.relation == v)
             } 
             case None => {
-              cexLibrary.relationSet.get.relations.filter( rt =>{
+              deluxeRelationSet.get.relations.filter( rt =>{
                 (rt ~~ urn)
               })
             }
@@ -120,7 +243,7 @@ case class VectorOfCiteTriplesJson(citeTriples:Vector[CiteTripleJson])
 
     def getVerbs:Option[Vector[Cite2Urn]] = {
       if (hasRelations) {
-        val verbSet:Set[Cite2Urn] = cexLibrary.relationSet.get.verbs
+        val verbSet:Set[Cite2Urn] = deluxeRelationSet.get.verbs
         Some(verbSet.toVector)
       } else { None }
     }

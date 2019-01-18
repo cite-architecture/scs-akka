@@ -56,6 +56,7 @@ case class CatalogJson(citeCatalog:Vector[(
     def config: Config
     val logger: LoggingAdapter
 
+
   def fetchLibraryInfo: Future[Either[String,Map[String,String]]] = {
     try {
       val libraryName:String = cexLibrary.name
@@ -149,7 +150,6 @@ case class CatalogJson(citeCatalog:Vector[(
           val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
           val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
           val corpora:Vector[Corpus] = realUrns.map(ru => {
-            //logger.info(ru.toString)
             textRepository.get.corpus >= CtsUrn(s"${ru.dropPassage}${passageComp}")
           })
           val assembledVector:Vector[String] = {
@@ -263,12 +263,15 @@ case class CatalogJson(citeCatalog:Vector[(
 
         val reff:Vector[CtsUrn] = {
           if (withDse || withCommentary) {
-            textRepository.get.corpus.validReff(urn)
+            // get any contained URNs
+            val containedUrns:Vector[CtsUrn] = textRepository.get.corpus.validReff(urn)
+            // BUT DON'T FORGET THE URN THAT GOT YOU HERE!!!
+            val returnVector:Vector[CtsUrn] = containedUrns ++ Vector(urn)
+            returnVector
           } else {
             Vector()
           }
         }
-
         // Get DSE records, if any, for the requested text
         val dseRecs:VectorOfDseRecordsJson = {
           if (withDse) dseRecordsComprehensive(reff)
@@ -285,6 +288,7 @@ case class CatalogJson(citeCatalog:Vector[(
         Unmarshal(n).to[CorpusJson].map(Right(_))
       }
       case None => {
+        //logger.info(s"got to case None")
         val passageComp:String = urn.passageComponentOption match {
           case Some(s) => s
           case None => ""
@@ -300,15 +304,19 @@ case class CatalogJson(citeCatalog:Vector[(
           }).flatten
         }
 
+          val corpUrns:Vector[CtsUrn] = corpora.map( c => {
+            c.nodes.map( _.urn )
+          }).flatten
+          //logger.info(s"corpUrns: ${corpUrns}")
           // Get DSE records, if any, for the requested text
           val dseRecs:VectorOfDseRecordsJson = {
-            if (withDse) dseRecordsComprehensive(realUrns)
+            if (withDse) dseRecordsComprehensive(corpUrns)
             else VectorOfDseRecordsJson(Vector())
           }
 
           val commentary:VectorOfCiteTriplesJson = {
             if (withCommentary) {
-              getCommentaryForText(realUrns)
+              getCommentaryForText(corpUrns)
             }
               else VectorOfCiteTriplesJson(Vector())
           }
