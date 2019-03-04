@@ -135,18 +135,15 @@ case class CatalogJson(citeCatalog:Vector[(
    try {
     val urn:CtsUrn = CtsUrn(urnString)
 
-    urn.versionOption match {
-      case Some(v) => {
-        val c:Corpus = cexLibrary.textRepository.get.corpus >= urn 
-        val v:Vector[String] = c.urns.map(u => u.toString)
-        val n:ReffJson = ReffJson(v) 
-        Unmarshal(n).to[ReffJson].map(Right(_))
-      }
-      case None => {
-        val passageComp:String = urn.passageComponentOption match {
-          case Some(s) => s
-          case None => ""
-          }
+      urn.versionOption match {
+        case Some(v) => {
+          val c:Corpus = cexLibrary.textRepository.get.corpus >= urn 
+          val v:Vector[String] = c.urns.map(u => u.toString)
+          val n:ReffJson = ReffJson(v) 
+          Unmarshal(n).to[ReffJson].map(Right(_))
+        }
+        case None => {
+          val passageComp:String = urn.passageComponent
           val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
           val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
           val corpora:Vector[Corpus] = realUrns.map(ru => {
@@ -289,10 +286,7 @@ case class CatalogJson(citeCatalog:Vector[(
       }
       case None => {
         //logger.info(s"got to case None")
-        val passageComp:String = urn.passageComponentOption match {
-          case Some(s) => s
-          case None => ""
-        }
+        val passageComp:String = urn.passageComponent
         val allUrns:Vector[CtsUrn] = textRepository.get.corpus.citedWorks        
         val realUrns:Vector[CtsUrn] = allUrns.filter(urn.dropPassage == _.dropVersion)
         val corpora:Vector[Corpus] = realUrns.map(ru => textRepository.get.corpus >= CtsUrn(s"${ru.dropPassage}${passageComp}"))

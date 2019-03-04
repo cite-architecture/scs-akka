@@ -1,6 +1,8 @@
 # `scs-akka`: releases
 
-**1.15.4**: Scala 2.12.8. OHCO2 10.12.3 with better `validReff` performance.
+**1.15.6**: OHCO2 10.12.5 and xCite 4.0.2
+
+**1.15.5**: Scala 2.12.8. OHCO2 10.12.3 with better `validReff` performance.
 
 **1.15.4**: Updated CiteObj library to 7.1.3; better testing on load for duplicate URNs.
 
