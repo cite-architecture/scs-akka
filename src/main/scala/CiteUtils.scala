@@ -19,7 +19,7 @@ object CexRepos{
 	def apply(cexFiles:List[java.io.File]):scala.collection.immutable.Map[String,CiteLibrary] = {
 		val cexMap:scala.collection.immutable.Map[String,CiteLibrary] =
 			cexFiles.foldLeft(Map[String,CiteLibrary]()){ (m, f) => m + (f.getName.replaceFirst(".cex","") ->
-				CiteLibrary(Source.fromFile(f).getLines.mkString("\n"),"#",",")
+				CiteLibrarySource.fromFile(f.getName)
 			)
 		}
 		cexMap

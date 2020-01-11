@@ -4,7 +4,7 @@ enablePlugins(LauncherJarPlugin)
 
 name := "cite-microservice"
 organization := "edu.furman.classics"
-version := "1.15.6"
+version := "2.0.0"
 scalaVersion := "2.12.8"
 
 fork in run := true
@@ -23,23 +23,24 @@ resolvers += Resolver.bintrayRepo("eumaeus", "maven")
 
 libraryDependencies ++= {
   val scalaTestV  = "3.0.1"
-  val akkaVersion = "2.5.12"
-  val akkaHttpVersion = "10.1.1"
+  val akkaVersion = "2.6.1"
+  val akkaHttpVersion = "10.1.11"
   Seq(
+    "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
     "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
     "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "org.scalatest"     %% "scalatest" % scalaTestV % "test",
-    "edu.holycross.shot.cite" %% "xcite" % "4.0.2",
-    "edu.holycross.shot" %% "cex" % "6.2.1",
-    "edu.holycross.shot" %% "citerelations" % "2.3.0",
-    "edu.holycross.shot" %% "ohco2" % "10.12.5",
-    "edu.holycross.shot" %% "scm" % "6.2.0",
-    "edu.holycross.shot" %% "citebinaryimage" % "1.1.2",
-    "edu.holycross.shot" %% "citeobj" % "7.2.0",
-    "edu.holycross.shot" %% "dse" % "3.1.0",
+    "edu.holycross.shot.cite" %% "xcite" % "4.2.0",
+    "edu.holycross.shot" %% "cex" % "6.4.0",
+    "edu.holycross.shot" %% "citerelations" % "2.6.0",
+    "edu.holycross.shot" %% "ohco2" % "10.18.2",
+    "edu.holycross.shot" %% "scm" % "7.2.0",
+    "edu.holycross.shot" %% "citebinaryimage" % "3.1.1",
+    "edu.holycross.shot" %% "citeobj" % "7.4.0",
+    "edu.holycross.shot" %% "dse" % "6.0.4",
   )
 }
 

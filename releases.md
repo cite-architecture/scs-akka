@@ -1,6 +1,8 @@
 # `scs-akka`: releases
 
-**1.15.6**: OHCO2 10.12.5 and xCite 4.0.2
+**2.0.0**: Using DSE v. 6.0.4, so a breaking change. Many dependency updates.
+
+**1.15.6**: ohco2 10.12.5 and xcite 4.0.2
 
 **1.15.5**: Scala 2.12.8. OHCO2 10.12.3 with better `validReff` performance.
 

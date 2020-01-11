@@ -112,26 +112,30 @@ trait Service extends Protocols with Ohco2Service with CiteCollectionService wit
   lazy val cexLibraryLocal:CiteLibrary = {
       val f:String = config.getString("cex.library")
       logger.debug(s"\n\nUsing CEX file: ${f}\n")
-      val cl:CiteLibrary = CiteLibrarySource.fromFile( f , "#", ",")
+      val cl:CiteLibrary = CiteLibrarySource.fromFile( f )
       cl
   }
 
   lazy val cexLibraryRemote:CiteLibrary = {
       val url:String = config.getString("cex.libraryUrl")
       logger.debug(s"\n\nUsing CEX file from URL: ${url}\n")
-      val cexFile = scala.io.Source.fromURL(url)
-      val cexString = cexFile.mkString
-      val repo:CiteLibrary = CiteLibrary(cexString, "#", ",")
+      //val cexFile = scala.io.Source.fromURL(url)
+      //val cexString = cexFile.mkString
+      val repo:CiteLibrary = CiteLibrarySource.fromUrl(url)
       repo
   }
 
-  lazy val cexLibrary:CiteLibrary = {
+  lazy val cexLibrary: CiteLibrary = {
     val useRemote:Boolean = config.getBoolean("cex.useRemote")
     val cl:CiteLibrary = useRemote match {
       case true => cexLibraryRemote
       case _ => cexLibraryLocal
     }
     cl
+  }
+
+  lazy val dseVector: DseVector = {
+    DseVector.fromCiteLibrary(cexLibrary)
   }
 
   val routes = cors{

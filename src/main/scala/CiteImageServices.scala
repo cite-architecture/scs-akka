@@ -58,8 +58,8 @@ case class ServiceUrlString(urlString: String)
         val serverData:Map[String,String] = gatherInfo(urn)
         val baseUrl = serverData("baseUrl")
         val serverPath = serverData("serverPath")
-        val iifService:IIIFApi = IIIFApi(baseUrl, serverPath, width, maxWidth, maxHeight) 
-        val responseString:String = iifService.serviceRequest(urn)
+        val iifService:IIIFApi = IIIFApi(baseUrl, serverPath) 
+        val responseString:String = iifService.serviceRequest(urn, width = width, maxWidth = maxWidth, maxHeight = maxHeight)
         Future.successful(Right(responseString))
       } catch {
         case e: Exception => {
@@ -79,8 +79,8 @@ case class ServiceUrlString(urlString: String)
         val serverData:Map[String,String] = gatherInfo(urn)
         val baseUrl = serverData("baseUrl")
         val serverPath = serverData("serverPath")
-        val iifService:IIIFApi = IIIFApi(baseUrl, serverPath, width, maxWidth, maxHeight) 
-        val responseString:String = iifService.serviceRequest(urn)
+        val iifService:IIIFApi = IIIFApi(baseUrl, serverPath) 
+        val responseString:String = iifService.serviceRequest(urn, width = width, maxWidth = maxWidth, maxHeight = maxHeight)
         responseString
       } catch {
         case e: Exception => {
